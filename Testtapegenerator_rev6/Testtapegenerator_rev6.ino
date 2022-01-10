@@ -1,5 +1,3 @@
-
-
 // *********************************************************************
 //  Test software for Analyzer
 // *********************************************************************
@@ -9,16 +7,6 @@ LiquidCrystal_I2C lcd(0x25, 40, 2);
 #include <Wire.h>
 #include <RTC.h>
 static DS3231 RTC;
-//-------------------------------------------------------------------------
-// TIL PRINTER
-//-------------------------------------------------------------------------
-#include "adaqrcode.h"
-#include <Adafruit_Thermal.h>
-#include "SoftwareSerial.h"
-#define TX_PIN 6 // Arduino transmit  YELLOW WIRE  labeled RX on printer
-#define RX_PIN 5 // Arduino receive   GREEN WIRE   labeled TX on printer
-SoftwareSerial mySerial(RX_PIN, TX_PIN); // Declare SoftwareSerial obj first
-Adafruit_Thermal printer(&mySerial);     // Pass addr to printer constructor
 //-------------------------------------------------------------------------
 #include <movingAvg.h>                       // include bib for Mavg
 int awgnum = 5;                              // start antal af mawg
@@ -72,10 +60,6 @@ int nsl;
 int Rightscaled;
 int Leftscaled;
 int  input_scale;
-int Rightfine = 0;
-int Leftfine = 0;
-byte port1;
-int dBinputoff;
 //*****************************************************************
 // DDS generator
 //-----------------------------------------------------------------
@@ -150,11 +134,10 @@ void setup() {
   digitalWrite(30, LOW);   // input att fixed
   digitalWrite(_fsyncPin, HIGH);
   digitalWrite(_clkPin,   LOW);
-
   //-----------------------------------------------------------
   Serial.begin(115200);    // start serial com på 115200 Baud
   potentio.begin();        // start Didital potmeter
-  mySerial.begin(9600);  // Initialize SoftwareSerial til 9600 ( printer)
+
   RTC.begin();             // start RTC
   RTC.setHourMode(CLOCK_H24); // set til 24 timer
   //------------------------------------------------------------
@@ -171,20 +154,19 @@ void setup() {
   //*****************************************************************
   //   dB set på output
   //----------------------------------------------------------------
-  //dBset_out = 15;           // setpunkt
-  // SetdBout();             // kald set output nivau rutine
-  Rightfine = 0;            // finjustering af output Right
-  Leftfine = 0;              // finjustering af output Left
+  //dBset_out = 0;           // setpunkt
+  //SetdBout();             // kald set output nivau rutine
+
   //*****************************************************************
   //   dB set på input
   //----------------------------------------------------------------
-  //input_scale = 245;
-  // SetdBin();    // set scaler på input
+  input_scale=45;
+  SetdBin();    // set scaler på input
 
   //********************************************************
   // Set frekvens
   //----------------------------------------------------------
-  freq = 1000;  // set frekvensen
+  freq = 100;  // set frekvensen
   setFreq(freq);// Og upload til DDS
 }
 
@@ -195,17 +177,17 @@ int i = 0;
 //
 //*********************************************************************
 void loop() {
-  data();                        // hent måle data
+  data();                        // hent måle data 
   gettime();                     // hent tiden
-  counter = millis() / 1000;     // sekund tæller
+  counter = millis()/1000;       // sekund tæller
 
-  if (counter >= countnu + 5) {
+  if (counter >= countnu + 3) {
     countnu = counter;
     dBset_out = i;               // setpunkt for output
     SetdBout();                  //  kald set output nivau rutine
 
     i = i + 1;
-    if (i >= 30) {
+    if (i >= 15) {
       i = 0;
 
     }
@@ -222,26 +204,10 @@ void loop() {
   RIGHTMAT = (71.928 - (31.3812 * pow(RIGHT, 0.119992))); // skalering af input til dB 15 max
   LEFTMAT = (71.928 - (31.3812 * pow(LEFT, 0.119992))); // skalering af input til dB 15 max
   // RIGHTMAT = (46.3906 - (11.5751 * pow(RIGHT, 0.201542))); // skalering af input til dB 25 max
+Rightscaled = RIGHTMAT * 10 ;     // skaleret outpot i dB gange 10 (right)
+Leftscaled = LEFTMAT * 10 ;       // skaleret outpot i dB gange 10 ( Left)
 
-  if (dBset_out <= 15) {
-    input_scale = 45;
-    SetdBin();    // set scaler på input
-    dBinputoff =   0 ;  //
-
-    Rightscaled  = ((RIGHTMAT ) * 10) + dBinputoff ;   // skaleret outpot i dB gange 10 (right)
-    Leftscaled = ((LEFTMAT ) * 10) + dBinputoff   ;    // skaleret outpot i dB gange 10 ( Left)
-  }
-  if (dBset_out > 15) {
-    input_scale = 245;
-    SetdBin();    // set scaler på input
-    dBinputoff =   150 ;  //
-
-    Rightscaled  = ((RIGHTMAT ) * 10) + dBinputoff ;   // skaleret outpot i dB gange 10 (right)
-    Leftscaled = ((LEFTMAT ) * 10) + dBinputoff   ;    // skaleret outpot i dB gange 10 ( Left)
-  }
-
-  //sprintf(stringbuffer, "Right: %4i Left: %4i Freq: %4i Hz", RIGHT, LEFT, freq);
-  sprintf(stringbuffer, "Right: %4i Left: %4i Input: %02i ", RIGHT, LEFT, portl);
+  sprintf(stringbuffer, "Right: %4i Left: %4i Freq: %4i Hz", RIGHT, LEFT, freq);
   lcd.setCursor(0, 1); //2 line
   lcd.print(stringbuffer);
 
@@ -251,15 +217,16 @@ void loop() {
 
   //*******************************************************************
   // Skriv i display linje 3 og 4        sekund tæller mm.
-  //*******************************************************************
+  //---------------------------------------------------------------------
 
-  digitalWrite(8, LOW);              // skift til disp line 3 OG 4
+  digitalWrite(8, LOW);        // skift til disp line 3 OG 4
   lcd.setCursor(0, 0);
   sprintf(stringbuffer, "Time: %02i:%02i:%02i  #Avg: %02i  Temp: %2i C", timer, minut, sekunder, awgnum , temp);
+
   lcd.print(stringbuffer);           // skriv i linje 3
-  //------------------------------------------------------------------------------------------------------------------
+
   lcd.setCursor(0, 1);               //4 line
-  sprintf(stringbuffer, "L-R:%2i.%1i dB L-L:%2i.%1i dB  Set: -%2i dBm " , Rightscaled / 10, (Rightscaled % 10), Leftscaled / 10, (Leftscaled % 10), dBset_out );
+  sprintf(stringbuffer, "L_R:%2i.%1i dB L_L:%2i.%1i dB  Set: -%2i dBm " , Rightscaled / 10, (Rightscaled % 10), Leftscaled / 10, (Leftscaled % 10), dBset_out );
   lcd.print(stringbuffer);           // skriv i linje 4
 
   //-------------------------------------------------------------------------------------------------
@@ -329,11 +296,11 @@ void SetdBout() {
   //************************************************************
   // output scale
   //---------------
-  uint8_t targetChannel0 = 0;                         // vælg kanal 0 i digipot
-  uint8_t targetValue0 = output + Rightfine;
+  uint8_t targetChannel0 = 0;
+  uint8_t targetValue0 = output;
   set0 = targetValue0 ; // FLYT DEN OVER I SET0
   uint8_t targetChannel1 = 1;
-  uint8_t targetValue1 = output + Leftfine;
+  uint8_t targetValue1 = output;
   set1 = targetValue1 ; // FLYT DEN OVER I SET1
   potentio.writeRDAC(targetChannel0, targetValue0);  // skriv til Digi pot
   potentio.writeRDAC(targetChannel1, targetValue1);
@@ -377,7 +344,7 @@ void data() {
 
   LEFT = leftavg.reading(LEFTRAW);      // calculate the moving average
   RIGHT = rightavg.reading(RIGHTRAW);   // calculate the moving average
-
+ 
   portl = PINL;                         // læs hele port L
   return ;
 }
@@ -400,50 +367,12 @@ void splashscreen() {
   lcd.setCursor(0, 0);         //1 line
   lcd.print("         Test Tape Generator  ");
   lcd.setCursor(0, 1);         //2 line
-  lcd.print("     Software ver: 2021-09-16-NSL  ");
+  lcd.print("     Software ver: 2021-07-27-NSL  ");
   delay(500);
   lcd.clear();
   digitalWrite(8, LOW);       //skift til disp line 1 OG 2
   lcd.clear();
   lcd.init();
-
-  //-------------------------------------------------------------------------------------------------
-  // PRINTER
-  //----------------------------------------------------------------------------------------------------
-  //  printer.justify('C');              // tekst certrer   (right, center, left) -- accepts 'L', 'C', 'R'
-  //  printer.setSize('S');              // Set type size, accepts 'S', 'M', 'L'
-  //  printer.setDefault();              // Restore printer to defaults
-  //  printer.boldOn();
-  //  printer.boldOff();
-  //  printer.underlineOn();
-  //  printer.underlineOff();
-  //  printer.inverseOn();
-  //  printer.inverseOff();
-  //  printer.doubleHeightOn();
-  //  printer.doubleHeightOff();
-  //-------------------------------------------------------------------------
-
-  printer.justify('C');
-  printer.setSize('M');
-  printer.println(F("Software ver: 2021-09-16-NSL"));          // PrinTXT
-  gettime();                     // hent tiden
-  sprintf(stringbuffer, "Time: %02i:%02i:%02i    Temp: %2i C", timer, minut, sekunder,  temp);
-  printer.println((stringbuffer));
-  printer.feed(4);
-
-  //--------------------------------------------------------------------------------------------
-  //  QR Kode
-  //----------------------------------------
-  // Print the 135x135 pixel QR code in adaqrcode.h:
-  printer.begin();        // Init printer (same regardless of serial type)
-  printer.setDefault(); // Restore printer to defaults
-  printer.justify('C');
-  printer.printBitmap(adaqrcode_width, adaqrcode_height, adaqrcode_data);
-
-  printer.feed(2);
-  //--------------------------------------
-
-
   return;
 }
 //**************************************************************************
