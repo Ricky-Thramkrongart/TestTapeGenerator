@@ -6,14 +6,14 @@
 class RecordStep
 {
   public:
-    uint64_t Frequency;
-    uint64_t Time;
-    int64_t  Level;
+    int Frequency;
+    int Time;
+    int  Level;
     std::string Comment;
-    RecordStep(uint64_t Frequency_, uint64_t Time_, int64_t Level_, const char* Comment_): Frequency(Frequency_), Time(Time_), Level(Level_), Comment(Comment_)
+    RecordStep(int Frequency_, int Time_, int Level_, const char* Comment_): Frequency(Frequency_), Time(Time_), Level(Level_), Comment(Comment_)
     {
     }
-    RecordStep(uint64_t Frequency_, uint64_t Time_, int64_t Level_): Frequency(Frequency_), Time(Time_), Level(Level_), Comment("")
+    RecordStep(int Frequency_, int Time_, int Level_): Frequency(Frequency_), Time(Time_), Level(Level_), Comment("")
     {
     }
 
@@ -67,7 +67,6 @@ class TapeInfo
       if (Format == TapeFormat::Cassette) {
         format = 'C';
       }
-      //      sprintf(stringbuffer, "%i Track - %u Tracks - %u Min - %u nW/m %c", Tracks, RecordSteps.size(), (Length % 60) ? Length / 60 + 1 : Length / 60, Flux, format);
       sprintf(stringbuffer, "Track:%i Tracks:%u %u[Min] %u[nW/m] %c", Tracks, RecordSteps.size(), (Length % 60) ? Length / 60 + 1 : Length / 60, Flux, format);
       Result[1] = stringbuffer;
       return Result;
@@ -104,14 +103,14 @@ class TapeInfo
     static TapeInfo * Get(Tapes tape) {
       switch (tape) {
         case AKAI_GX_75_95_TEST_TAPE:
-          return new TapeInfo("AKAI GX-75/95 Test Tape", 2, 200, TapeInfo::Cassette, 0, {
+          return new TapeInfo("AKAI GX-75/95 Test Tape", 2, 200, TapeInfo::Cassette, 0.0, {
             new RecordStep(315, 180, 0, "Level"),
             new RecordStep(1000, 180, 0, "Azimuth"),
             new RecordStep(3150, 180, 0),
             new RecordStep(10000, 180, -15)
           });
         case NAKAMICHI_TEST_TAPE:
-          return new TapeInfo("Nakamichi Test Tape", 2, 200, TapeInfo::Cassette, 0, {
+          return new TapeInfo("Nakamichi Test Tape", 2, 200, TapeInfo::Cassette, 0.0, {
             new RecordStep(20000, 180, -20, "DA09001A 20 kHz Frequency Response"),
             new RecordStep(15000, 180, -20, "DA09002A 15 kHz Frequency Response"),
             new RecordStep(10000, 180, -20, "DA09003A 10 kHz Frequency Response"),
@@ -120,7 +119,7 @@ class TapeInfo
             new RecordStep(3000, 180, 0, "DA09006A 3 kHz Speed and Wow & Flutter")
           });
         case PANASONIC_QZZCFM_TEST_TAPE:
-          return new TapeInfo("Panasonic QZZCFM Test Tape", 2, 200, TapeInfo::Cassette, 0, {
+          return new TapeInfo("Panasonic QZZCFM Test Tape", 2, 200, TapeInfo::Cassette, 0.0, {
             new RecordStep(315, 180, -2, "Level"),
             new RecordStep(3000, 180, -10, "Azimuth"),
             new RecordStep(8000, 180, -20),
@@ -134,7 +133,7 @@ class TapeInfo
             new RecordStep(12500, 20, -20)
           });
         case PLAYBACK_EQ_TEST_TAPE:
-          return new TapeInfo("Playback EQ Test Tape", 2, 200, TapeInfo::Cassette, 0, {
+          return new TapeInfo("Playback EQ Test Tape", 2, 200, TapeInfo::Cassette, 0.0, {
             new RecordStep(1000, 120, 0, "1 kHz Reference Level"),
             new RecordStep(10000, 5, -20, "Alternating 10kHz"),
             new RecordStep(1000, 5, -20, "Alternating 1kHz"),
@@ -187,7 +186,7 @@ class TapeInfo
             new RecordStep(10000, 120, -20, "Azimuth")
           });
         case REVOX_B215_TEST_TAPE:
-          return   new TapeInfo("Revox B-215 Test Tape", 2, 200, TapeInfo::Cassette, 0, {
+          return   new TapeInfo("Revox B-215 Test Tape", 2, 200, TapeInfo::Cassette, 0.0, {
             new RecordStep(1000, 180, 2),
             new RecordStep(1000, 180, 0),
             new RecordStep(3150, 180, 0),
@@ -209,16 +208,16 @@ class TapeInfo
             new RecordStep(10000, 120, 0, "Azimuth")
           });
         case STUDER_A710_TEST_TAPE:
-          return new TapeInfo("Studer A710 Test Tape", 2, 200, TapeInfo::Cassette, 0, {
+          return new TapeInfo("Studer A710 Test Tape", 2, 200, TapeInfo::Cassette, 0.0, {
             new RecordStep(315, 460, 0, "Level"),
             new RecordStep(10000, 460, -20, "Azimuth")
           });
         case TANDBERG_24_TEST_TAPE:
-          return new TapeInfo("Tandberg #24 Test Tape", 2, 250, TapeInfo::Cassette, 0, {
+          return new TapeInfo("Tandberg #24 Test Tape", 2, 250, TapeInfo::Cassette, 0.0, {
             new RecordStep(1000, 4800, + 2, "Flux: 250nW/m")
           });
         case TEAC_MTT_MULTI_TEST_TAPE:
-          return new TapeInfo("Tandberg #24 Test Tape", 2, 250, TapeInfo::Cassette, 0, {
+          return new TapeInfo("Tandberg #24 Test Tape", 2, 250, TapeInfo::Cassette, 0.0, {
             new RecordStep(315, 120, 0, "MTT-212N"),
             new RecordStep(315, 120, -4, "MTT-212CN"),
             new RecordStep(1000, 120, -4, "MTT-212EN"),
@@ -304,7 +303,7 @@ class TapeInfo
             new RecordStep(1000, 120, 0)
           });
         case WOW_AND_FLUTTER_TEST_TAPE_1:
-          return new TapeInfo("Wow & Flutter Test Tape #1", 2, 200, TapeInfo::Cassette, 0, {
+          return new TapeInfo("Wow & Flutter Test Tape #1", 2, 200, TapeInfo::Cassette, 0.0, {
             new RecordStep(3000, 120, 0, "DIN Standard"),
             new RecordStep(3150, 120, 0, "JIS Standard")
           });

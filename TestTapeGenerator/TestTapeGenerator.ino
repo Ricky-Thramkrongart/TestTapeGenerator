@@ -4,8 +4,11 @@
 
 #include <ArduinoSTL.h>
 #include <bitset>
+#include <ArxSmartPtr.h>
+
 #include "TapeInfo.h"
 #include "LCDHelper.h"
+#include "Menu.h"
 using namespace std;
 
 void splashscreen()
@@ -35,61 +38,214 @@ void selftest()
   delay(1000);
 }
 
-void tapeSelection()
+double randomDouble(double minf, double maxf)
 {
-  LCD_Helper lcdhelper;
-  DDRL = B00000000; // all inputs PORT-L D42 til D49
+  return minf + random(1UL << 31) * (maxf - minf) / (1UL << 31);  // use 1ULL<<63 for max double values)
+}
 
-  auto ti = TapeInfo::Begin();
-  auto current = TapeInfo::End();
-  do {
-    if (current != ti) {
-      TapeInfo *tapeInfo = TapeInfo::Get(ti);
-      std::vector<std::string> strs = tapeInfo->ToString();
-      delete tapeInfo;
+class AdjustingReferenceLevelOkDialog : public Dialog
+{
+  public:
+    std::shared_ptr<TapeInfo> tapeInfo;
+    AdjustingReferenceLevelOkDialog(TapeInfo::Tapes Tape): Dialog(0), tapeInfo(TapeInfo::Get(Tape))
+    {
+    }
+    void UpdateLCD() {
+      lcdhelper.line[0] = "Reference Level";
+      lcdhelper.line[1] = tapeInfo->ToString()[0];
+      lcdhelper.line[2] = "Start recording";
+    }
+};
+
+class AdjustingReferenceLevelMonitor : public Dialog
+{
+  public:
+    std::shared_ptr<TapeInfo> tapeInfo;
+    AdjustingReferenceLevelMonitor(TapeInfo::Tapes Tape): Dialog(1000),  tapeInfo(TapeInfo::Get(Tape))
+    {
+    }
+    void UpdateLCD() {
+      double Target = tapeInfo->Target;
+      double LeftLevel = Target + randomDouble(-1.0, 1.0);
+      double RightLevel = Target + randomDouble(-1.0, 1.0);
+      char LeftLevelStatus = '=';
+      if (LeftLevel < 0.5)
+      {
+        LeftLevelStatus = '<';
+      }
+      if (LeftLevel > 0.5)
+      {
+        LeftLevelStatus = '>';
+      }
+
+      char RightLevelStatus = '=';
+      if (RightLevel < 0.5)
+      {
+        RightLevelStatus = '<';
+      }
+      if (RightLevel > 0.5)
+      {
+        RightLevelStatus = '>';
+      }
+
       char stringbuffer[40];
-      sprintf(stringbuffer, "Tape #%i Input %i", ti, PINL);
+      char str_target[6];
+      dtostrf(Target, 4, 1, str_target);
+      sprintf(stringbuffer, "Target: %s dB  Actuel (L:R): %c:%c", str_target, LeftLevelStatus, RightLevelStatus);
+      lcdhelper.line[0] = "Reference Level";
+      lcdhelper.line[1] = tapeInfo->ToString()[0];
+      lcdhelper.line[2] = stringbuffer;
+    }
+};
+
+class AdjustingReferenceLevelProgress : public Dialog
+{
+  public:
+    std::shared_ptr<TapeInfo> tapeInfo;
+    uint16_t i;
+    AdjustingReferenceLevelProgress(TapeInfo::Tapes Tape): Dialog(1000),  tapeInfo(TapeInfo::Get(Tape)), i(0)
+    {
+    }
+    void UpdateLCD() {
+      char stringbuffer[40];
+      sprintf(stringbuffer, "Adjustment: %3i %% Complete", i);
+      lcdhelper.line[0] = "Reference Level";
+      lcdhelper.line[1] = tapeInfo->ToString()[0];
+      lcdhelper.line[2] = stringbuffer;
+      i += 10;
+      if (i > 100) {
+        finished = true;
+      }
+    }
+};
+
+class AdjustingRecordLevelProgress : public Dialog
+{
+  public:
+    std::shared_ptr<TapeInfo> tapeInfo;
+    std::vector<RecordStep*>::iterator ptr;
+    AdjustingRecordLevelProgress(TapeInfo::Tapes Tape): Dialog(1000),  tapeInfo(TapeInfo::Get(Tape)), ptr(tapeInfo->RecordSteps.begin())
+    {
+    }
+    void UpdateLCD() {
+      char stringbuffer[40];
+      sprintf(stringbuffer, "%s (%i/%i)", (*ptr)->ToString().c_str(), (ptr - tapeInfo->RecordSteps.begin()) + 1, (int)tapeInfo->RecordSteps.size());
+      lcdhelper.line[0] = "Record Level";
+      lcdhelper.line[1] = tapeInfo->ToString()[0];
+      lcdhelper.line[2] = stringbuffer;
+      ptr++;
+      if (ptr == tapeInfo->RecordSteps.end()) {
+        finished = true;
+      }
+    }
+};
+
+class RecordTestTape : public Dialog
+{
+  public:
+    std::shared_ptr<TapeInfo> tapeInfo;
+    std::vector<RecordStep*>::iterator ptr;
+    RecordTestTape(TapeInfo::Tapes Tape): Dialog(1000),  tapeInfo(TapeInfo::Get(Tape)), ptr(tapeInfo->RecordSteps.begin())
+    {
+    }
+    void UpdateLCD() {
+      char stringbuffer[40];
+      sprintf(stringbuffer, "%s (%i/%i)", (*ptr)->ToString().c_str(), (ptr - tapeInfo->RecordSteps.begin()) + 1, (int)tapeInfo->RecordSteps.size());
+      lcdhelper.line[0] = "Recording Test Tape";
+      lcdhelper.line[1] = tapeInfo->ToString()[0];
+      lcdhelper.line[2] = stringbuffer;
+      ptr++;
+      if (ptr == tapeInfo->RecordSteps.end()) {
+        finished = true;
+      }
+    }
+};
+
+class MainMenu : public Menu
+{
+  public:
+    MainMenu (): Menu(3) {}
+    void UpdateLCD() {
+      std::string str;
+      switch (Current) {
+        case 0:
+          str = "Create Test Tape";
+          break;
+        case 1:
+          str = "Set Time";
+          break;
+        case 2:
+          str = "Mode";
+          break;
+      }
+      char buffer[40];
+      sprintf(buffer, "Current: %i", Current);
+      lcdhelper.line[0] = "== Main Menu ===============";
+      lcdhelper.line[1] = str;
+    }
+};
+
+class SelectTape : public Menu
+{
+  public:
+    SelectTape (): Menu(TapeInfo::Tapes::LAST_TAPE) {}
+    void UpdateLCD() {
+      std::shared_ptr<TapeInfo> tapeInfo(TapeInfo::Get(Current));
+      std::vector<std::string> strs = tapeInfo->ToString();
+      char stringbuffer[40];
+      sprintf(stringbuffer, "Tape #%i", Current);
       lcdhelper.line[0] = strs[0];
       lcdhelper.line[1] = strs[1];
-      lcdhelper.line[1] = strs[1];
       lcdhelper.line[3] = stringbuffer;
-      lcdhelper.Show();
-      current = ti;
     }
-    do {
-    } while (PINL == 0);
-    enum Buttons {BN_UP, BN_DOWN, BN_RIGHT, BN_LEFT, BN_PAGEUP, BN_PAGEDOWN, BN_ESCAPE, BN_OK};
+};
 
-    std::bitset<8> b{PINL};
-    if (b.test(BN_UP) || b.test(BN_RIGHT)) {
-      ti++;
-      delay(50);
-    } else if (b.test(BN_DOWN) || b.test(BN_LEFT)) {
-      ti--;
-      delay(50);
-    } else if (b.test(BN_PAGEUP)) {
-      for (int i = 0; i != 10; ++i) {
-        ti++;
-      }
-      delay(50);
-    } else if (b.test(BN_PAGEDOWN)) {
-      for (int i = 0; i != 10; ++i) {
-        ti--;
-      }
-      delay(50);
-    } else if (b.test(BN_ESCAPE) || b.test(BN_OK)) {
+void NewTestTape()
+{
+  TapeInfo::Tapes tape;
+  {
+    SelectTape selectTape;
+    if (! selectTape.Execute()) {
       return;
     }
-
-  } while (1);
+    tape = selectTape.Current;
+  }
+  if (! AdjustingReferenceLevelOkDialog(tape).Execute()) {
+    return;
+  }
+  if (! AdjustingReferenceLevelMonitor(tape).Execute()) {
+    return;
+  }
+  if (! AdjustingReferenceLevelProgress(tape).Execute()) {
+    return;
+  }
+  if (! AdjustingRecordLevelProgress(tape).Execute()) {
+    return;
+  }
+  if (! RecordTestTape(tape).Execute()) {
+    return;
+  }
+  //        Start-PrintLabel -Tape $Tape
 }
 
 void setup() {
   splashscreen();
   selftest();
-  tapeSelection();
-
+  do {
+    MainMenu mainMenu;
+    if (mainMenu.Execute()) {
+      switch (mainMenu.Current)
+      {
+        case 0:
+          NewTestTape();
+          break;
+        case 1:
+        case 2:
+          break;
+      };
+    }
+  } while (1);
 }
 
 void loop() {
-}
+};

@@ -16,18 +16,18 @@ class LCD_Helper
       digitalWrite(8, HIGH);   // disp line
 
       // Only run lcd.init() once per run.
-      static bool initilized = false;
+//      static bool initilized = false;
 
-      if (!initilized) {
+//      if (!initilized) {
         lcd.init();              // initialize the LCD
-      }
+//      }
       lcd.clear();             // clear Display
       digitalWrite(8, LOW);   // disp line
-      if (!initilized) {
+//      if (!initilized) {
         lcd.init();              // initialize the LCD
         // lcd.init() completed
-        initilized = true;
-      }
+//        initilized = true;
+//      }
       lcd.clear();             // clear Display
     };
     ~LCD_Helper() {
