@@ -8,7 +8,7 @@ class RecordStep
   public:
     int Frequency;
     int Time;
-    int  Level;
+    int Level;
     std::string Comment;
     RecordStep(int Frequency_, int Time_, int Level_, const char* Comment_): Frequency(Frequency_), Time(Time_), Level(Level_), Comment(Comment_)
     {
@@ -19,8 +19,8 @@ class RecordStep
 
     std::string ToString ()
     {
-      char stringbuffer[40];
-      sprintf(stringbuffer, "%5i Hz %4i dB %4i Sec", Frequency, Level, Time);
+      char stringbuffer[255];
+      sprintf(stringbuffer, "%5i Hz %4i dB %4i Sec %s", Frequency, Level, Time, Comment.c_str());
       return stringbuffer;
     }
 

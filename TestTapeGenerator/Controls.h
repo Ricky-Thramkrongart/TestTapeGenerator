@@ -1,7 +1,46 @@
-#ifndef MENU_H
-#define MENU_H
+#ifndef CONTROLS_H
+#define CONTROLS_H
 
 #include "LCDHelper.h"
+
+void GetCaret(double min_val, double max_val, double value, char& caret, int& index)
+{
+  if (value < min_val) {
+    caret = '<';
+    index = 1;
+    return;
+  }
+  if (value > max_val) {
+    caret = '>';
+    index = 39;
+    return;
+  }
+  caret = '\xDB';
+  //    1234567890123456789012345678901234567890
+  //   "   -2   .   1   .   0   .   1   .   2+  "
+
+  index = 8 * value + 20;
+
+}
+
+std::vector<std::string> GetVUMeterStrings (double left, double right)
+{
+  std::vector<std::string> strs(3);
+  double min_val = -2.0;
+  double max_val =  2.0;
+  //         1234567890123456789012345678901234567890
+  strs[0] = "   -2   .   1   .   0   .   1   .   2+  ";
+  strs[1] = "L                                       ";
+  strs[2] = "R                                       ";
+
+  char caret;
+  int index;
+  GetCaret(min_val, max_val, left, caret, index);
+  strs[1][index] = caret;
+  GetCaret(min_val, max_val, right, caret, index);
+  strs[2][index] = caret;
+  return strs;
+}
 
 class Menu
 {
@@ -120,4 +159,4 @@ class Dialog
 };
 
 
-#endif // MENU_H
+#endif // CONTROLS_H

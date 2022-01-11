@@ -8,8 +8,14 @@
 
 #include "TapeInfo.h"
 #include "LCDHelper.h"
-#include "Menu.h"
+#include "Controls.h"
+#include "Printer.h"
 using namespace std;
+
+double randomDouble(double minf, double maxf)
+{
+  return minf + random(1UL << 31) * (maxf - minf) / (1UL << 31);  // use 1ULL<<63 for max double values)
+}
 
 void splashscreen()
 {
@@ -36,11 +42,6 @@ void selftest()
   lcdhelper.line[3] = "20Hz to 25Khz +/- 0.1 dB :OK";
   lcdhelper.Show();
   delay(1000);
-}
-
-double randomDouble(double minf, double maxf)
-{
-  return minf + random(1UL << 31) * (maxf - minf) / (1UL << 31);  // use 1ULL<<63 for max double values)
 }
 
 class AdjustingReferenceLevelOkDialog : public Dialog
@@ -151,9 +152,11 @@ class RecordTestTape : public Dialog
     void UpdateLCD() {
       char stringbuffer[40];
       sprintf(stringbuffer, "%s (%i/%i)", (*ptr)->ToString().c_str(), (ptr - tapeInfo->RecordSteps.begin()) + 1, (int)tapeInfo->RecordSteps.size());
-      lcdhelper.line[0] = "Recording Test Tape";
-      lcdhelper.line[1] = tapeInfo->ToString()[0];
-      lcdhelper.line[2] = stringbuffer;
+      std::vector<std::string> VUMeter(GetVUMeterStrings(randomDouble(-3, 3), randomDouble(-3, 3))); 
+      lcdhelper.line[0] = stringbuffer;
+      lcdhelper.line[1] = VUMeter[0].c_str();
+      lcdhelper.line[2] = VUMeter[1].c_str();
+      lcdhelper.line[3] = VUMeter[2].c_str();
       ptr++;
       if (ptr == tapeInfo->RecordSteps.end()) {
         finished = true;
@@ -225,7 +228,9 @@ void NewTestTape()
   if (! RecordTestTape(tape).Execute()) {
     return;
   }
-  //        Start-PrintLabel -Tape $Tape
+  if (! PrintProgress(tape).Execute()) {
+    return;
+  }
 }
 
 void setup() {
