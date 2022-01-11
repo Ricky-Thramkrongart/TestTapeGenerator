@@ -1,7 +1,10 @@
 #ifndef CONTROLS_H
 #define CONTROLS_H
 
+#include <RTC.h>
+#define RTC_H //Bug in RTC.h
 #include "LCDHelper.h"
+
 
 void GetCaret(double min_val, double max_val, double value, char& caret, int& index)
 {
@@ -21,6 +24,13 @@ void GetCaret(double min_val, double max_val, double value, char& caret, int& in
 
   index = 8 * value + 20;
 
+}
+
+void Beep(long ms = 30)
+{
+  digitalWrite(11, HIGH); // set buzzer on
+  delay(ms);
+  digitalWrite(11, LOW); // set buzzer OFF
 }
 
 std::vector<std::string> GetVUMeterStrings (double left, double right)
@@ -45,6 +55,7 @@ std::vector<std::string> GetVUMeterStrings (double left, double right)
 class Menu
 {
   public:
+    DS3231 RTC;
     uint16_t End;
     uint16_t Current;
     uint16_t Display;
@@ -54,6 +65,8 @@ class Menu
     virtual Menu (uint16_t End_): End(End_), Current(0), Display(End_), lcdhelper(false)
     {
       DDRL = B00000000; // all inputs PORT-L D42 til D49
+      RTC.begin();             // start RTC
+      RTC.setHourMode(CLOCK_H24); // set til 24 timer
     }
 
     uint16_t Inc ()
@@ -74,39 +87,68 @@ class Menu
     bool Execute()
     {
       auto pinl = PINL;
+      int keycount = 0;
+
+      long ms = millis();
       do {
         if (Current != Display) {
           UpdateLCD();
+          char stringbuffer[255];
+          sprintf(stringbuffer, "%02i:%02i:%02i", (int)RTC.getHours(), (int)RTC.getMinutes(), (int)RTC.getSeconds());
+          std::string str = lcdhelper.line[0];
+          str.resize(32, ' ');
+          str += stringbuffer;
+          lcdhelper.line[0] = str;
           lcdhelper.Show();
           Display = Current;
         }
 
         do {
-        } while ((pinl == PINL) || (pinl = PINL) == 0);
+          if (PINL) {
+            if (pinl == PINL) {
+              keycount++;
+            } else {
+              keycount = 1;
+            }
+            pinl = PINL;
+          } else {
+            keycount = 0;
+            pinl = 0;
+            if (millis() - ms > 1000) {
+              ms = millis();
+              char stringbuffer[255];
+              sprintf(stringbuffer, "%02i:%02i:%02i", (int)RTC.getHours(), (int)RTC.getMinutes(), (int)RTC.getSeconds());
+              digitalWrite(8, HIGH);
+              lcdhelper.lcd.setCursor(32, 0);
+              lcdhelper.lcd.print(stringbuffer);
+            }
+          }
+          delay(50);
+        } while (keycount == 0 || ((keycount > 1) && (keycount < 4)));
         enum Buttons {BN_UP, BN_DOWN, BN_RIGHT, BN_LEFT, BN_PAGEUP, BN_PAGEDOWN, BN_ESCAPE, BN_OK};
 
         std::bitset<8> b{pinl};
         if (b.test(BN_UP) || b.test(BN_RIGHT)) {
           Inc();
-          delay(150);
+          Beep(25);
         } else if (b.test(BN_DOWN) || b.test(BN_LEFT)) {
           Dec();
-          delay(150);
+          Beep(25);
         } else if (b.test(BN_PAGEUP)) {
           for (int i = 0; i != 10; ++i) {
             Inc();
           }
-          delay(150);
+          Beep(25);
         } else if (b.test(BN_PAGEDOWN)) {
           for (int i = 0; i != 10; ++i) {
             Dec();
           }
-          delay(150);
+          Beep(25);
         } else if (b.test(BN_ESCAPE)) {
-          delay(150);
+          Beep(25);
           return false;
         } else if (b.test(BN_OK)) {
-          delay(150);
+          Beep(25);
           return true;
         }
       } while (true);
@@ -116,6 +158,7 @@ class Menu
 class Dialog
 {
   public:
+    DS3231 RTC;
     LCD_Helper lcdhelper;
     bool finished;
     enum Buttons {BN_UP, BN_DOWN, BN_RIGHT, BN_LEFT, BN_PAGEUP, BN_PAGEDOWN, BN_ESCAPE, BN_OK};
@@ -124,6 +167,8 @@ class Dialog
     virtual Dialog (uint16_t delay_): _delay(delay_), finished(false)
     {
       DDRL = B00000000; // all inputs PORT-L D42 til D49
+      RTC.begin();             // start RTC
+      RTC.setHourMode(CLOCK_H24); // set til 24 timer
     }
 
     bool Execute()

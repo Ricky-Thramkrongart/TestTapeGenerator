@@ -10,6 +10,8 @@
 #include "TestTapeGenerator.h"
 #include "SoftwareSerial.h"
 #include <RTC.h>
+#define RTC_H //Bug in RTC.h
+
 #define TX_PIN 6 // Arduino transmit  YELLOW WIRE  labeled RX on printer
 #define RX_PIN 5 // Arduino receive   GREEN WIRE   labeled TX on printer
 
@@ -25,7 +27,7 @@ class PrintProgress : public Dialog
       printer.println(TESTTAPEGENERATOR_SW_VERSION);
       printer.println(TAPELIST_VERSION);
       char stringbuffer[255];
-      sprintf(stringbuffer, "Time: %02i:%02i:%02i    Temp: %2i C", (int)RTC.getSeconds(), (int)RTC.getMinutes(), (int)RTC.getSeconds(),  (int)RTC.getTemp());
+      sprintf(stringbuffer, "Time: %02i:%02i:%02i    Temp: %2i C", (int)RTC.getHours(), (int)RTC.getMinutes(), (int)RTC.getSeconds(),  (int)RTC.getTemp());
       printer.justify('L');
       printer.println((stringbuffer));
       printer.setSize('S');

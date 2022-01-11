@@ -211,7 +211,7 @@ class SelectTape : public Menu
       std::shared_ptr<TapeInfo> tapeInfo(TapeInfo::Get(Current));
       std::vector<std::string> strs = tapeInfo->ToString();
       char stringbuffer[255];
-      sprintf(stringbuffer, "Tape #%i", Current);
+      sprintf(stringbuffer, "Tape (%i/%i)", Current+1, TapeInfo::LAST_TAPE-TapeInfo::FIRST_TAPE);
       lcdhelper.line[0] = strs[0];
       lcdhelper.line[1] = strs[1];
       lcdhelper.line[3] = stringbuffer;

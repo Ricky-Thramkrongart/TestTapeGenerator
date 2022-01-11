@@ -11,6 +11,7 @@ class LCD_Helper
     LiquidCrystal_I2C lcd;
     LCD_Helper(bool initilize = true): lcd(0x25, 40, 2)
     {
+      initilize = true;
       pinMode(8, OUTPUT);  // disp line select
       lcd.setBacklight(HIGH);  // SET LCD LYS ON / OFF
       digitalWrite(8, HIGH);   // disp line
@@ -36,7 +37,7 @@ class LCD_Helper
       for (int i = 0; i != 4; i++)
       {
         if (line[i].size() > 40) {
-          line[i].resize(40);
+          line[i].resize(40, ' ');
         }
       }
 
