@@ -51,7 +51,7 @@ class Menu
     LCD_Helper lcdhelper;
     enum Buttons {BN_UP, BN_DOWN, BN_RIGHT, BN_LEFT, BN_PAGEUP, BN_PAGEDOWN, BN_ESCAPE, BN_OK};
     virtual void UpdateLCD() = 0;
-    virtual Menu (uint16_t End_): End(End_), Current(0), Display(End_)
+    virtual Menu (uint16_t End_): End(End_), Current(0), Display(End_), lcdhelper(false)
     {
       DDRL = B00000000; // all inputs PORT-L D42 til D49
     }

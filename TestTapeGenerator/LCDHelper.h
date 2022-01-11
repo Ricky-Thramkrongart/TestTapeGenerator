@@ -9,25 +9,20 @@ class LCD_Helper
   public:
     std::string line[4];
     LiquidCrystal_I2C lcd;
-    LCD_Helper(): lcd(0x25, 40, 2)
+    LCD_Helper(bool initilize = true): lcd(0x25, 40, 2)
     {
       pinMode(8, OUTPUT);  // disp line select
       lcd.setBacklight(HIGH);  // SET LCD LYS ON / OFF
       digitalWrite(8, HIGH);   // disp line
 
-      // Only run lcd.init() once per run.
-//      static bool initilized = false;
-
-//      if (!initilized) {
+      if (initilize) {
         lcd.init();              // initialize the LCD
-//      }
+      }
       lcd.clear();             // clear Display
       digitalWrite(8, LOW);   // disp line
-//      if (!initilized) {
+      if (initilize) {
         lcd.init();              // initialize the LCD
-        // lcd.init() completed
-//        initilized = true;
-//      }
+      }
       lcd.clear();             // clear Display
     };
     ~LCD_Helper() {
@@ -38,6 +33,13 @@ class LCD_Helper
     }
     Show()
     {
+      for (int i = 0; i != 4; i++)
+      {
+        if (line[i].size() > 40) {
+          line[i].resize(40);
+        }
+      }
+
       digitalWrite(8, HIGH);
       lcd.setCursor(0, 0);
       lcd.clear();

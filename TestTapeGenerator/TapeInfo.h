@@ -10,14 +10,16 @@ class RecordStep
     int Time;
     int Level;
     std::string Comment;
-    RecordStep(int Frequency_, int Time_, int Level_, const char* Comment_): Frequency(Frequency_), Time(Time_), Level(Level_), Comment(Comment_)
+    RecordStep(int Frequency_, int Time_, int Level_, const char* Comment_ = ""): Frequency(Frequency_), Time(Time_), Level(Level_), Comment(Comment_)
     {
     }
-    RecordStep(int Frequency_, int Time_, int Level_): Frequency(Frequency_), Time(Time_), Level(Level_), Comment("")
-    {
-    }
-
     std::string ToString ()
+    {
+      char stringbuffer[255];
+      sprintf(stringbuffer, "%5i Hz %4i dB %4i Sec", Frequency, Level, Time);
+      return stringbuffer;
+    }
+    std::string ToStringExt ()
     {
       char stringbuffer[255];
       sprintf(stringbuffer, "%5i Hz %4i dB %4i Sec %s", Frequency, Level, Time, Comment.c_str());
@@ -134,9 +136,9 @@ class TapeInfo
           });
         case PLAYBACK_EQ_TEST_TAPE:
           return new TapeInfo("Playback EQ Test Tape", 2, 200, TapeInfo::Cassette, 0.0, {
-            new RecordStep(1000, 120, 0, "1 kHz Reference Level"),
-            new RecordStep(10000, 5, -20, "Alternating 10kHz"),
-            new RecordStep(1000, 5, -20, "Alternating 1kHz"),
+            //new RecordStep(1000, 120, 0, "1 kHz Reference Level"),
+            //new RecordStep(10000, 5, -20, "Alternating 10kHz"),
+            //new RecordStep(1000, 5, -20, "Alternating 1kHz"),
             new RecordStep(10000, 5, -20),
             new RecordStep(1000, 5, -20),
             new RecordStep(10000, 5, -20),

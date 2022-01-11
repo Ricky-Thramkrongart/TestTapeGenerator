@@ -20,7 +20,7 @@ class PrintProgress : public Dialog
     void Print(void) {
       printer.justify('C');
       printer.println(F("Software ver: 2021-09-16-NSL"));          // PrinTXT
-      char stringbuffer[41];
+      char stringbuffer[255];
       sprintf(stringbuffer, "Time: %02i:%02i:%02i    Temp: %2i C", (int)RTC.getSeconds(), (int)RTC.getMinutes(), (int)RTC.getSeconds(),  (int)RTC.getTemp());
       printer.justify('L');
       printer.println((stringbuffer));
@@ -30,7 +30,7 @@ class PrintProgress : public Dialog
       for (std::vector<RecordStep*>::iterator ptr = tapeInfo->RecordSteps.begin() ; ptr != tapeInfo->RecordSteps.end(); ptr++)
       {
         if ((*ptr)->Comment.size()) {
-          printer.println((*ptr)->ToString().c_str());
+          printer.println((*ptr)->ToStringExt().c_str());
         }
       }
 

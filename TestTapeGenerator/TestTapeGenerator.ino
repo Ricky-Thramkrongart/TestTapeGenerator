@@ -29,7 +29,7 @@ void splashscreen()
 
 void selftest()
 {
-  LCD_Helper lcdhelper;
+  LCD_Helper lcdhelper(false);
   lcdhelper.line[0] = "I2C test: OK";
   lcdhelper.Show();
   delay(750);
@@ -89,7 +89,7 @@ class AdjustingReferenceLevelMonitor : public Dialog
         RightLevelStatus = '>';
       }
 
-      char stringbuffer[40];
+      char stringbuffer[255];
       char str_target[6];
       dtostrf(Target, 4, 1, str_target);
       sprintf(stringbuffer, "Target: %s dB  Actuel (L:R): %c:%c", str_target, LeftLevelStatus, RightLevelStatus);
@@ -108,7 +108,7 @@ class AdjustingReferenceLevelProgress : public Dialog
     {
     }
     void UpdateLCD() {
-      char stringbuffer[40];
+      char stringbuffer[255];
       sprintf(stringbuffer, "Adjustment: %3i %% Complete", i);
       lcdhelper.line[0] = "Reference Level";
       lcdhelper.line[1] = tapeInfo->ToString()[0];
@@ -129,7 +129,7 @@ class AdjustingRecordLevelProgress : public Dialog
     {
     }
     void UpdateLCD() {
-      char stringbuffer[40];
+      char stringbuffer[255];
       sprintf(stringbuffer, "%s (%i/%i)", (*ptr)->ToString().c_str(), (ptr - tapeInfo->RecordSteps.begin()) + 1, (int)tapeInfo->RecordSteps.size());
       lcdhelper.line[0] = "Record Level";
       lcdhelper.line[1] = tapeInfo->ToString()[0];
@@ -150,7 +150,7 @@ class RecordTestTape : public Dialog
     {
     }
     void UpdateLCD() {
-      char stringbuffer[40];
+      char stringbuffer[255];
       sprintf(stringbuffer, "%s (%i/%i)", (*ptr)->ToString().c_str(), (ptr - tapeInfo->RecordSteps.begin()) + 1, (int)tapeInfo->RecordSteps.size());
       std::vector<std::string> VUMeter(GetVUMeterStrings(randomDouble(-3, 3), randomDouble(-3, 3))); 
       lcdhelper.line[0] = stringbuffer;
@@ -181,7 +181,7 @@ class MainMenu : public Menu
           str = "Mode";
           break;
       }
-      char buffer[40];
+      char buffer[255];
       sprintf(buffer, "Current: %i", Current);
       lcdhelper.line[0] = "== Main Menu ===============";
       lcdhelper.line[1] = str;
@@ -195,7 +195,7 @@ class SelectTape : public Menu
     void UpdateLCD() {
       std::shared_ptr<TapeInfo> tapeInfo(TapeInfo::Get(Current));
       std::vector<std::string> strs = tapeInfo->ToString();
-      char stringbuffer[40];
+      char stringbuffer[255];
       sprintf(stringbuffer, "Tape #%i", Current);
       lcdhelper.line[0] = strs[0];
       lcdhelper.line[1] = strs[1];
