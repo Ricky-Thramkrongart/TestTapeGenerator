@@ -41,6 +41,7 @@ class LCD_Helper
         }
       }
 
+      lcd.setBacklight(HIGH);  // SET LCD LYS ON / OFF
       digitalWrite(8, HIGH);
       lcd.setCursor(0, 0);
       lcd.clear();

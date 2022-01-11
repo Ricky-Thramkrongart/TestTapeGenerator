@@ -249,6 +249,9 @@ void NewTestTape()
 }
 
 void setup() {
+
+
+	
   splashscreen();
   selftest();
   do {

@@ -90,9 +90,12 @@ class Menu
       int keycount = 0;
 
       long ms = millis();
+      long ms_light = millis();
+
       do {
         if (Current != Display) {
           UpdateLCD();
+          ms_light = millis(); 	
           char stringbuffer[255];
           sprintf(stringbuffer, "%02i:%02i:%02i", (int)RTC.getHours(), (int)RTC.getMinutes(), (int)RTC.getSeconds());
           std::string str = lcdhelper.line[0];
@@ -121,6 +124,10 @@ class Menu
               digitalWrite(8, HIGH);
               lcdhelper.lcd.setCursor(32, 0);
               lcdhelper.lcd.print(stringbuffer);
+            }
+            if (millis() - ms_light > 120000) {
+              ms_light = millis();
+              lcdhelper.lcd.setBacklight(LOW);  // SET LCD LYS ON / OFF
             }
           }
           delay(50);
