@@ -56,6 +56,33 @@ class LCD_Helper
       lcd.setCursor(0, 1);
       lcd.print(line[3].c_str());
     };
+    Test()
+    {
+      for (int k = 0; k != 2; ++k)
+      {
+        for (int j = 0; j != 4; ++j) {
+          line[j] = std::string(40, ' ');
+          for (int i = 0; i != 40; ++i) {
+            line[j][i] = i + 32 + j * 40 + k*40*4;
+          }
+        }
+
+        lcd.setBacklight(HIGH);  // SET LCD LYS ON / OFF
+
+        digitalWrite(8, HIGH);
+        lcd.setCursor(0, 0);
+        lcd.clear();
+        lcd.print(line[0].c_str());
+        lcd.print(line[1].c_str());
+
+        digitalWrite(8, LOW);
+        lcd.setCursor(0, 0);
+        lcd.clear();
+        lcd.print(line[2].c_str());
+        lcd.print(line[3].c_str());
+        delay(500);
+      }
+    }
 };
 
 #endif // LCDHELPER_H

@@ -18,7 +18,7 @@ void GetCaret(double min_val, double max_val, double value, char& caret, int& in
     index = 39;
     return;
   }
-  caret = '\xDB';
+  caret = '\xFF';
   //    1234567890123456789012345678901234567890
   //   "   -2   .   1   .   0   .   1   .   2+  "
 

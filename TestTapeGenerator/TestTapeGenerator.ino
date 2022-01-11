@@ -33,7 +33,6 @@ void splashscreen()
 void selftest()
 {
   LCD_Helper lcdhelper;
-
   lcdhelper.line[0] = "Self Test";
   lcdhelper.Show();
   byte devices[] = {0x25, 0x2C, 0x50, 0x68};
@@ -42,8 +41,8 @@ void selftest()
     Wire.begin();
     Wire.beginTransmission(devices[i]);
     if (Wire.endTransmission() != 0) {
-	  char stringbuffer[255];
-	  sprintf(stringbuffer,"Hardware Not Found at %02X", devices[i]);
+      char stringbuffer[255];
+      sprintf(stringbuffer, "Hardware Not Found at %02X", devices[i]);
       lcdhelper.line[0] = stringbuffer;
       lcdhelper.Show();
       exit(EXIT_FAILURE);
@@ -53,10 +52,12 @@ void selftest()
   lcdhelper.Show();
   delay(750);
 
+  LCD_Helper().Test();
+
   lcdhelper.line[2] = "Frequncy response test:";
   lcdhelper.line[3] = "20Hz to 25Khz +/- 0.1 dB :OK";
   lcdhelper.Show();
-  delay(1000);
+  delay(2000);
 }
 
 class AdjustingReferenceLevelOkDialog : public Dialog
@@ -198,7 +199,7 @@ class MainMenu : public Menu
       }
       char buffer[255];
       sprintf(buffer, "Current: %i", Current);
-      lcdhelper.line[0] = "== Main Menu ===============";
+      lcdhelper.line[0] = "== Main Menu ==================";
       lcdhelper.line[1] = str;
     }
 };
@@ -211,7 +212,7 @@ class SelectTape : public Menu
       std::shared_ptr<TapeInfo> tapeInfo(TapeInfo::Get(Current));
       std::vector<std::string> strs = tapeInfo->ToString();
       char stringbuffer[255];
-      sprintf(stringbuffer, "Tape (%i/%i)", Current+1, TapeInfo::LAST_TAPE-TapeInfo::FIRST_TAPE);
+      sprintf(stringbuffer, "Tape (%i/%i)", Current + 1, TapeInfo::LAST_TAPE - TapeInfo::FIRST_TAPE);
       lcdhelper.line[0] = strs[0];
       lcdhelper.line[1] = strs[1];
       lcdhelper.line[3] = stringbuffer;
@@ -249,9 +250,6 @@ void NewTestTape()
 }
 
 void setup() {
-
-
-	
   splashscreen();
   selftest();
   do {
