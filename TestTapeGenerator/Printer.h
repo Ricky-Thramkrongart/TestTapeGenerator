@@ -6,6 +6,9 @@
 #include "adaqrcode.h"
 #include <Adafruit_Thermal.h>
 #include "SoftwareSerial.h"
+#include "TapeInfo.h"
+#include "TestTapeGenerator.h"
+#include "SoftwareSerial.h"
 #include <RTC.h>
 #define TX_PIN 6 // Arduino transmit  YELLOW WIRE  labeled RX on printer
 #define RX_PIN 5 // Arduino receive   GREEN WIRE   labeled TX on printer
@@ -19,7 +22,8 @@ class PrintProgress : public Dialog
     std::shared_ptr<TapeInfo> tapeInfo;
     void Print(void) {
       printer.justify('C');
-      printer.println(F("Software ver: 2021-09-16-NSL"));          // PrinTXT
+      printer.println(TESTTAPEGENERATOR_SW_VERSION);
+      printer.println(TAPELIST_VERSION);
       char stringbuffer[255];
       sprintf(stringbuffer, "Time: %02i:%02i:%02i    Temp: %2i C", (int)RTC.getSeconds(), (int)RTC.getMinutes(), (int)RTC.getSeconds(),  (int)RTC.getTemp());
       printer.justify('L');
@@ -51,13 +55,13 @@ class PrintProgress : public Dialog
       printer.begin();        // Init printer (same regardless of serial type)
       RTC.begin();             // start RTC
       RTC.setHourMode(CLOCK_H24); // set til 24 timer
-   }
+    }
     void UpdateLCD() {
       lcdhelper.line[0] = "Printing";
       lcdhelper.line[1] = tapeInfo->ToString()[0];
       lcdhelper.line[2] = tapeInfo->ToString()[1];
       lcdhelper.Show();
-     if (!finished) {
+      if (!finished) {
         Print();
         lcdhelper.line[0] = "Finished Printing";
         finished = true;

@@ -6,6 +6,7 @@
 #include <bitset>
 #include <ArxSmartPtr.h>
 
+#include "TestTapeGenerator.h"
 #include "TapeInfo.h"
 #include "LCDHelper.h"
 #include "Controls.h"
@@ -20,9 +21,11 @@ double randomDouble(double minf, double maxf)
 void splashscreen()
 {
   LCD_Helper lcdhelper;
+  char stringbuffer[255];
+  sprintf(stringbuffer, "  %s", TESTTAPEGENERATOR_SW_VERSION);
   lcdhelper.line[0] = "Test Tape Generator";
-  lcdhelper.line[1] = "  SW rev: 2022/01/02";
-  lcdhelper.line[2] = "TapeList: 2022/01/02";
+  lcdhelper.line[1] = stringbuffer;
+  lcdhelper.line[2] = TAPELIST_VERSION;
   lcdhelper.Show();
   delay(2000);
 }
@@ -152,7 +155,7 @@ class RecordTestTape : public Dialog
     void UpdateLCD() {
       char stringbuffer[255];
       sprintf(stringbuffer, "%s (%i/%i)", (*ptr)->ToString().c_str(), (ptr - tapeInfo->RecordSteps.begin()) + 1, (int)tapeInfo->RecordSteps.size());
-      std::vector<std::string> VUMeter(GetVUMeterStrings(randomDouble(-3, 3), randomDouble(-3, 3))); 
+      std::vector<std::string> VUMeter(GetVUMeterStrings(randomDouble(-3, 3), randomDouble(-3, 3)));
       lcdhelper.line[0] = stringbuffer;
       lcdhelper.line[1] = VUMeter[0].c_str();
       lcdhelper.line[2] = VUMeter[1].c_str();

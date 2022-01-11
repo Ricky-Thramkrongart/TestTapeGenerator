@@ -3,6 +3,8 @@
 
 #include <ArduinoSTL.h>
 
+const char *TAPELIST_VERSION = "TapeList: 2022/01/11";
+
 class RecordStep
 {
   public:
@@ -331,16 +333,16 @@ class TapeInfo
 };
 TapeInfo::Tapes& operator++(TapeInfo::Tapes &t, int)
 {
-  if (t + 1 <  TapeInfo::End()){
-  	return t = t + 1;
+  if (t + 1 <  TapeInfo::End()) {
+    return t = t + 1;
   }
   return t;
 }
 
 TapeInfo::Tapes& operator--(TapeInfo::Tapes &t, int)
 {
-  if (t - 1 >=  TapeInfo::Begin()){
-  	return t = t - 1;
+  if (t - 1 >=  TapeInfo::Begin()) {
+    return t = t - 1;
   }
   return t;
 }
