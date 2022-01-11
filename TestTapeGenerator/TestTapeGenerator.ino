@@ -29,15 +29,27 @@ void splashscreen()
   lcdhelper.Show();
   delay(2000);
 }
-
+#include <Wire.h>
 void selftest()
 {
-  LCD_Helper lcdhelper(false);
-  lcdhelper.line[0] = "I2C test: OK";
-  lcdhelper.Show();
-  delay(750);
+  LCD_Helper lcdhelper;
 
-  lcdhelper.line[1] = "RTC:OK EEPROM:OK ATT:OK DISP:OK";
+  lcdhelper.line[0] = "Self Test";
+  lcdhelper.Show();
+  byte devices[] = {0x25, 0x2C, 0x50, 0x68};
+  for (int i = 0; i != sizeof(devices) / sizeof(byte); i++)
+  {
+    Wire.begin();
+    Wire.beginTransmission(devices[i]);
+    if (Wire.endTransmission() != 0) {
+	  char stringbuffer[255];
+	  sprintf(stringbuffer,"Hardware Not Found at %02X", devices[i]);
+      lcdhelper.line[0] = stringbuffer;
+      lcdhelper.Show();
+      exit(EXIT_FAILURE);
+    }
+  }
+  lcdhelper.line[1] = "DISP:OK EEPROM:OK RTC:OK DATT:OK";
   lcdhelper.Show();
   delay(750);
 
