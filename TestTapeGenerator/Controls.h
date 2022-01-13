@@ -5,7 +5,6 @@
 #define RTC_H //Bug in RTC.h
 #include "LCDHelper.h"
 
-
 void GetCaret(double min_val, double max_val, double value, char& caret, int& index)
 {
   if (value < min_val) {
@@ -191,6 +190,29 @@ class ButtonPanel
     MyTypedef OnLoop;
 };
 
+
+class RTC_Helper
+{
+  public:
+    DS3231 RTC;
+    RTC_Helper() {
+      RTC.begin();             // start RTC
+      RTC.setHourMode(CLOCK_H24); // set til 24 timer
+    }
+    std::string ToString() {
+      char stringbuffer[255];
+      sprintf(stringbuffer, "%02i:%02i:%02i", (int)RTC.getHours(), (int)RTC.getMinutes(), (int)RTC.getSeconds());
+      return stringbuffer;
+    }
+    std::string ToStringExt() {
+      char stringbuffer[255];
+      char degree = '\xDF';
+      sprintf(stringbuffer, "%02i:%02i:%02i %02i C", (int)RTC.getHours(), (int)RTC.getMinutes(), (int)RTC.getSeconds(), (int)RTC.getTemp());
+      stringbuffer[11] = degree;
+      return stringbuffer;
+    }
+};
+
 class Menu
 {
   protected:
@@ -215,11 +237,9 @@ class Menu
     ButtonPanel<Menu> buttonPanel;
     void OnTimerClock (Timer<Menu> *timer)
     {
-      char stringbuffer[255];
-      sprintf(stringbuffer, "%02i:%02i:%02i", (int)RTC.getHours(), (int)RTC.getMinutes(), (int)RTC.getSeconds());
       digitalWrite(8, HIGH);
       lcdhelper.lcd.setCursor(32, 0);
-      lcdhelper.lcd.print(stringbuffer);
+      lcdhelper.lcd.print(rtchelper.ToString().c_str());
     }
     void OnTimerLCD (Timer<Menu> *timer)
     {
@@ -253,12 +273,8 @@ class Menu
     {
       if (Current != Display) {
         UpdateLCD();
-        char stringbuffer[255];
-        sprintf(stringbuffer, "%02i:%02i:%02i", (int)RTC.getHours(), (int)RTC.getMinutes(), (int)RTC.getSeconds());
-        std::string str = lcdhelper.line[0];
-        str.resize(32, ' ');
-        str += stringbuffer;
-        lcdhelper.line[0] = str;
+        lcdhelper.line[0].resize(32, ' ');
+        lcdhelper.line[0] += rtchelper.ToString();
         lcdhelper.Show();
         Display = Current;
       }
@@ -268,7 +284,7 @@ class Menu
       TimerClock.process();
       TimerLCD.process();
     }
-    DS3231 RTC;
+    RTC_Helper rtchelper;
     uint16_t End;
     uint16_t Current;
     uint16_t Display;
@@ -292,9 +308,6 @@ class Menu
       TimerLCD.enable();
 
       DDRL = B00000000; // all inputs PORT-L D42 til D49
-      RTC.begin();             // start RTC
-      RTC.setHourMode(CLOCK_H24); // set til 24 timer
-
     }
 
     bool Execute()
@@ -306,7 +319,7 @@ class Menu
 class Dialog
 {
   public:
-    DS3231 RTC;
+    RTC_Helper rtchelper;
     LCD_Helper lcdhelper;
     bool finished;
     enum Buttons {BN_UP, BN_DOWN, BN_RIGHT, BN_LEFT, BN_PAGEUP, BN_PAGEDOWN, BN_ESCAPE, BN_OK};
@@ -315,8 +328,6 @@ class Dialog
     virtual Dialog (uint16_t delay_): _delay(delay_), finished(false)
     {
       DDRL = B00000000; // all inputs PORT-L D42 til D49
-      RTC.begin();             // start RTC
-      RTC.setHourMode(CLOCK_H24); // set til 24 timer
     }
 
     bool Execute()
