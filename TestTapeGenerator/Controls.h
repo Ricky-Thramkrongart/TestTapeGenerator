@@ -52,24 +52,151 @@ std::vector<std::string> GetVUMeterStrings (double left, double right)
   return strs;
 }
 
-class Menu
+template <class T>
+class Timer
 {
+    long ms;
+    T *t;
+    bool enabled;
   public:
-    DS3231 RTC;
-    uint16_t End;
-    uint16_t Current;
-    uint16_t Display;
-    LCD_Helper lcdhelper;
-    enum Buttons {BN_UP, BN_DOWN, BN_RIGHT, BN_LEFT, BN_PAGEUP, BN_PAGEDOWN, BN_ESCAPE, BN_OK};
-    virtual void UpdateLCD() = 0;
-    virtual Menu (uint16_t End_): End(End_), Current(0), Display(End_), lcdhelper(false)
-    {
-      DDRL = B00000000; // all inputs PORT-L D42 til D49
-      RTC.begin();             // start RTC
-      RTC.setHourMode(CLOCK_H24); // set til 24 timer
+    long period;
+    void enable(void) {
+      enabled = true;
+      ms = millis();
+    }
+    void disable(void) {
+      enabled = false;
+      ms = 0;
+    }
+    Timer(T *t_):  t(t_), enabled(false), ms(0), period(0)  {
     }
 
-    uint16_t Inc ()
+    typedef void (T::*TimerTypedef)(Timer*);
+    TimerTypedef OnTimer;
+
+    void process() {
+      if (millis() - ms > period) {
+        ms = millis();
+        if (OnTimer) {
+          (t->*OnTimer)(this);
+        }
+      }
+    }
+};
+
+
+template <class T>
+class ButtonPanel
+{
+  protected:
+    enum Buttons {BN_UP, BN_DOWN, BN_RIGHT, BN_LEFT, BN_PAGEUP, BN_PAGEDOWN, BN_ESCAPE, BN_OK};
+    T *t;
+  public:
+    bool Execute()
+    {
+      auto pinl = PINL;
+      int keycount = 0;
+
+      do {
+        if (OnUpdate) {
+          (t->*OnUpdate)(this);
+        }
+        do {
+          if (PINL) {
+            if (pinl == PINL) {
+              keycount++;
+            } else {
+              keycount = 1;
+            }
+            pinl = PINL;
+          } else {
+            keycount = 0;
+            pinl = 0;
+            if (OnLoop) {
+              (t->*OnLoop)(this);
+            }
+          }
+          delay(50);
+        } while (keycount == 0 || ((keycount > 1) && (keycount < 4)));
+        std::bitset<8> b{pinl};
+        if (b.test(BN_UP)) {
+          if (OnButtonUp) {
+            (t->*OnButtonUp)(this);
+          }
+          Beep(25);
+        } else if (b.test(BN_DOWN)) {
+          if (OnButtonDown) {
+            (t->*OnButtonDown)(this);
+          }
+          Beep(25);
+        } else if (b.test(BN_RIGHT)) {
+          if (OnButtonRight) {
+            (t->*OnButtonRight)(this);
+          }
+          Beep(25);
+        } else if (b.test(BN_LEFT)) {
+          if (OnButtonLeft) {
+            (t->*OnButtonLeft)(this);
+          }
+          Beep(25);
+        } else if (b.test(BN_PAGEUP)) {
+          if (OnButtonPageUp) {
+            (t->*OnButtonPageUp)(this);
+          }
+          Beep(25);
+        } else if (b.test(BN_PAGEDOWN)) {
+          if (OnButtonPageDown) {
+            (t->*OnButtonPageDown)(this);
+          }
+          Beep(25);
+        } else if (b.test(BN_ESCAPE)) {
+          if (OnButtonEscape) {
+            (t->*OnButtonEscape)(this);
+          }
+          Beep(25);
+          return false;
+        } else if (b.test(BN_OK)) {
+          if (OnButtonOk) {
+            (t->*OnButtonOk)(this);
+          }
+          Beep(25);
+          return true;
+        }
+      } while (true);
+    }
+
+    ButtonPanel(T *t_): t(t_),
+      OnButtonUp(0),
+      OnButtonDown(0),
+      OnButtonRight(0),
+      OnButtonLeft(0),
+      OnButtonPageUp(0),
+      OnButtonPageDown(0),
+      OnButtonEscape(0),
+      OnButtonOk(0),
+      OnUpdate(0),
+      OnLoop(0)
+    {
+    }
+    typedef void (T::*MyTypedef)(ButtonPanel*);
+    MyTypedef OnButtonUp;
+    MyTypedef OnButtonDown;
+    MyTypedef OnButtonRight;
+    MyTypedef OnButtonLeft;
+    MyTypedef OnButtonPageUp;
+    MyTypedef OnButtonPageDown;
+    MyTypedef OnButtonEscape;
+    MyTypedef OnButtonOk;
+    MyTypedef OnUpdate;
+    MyTypedef OnLoop;
+};
+
+class Menu
+{
+  protected:
+    Timer<Menu> TimerClock;
+    Timer<Menu> TimerLCD;
+    uint16_t Inc()
     {
       if (Current + 1 <  End) {
         return Current = Current + 1;
@@ -84,81 +211,95 @@ class Menu
       return Current;
     }
 
+  public:
+    ButtonPanel<Menu> buttonPanel;
+    void OnTimerClock (Timer<Menu> *timer)
+    {
+      char stringbuffer[255];
+      sprintf(stringbuffer, "%02i:%02i:%02i", (int)RTC.getHours(), (int)RTC.getMinutes(), (int)RTC.getSeconds());
+      digitalWrite(8, HIGH);
+      lcdhelper.lcd.setCursor(32, 0);
+      lcdhelper.lcd.print(stringbuffer);
+    }
+    void OnTimerLCD (Timer<Menu> *timer)
+    {
+      lcdhelper.lcd.setBacklight(LOW);  // SET LCD LYS ON / OFF
+    }
+    void OnButtonUp (ButtonPanel<Menu> *buttonPanel)
+    {
+      TimerLCD.enable();
+      Inc();
+    }
+    void OnButtonDown (ButtonPanel<Menu> *buttonPanel)
+    {
+      TimerLCD.enable();
+      Dec();
+    }
+    void OnButtonPageUp (ButtonPanel<Menu> *buttonPanel)
+    {
+      TimerLCD.enable();
+      for (int i = 0; i != 10; ++i) {
+        Inc();
+      }
+    }
+    void OnButtonPageDown (ButtonPanel<Menu> *buttonPanel)
+    {
+      TimerLCD.enable();
+      for (int i = 0; i != 10; ++i) {
+        Dec();
+      }
+    }
+    void OnUpdate (ButtonPanel<Menu> *buttonPanel)
+    {
+      if (Current != Display) {
+        UpdateLCD();
+        char stringbuffer[255];
+        sprintf(stringbuffer, "%02i:%02i:%02i", (int)RTC.getHours(), (int)RTC.getMinutes(), (int)RTC.getSeconds());
+        std::string str = lcdhelper.line[0];
+        str.resize(32, ' ');
+        str += stringbuffer;
+        lcdhelper.line[0] = str;
+        lcdhelper.Show();
+        Display = Current;
+      }
+    }
+    void OnLoop (ButtonPanel<Menu> *buttonPanel)
+    {
+      TimerClock.process();
+      TimerLCD.process();
+    }
+    DS3231 RTC;
+    uint16_t End;
+    uint16_t Current;
+    uint16_t Display;
+    LCD_Helper lcdhelper;
+    virtual void UpdateLCD() = 0;
+    virtual Menu (uint16_t End_): End(End_), Current(0), Display(End_), lcdhelper(false), buttonPanel(this), TimerClock(this), TimerLCD(this)
+    {
+      buttonPanel.OnButtonUp = & Menu::OnButtonUp;
+      buttonPanel.OnButtonDown = & Menu::OnButtonDown;
+      buttonPanel.OnButtonPageUp = & Menu::OnButtonPageUp;
+      buttonPanel.OnButtonPageDown = & Menu::OnButtonPageDown;
+      buttonPanel.OnUpdate = & Menu::OnUpdate;
+      buttonPanel.OnLoop = & Menu::OnLoop;
+
+      TimerClock.period = 1000;
+      TimerClock.OnTimer = & Menu::OnTimerClock;
+      TimerClock.enable();
+
+      TimerLCD.period = 120000;
+      TimerLCD.OnTimer = & Menu::OnTimerLCD;
+      TimerLCD.enable();
+
+      DDRL = B00000000; // all inputs PORT-L D42 til D49
+      RTC.begin();             // start RTC
+      RTC.setHourMode(CLOCK_H24); // set til 24 timer
+
+    }
+
     bool Execute()
     {
-      auto pinl = PINL;
-      int keycount = 0;
-
-      long ms = millis();
-      long ms_light = millis();
-
-      do {
-        if (Current != Display) {
-          UpdateLCD();
-          ms_light = millis(); 	
-          char stringbuffer[255];
-          sprintf(stringbuffer, "%02i:%02i:%02i", (int)RTC.getHours(), (int)RTC.getMinutes(), (int)RTC.getSeconds());
-          std::string str = lcdhelper.line[0];
-          str.resize(32, ' ');
-          str += stringbuffer;
-          lcdhelper.line[0] = str;
-          lcdhelper.Show();
-          Display = Current;
-        }
-
-        do {
-          if (PINL) {
-            if (pinl == PINL) {
-              keycount++;
-            } else {
-              keycount = 1;
-            }
-            pinl = PINL;
-          } else {
-            keycount = 0;
-            pinl = 0;
-            if (millis() - ms > 1000) {
-              ms = millis();
-              char stringbuffer[255];
-              sprintf(stringbuffer, "%02i:%02i:%02i", (int)RTC.getHours(), (int)RTC.getMinutes(), (int)RTC.getSeconds());
-              digitalWrite(8, HIGH);
-              lcdhelper.lcd.setCursor(32, 0);
-              lcdhelper.lcd.print(stringbuffer);
-            }
-            if (millis() - ms_light > 120000) {
-              ms_light = millis();
-              lcdhelper.lcd.setBacklight(LOW);  // SET LCD LYS ON / OFF
-            }
-          }
-          delay(50);
-        } while (keycount == 0 || ((keycount > 1) && (keycount < 4)));
-        enum Buttons {BN_UP, BN_DOWN, BN_RIGHT, BN_LEFT, BN_PAGEUP, BN_PAGEDOWN, BN_ESCAPE, BN_OK};
-
-        std::bitset<8> b{pinl};
-        if (b.test(BN_UP) || b.test(BN_RIGHT)) {
-          Inc();
-          Beep(25);
-        } else if (b.test(BN_DOWN) || b.test(BN_LEFT)) {
-          Dec();
-          Beep(25);
-        } else if (b.test(BN_PAGEUP)) {
-          for (int i = 0; i != 10; ++i) {
-            Inc();
-          }
-          Beep(25);
-        } else if (b.test(BN_PAGEDOWN)) {
-          for (int i = 0; i != 10; ++i) {
-            Dec();
-          }
-          Beep(25);
-        } else if (b.test(BN_ESCAPE)) {
-          Beep(25);
-          return false;
-        } else if (b.test(BN_OK)) {
-          Beep(25);
-          return true;
-        }
-      } while (true);
+      return buttonPanel.Execute();
     }
 };
 
@@ -196,7 +337,6 @@ class Dialog
             }
           }
         } while ((pinl == PINL) || (pinl = PINL) == 0);
-        enum Buttons {BN_UP, BN_DOWN, BN_RIGHT, BN_LEFT, BN_PAGEUP, BN_PAGEDOWN, BN_ESCAPE, BN_OK};
 
         std::bitset<8> b{pinl};
         if (b.test(BN_ESCAPE)) {
@@ -209,6 +349,5 @@ class Dialog
       } while (true);
     }
 };
-
 
 #endif // CONTROLS_H

@@ -252,6 +252,7 @@ void NewTestTape()
 void setup() {
   splashscreen();
   selftest();
+  
   do {
     MainMenu mainMenu;
     if (mainMenu.Execute()) {
@@ -266,7 +267,7 @@ void setup() {
       };
     }
   } while (1);
-}
+ }
 
 void loop() {
 };
