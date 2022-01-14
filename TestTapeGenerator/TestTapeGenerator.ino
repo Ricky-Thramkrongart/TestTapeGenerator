@@ -48,11 +48,12 @@ void selftest()
             exit(EXIT_FAILURE);
         }
     }
+    LCD_Helper().Test();
+    
     lcdhelper.line[1] = "DISP:OK EEPROM:OK RTC:OK DATT:OK";
     lcdhelper.Show();
     delay(750);
 
-    LCD_Helper().Test();
 
     lcdhelper.line[2] = "Frequncy response test:";
     lcdhelper.line[3] = "20Hz to 25Khz +/- 0.1 dB :OK";
@@ -81,8 +82,6 @@ class AdjustingReferenceLevelOkDialog : public DialogOk
 
 class AdjustingReferenceLevelMonitor : public DialogOk
 {
-
-
     public:
         std::shared_ptr<TapeInfo> tapeInfo;
         AdjustingReferenceLevelMonitor(TapeInfo::Tapes Tape): tapeInfo(TapeInfo::Get(Tape))
@@ -91,8 +90,8 @@ class AdjustingReferenceLevelMonitor : public DialogOk
         void Update()
         {
             double Target = tapeInfo->Target;
-            double LeftLevel = Target + randomDouble(-1.0, 1.0);
-            double RightLevel = Target + randomDouble(-1.0, 1.0);
+            double LeftLevel = randomDouble(-0.55, 0.55);
+            double RightLevel = randomDouble(-1.0, 1.0);
             std::string statuscontrol = StatusControl(0.5, LeftLevel, RightLevel);
 
             char stringbuffer[255];
@@ -100,20 +99,16 @@ class AdjustingReferenceLevelMonitor : public DialogOk
             dtostrf(Target, 4, 1, str_target);
             sprintf(stringbuffer, "Target: %s dB  Actuel (L:R): ", str_target);
             digitalWrite(8, LOW);
-            lcdhelper.lcd.setCursor(strlen(stringbuffer)+1, 0);
+            lcdhelper.lcd.setCursor(strlen(stringbuffer), 0);
             lcdhelper.lcd.print(statuscontrol.c_str());
         }
 
         void FullUpdate() {
             double Target = tapeInfo->Target;
-            double LeftLevel = Target + randomDouble(-1.0, 1.0);
-            double RightLevel = Target + randomDouble(-1.0, 1.0);
-            std:: string statuscontrol = StatusControl(0.5, LeftLevel, RightLevel);
-
             char stringbuffer[255];
             char str_target[6];
             dtostrf(Target, 4, 1, str_target);
-            sprintf(stringbuffer, "Target: % s dB  Actuel (L:R): % s", str_target, statuscontrol.c_str());
+            sprintf(stringbuffer, "Target: % s dB  Actuel (L:R):        ", str_target);
             lcdhelper.line[0] = "Reference Level";
             lcdhelper.line[1] = tapeInfo->ToString()[0];
             lcdhelper.line[2] = stringbuffer;

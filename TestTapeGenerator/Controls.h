@@ -7,28 +7,25 @@
 
 std::string StatusControl(double trashhold, double LeftLevel, double RightLevel)
 {
-    char LeftLevelStatus = '=';
-    if (LeftLevel < trashhold)
+	char stringbuffer[] = "=:=";
+    if (LeftLevel < -trashhold)
     {
-        LeftLevelStatus = '<';
+        stringbuffer[0] = '<';
     }
     if (LeftLevel > trashhold)
     {
-        LeftLevelStatus = '>';
+        stringbuffer[0] = '>';
     }
 
-    char RightLevelStatus = '=';
-    if (RightLevel < trashhold)
+    if (RightLevel < -trashhold)
     {
-        RightLevelStatus = '<';
+        stringbuffer[2] = '<';
     }
     if (RightLevel > trashhold)
     {
-        RightLevelStatus = '>';
+        stringbuffer[2] = '>';
     }
 
-    char stringbuffer[255];
-    sprintf(stringbuffer, "%c:%c", LeftLevelStatus, RightLevelStatus);
     return stringbuffer;
 }
 

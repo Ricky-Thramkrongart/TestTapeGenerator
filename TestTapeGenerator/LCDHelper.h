@@ -80,7 +80,7 @@ class LCD_Helper
                 lcd.clear();
                 lcd.print(line[2].c_str());
                 lcd.print(line[3].c_str());
-                delay(500);
+                delay(1000);
             }
         }
 };
