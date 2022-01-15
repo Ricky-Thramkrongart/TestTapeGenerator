@@ -11,6 +11,7 @@
 #include "LCDHelper.h"
 #include "Controls.h"
 #include "Printer.h"
+#include <DS3232RTC.h>      // https://github.com/JChristensen/DS3232RTC
 using namespace std;
 
 double randomDouble(double minf, double maxf)
@@ -247,35 +248,78 @@ void NewTestTape()
         return;
     }
 }
+/*
 
-int incomingByte = 0; // for incoming serial data
+    time_t t;
+    tmElements_t tm;
 
-void setup()
+    // check for input to set the RTC, minimum length is 12, i.e. yy,m,d,h,m,s
+    if (Serial.available() >= 12) {
+        // note that the tmElements_t Year member is an offset from 1970,
+        // but the RTC wants the last two digits of the calendar year.
+        // use the convenience macros from the Time Library to do the conversions.
+        int y = Serial.parseInt();
+        if (y >= 100 && y < 1000)
+            Serial << F("Error: Year must be two digits or four digits!") << endl;
+        else {
+            if (y >= 1000)
+                tm.Year = CalendarYrToTm(y);
+            else    // (y < 100)
+                tm.Year = y2kYearToTm(y);
+            tm.Month = Serial.parseInt();
+            tm.Day = Serial.parseInt();
+            tm.Hour = Serial.parseInt();
+            tm.Minute = Serial.parseInt();
+            tm.Second = Serial.parseInt();
+            t = makeTime(tm);
+            RTC.set(t);        // use the time_t value to ensure correct weekday is set
+*/
+void SetDateTime()
 {
     LCD_Helper lcdhelper;
     RTC_Helper rtchelper;
-    lcdhelper.line[0] = "Set Time";
+    lcdhelper.line[0] = "Set DateTime";
     lcdhelper.Show();
     Serial.begin(115200); // opens serial port, sets data rate to 9600 bps
     Serial.setTimeout(500);
 
     do {
-        if (Serial.available()  0) {
-            std::string datetime(Serial.readString().c_str());
-            std::string str_date = datetime.substr(0, 10);
-            std::string str_time = datetime.substr(11, 8);
-            rtchelper.RTC.setDateTime(str_date.c_str(),str_time.c_str());
-            rtchelper.RTC.get
-            lcdhelper.line[1] = datetime;
-            lcdhelper.line[2] = str_time;
+        if (Serial.available() >= 12) {
+            uint16_t Year(Serial.parseInt());
+            uint8_t Month(Serial.parseInt()), Day(Serial.parseInt()), Hour(Serial.parseInt()), Minute(Serial.parseInt()), Second(Serial.parseInt());
+            time_t t;
+            tmElements_t tm;
+            if (Year >= 1000)
+                tm.Year = CalendarYrToTm(Year);
+            else    // (year < 100)
+                tm.Year = y2kYearToTm(Year);
+            tm.Month = Month;
+            tm.Day = Day;
+            tm.Hour = Hour;
+            tm.Minute = Minute;
+            tm.Second = Second;
+            t = makeTime(tm);
+            RTC.set(t);        // use the time_t value to ensure correct weekday is set
+            setSyncProvider(RTC.get);   // the function to get the time from the RTC
+            char sprintfbuffer[256];
+            sprintf(sprintfbuffer, "%04i:%02i:%02i %02i:%02i:%02i", Year, Month, Day, Hour, Minute, Second);
+            lcdhelper.line[2] = sprintfbuffer;
+            sprintf(sprintfbuffer, "%04i:%02i:%02i %02i:%02i:%02i", year(), month(), day(), hour(), minute(), second());
+            //sprintf(sprintfbuffer, "RTCDate:%04i:%02i:%02i RTCTime:%02i:%02i:%02i", rtchelper.RTC.getYear(), rtchelper.RTC.getMonth(), rtchelper.RTC.getDay(), rtchelper.RTC.getHours(), rtchelper.RTC.getMinutes(), rtchelper.RTC.getSeconds());
+            lcdhelper.line[3] = sprintfbuffer;
             lcdhelper.Show();
-            
         }
     } while (true);
- 
+
+}
+
+
+
+void setup()
+{
     splashscreen();
     selftest();
-
+  
     do {
         MainMenu mainMenu;
         if (mainMenu.Execute()) {
@@ -285,12 +329,14 @@ void setup()
                     NewTestTape();
                     break;
                 case 1:
+                    SetDateTime();
+                    break;
                 case 2:
                     break;
             };
         }
     } while (1);
-   
+
 }
 
 void loop() {

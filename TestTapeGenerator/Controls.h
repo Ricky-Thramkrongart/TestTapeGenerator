@@ -1,9 +1,8 @@
 #ifndef CONTROLS_H
 #define CONTROLS_H
 
-#include <RTC.h>
-#define RTC_H //Bug in RTC.h
 #include "LCDHelper.h"
+#include <DS3232RTC.h>
 
 std::string StatusControl(double trashhold, double LeftLevel, double RightLevel)
 {
@@ -219,20 +218,19 @@ class ButtonPanel
 class RTC_Helper
 {
     public:
-        DS3231 RTC;
         RTC_Helper() {
-            RTC.begin();             // start RTC
-            RTC.setHourMode(CLOCK_H24); // set til 24 timer
+            RTC.begin();
+            setSyncProvider(RTC.get);   // the function to get the time from the RTC
         }
         std::string ToString() {
             char stringbuffer[255];
-            sprintf(stringbuffer, "%02i:%02i:%02i", (int)RTC.getHours(), (int)RTC.getMinutes(), (int)RTC.getSeconds());
+            sprintf(stringbuffer, "%02i:%02i:%02i", hour(), minute(), second());
             return stringbuffer;
         }
         std::string ToStringExt() {
             char stringbuffer[255];
             char degree = '\xDF';
-            sprintf(stringbuffer, "%02i:%02i:%02i %02i C", (int)RTC.getHours(), (int)RTC.getMinutes(), (int)RTC.getSeconds(), (int)RTC.getTemp());
+            sprintf(stringbuffer, "%02i:%02i:%02i %02i C", hour(), minute(), second(), RTC.temperature());
             stringbuffer[11] = degree;
             return stringbuffer;
         }

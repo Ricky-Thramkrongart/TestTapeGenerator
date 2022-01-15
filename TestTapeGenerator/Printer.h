@@ -10,8 +10,6 @@
 #include "TestTapeGenerator.h"
 #include "SoftwareSerial.h"
 #include "Controls.h"
-#include <RTC.h>
-#define RTC_H //Bug in RTC.h
 
 #define TX_PIN 6 // Arduino transmit  YELLOW WIRE  labeled RX on printer
 #define RX_PIN 5 // Arduino receive   GREEN WIRE   labeled TX on printer

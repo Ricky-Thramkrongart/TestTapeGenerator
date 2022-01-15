@@ -19,14 +19,15 @@ do
 		$port = new-Object System.IO.Ports.SerialPort $COM, 115200, None, 8, one
 		if (!$port.IsOpen) { $port.open() }
 		while ($port.IsOpen)
-		{
-			[string]$datetime = Get-Date -format 'yyyy-MM-dd HH.mm.ss'
+		{                                                 
+			#[string]$datetime = Get-Date -format '2020,12,22,22,22,22.'
+			[string]$datetime = Get-Date -format 'yyyy,MM,dd,HH,mm,ss.'
 			$port.Write($datetime)
 			Write-Host "Sent '$datetime' to $COM"
 			Start-Sleep -Seconds 1
 		}
 	}
-		start-Sleep -Seconds 1
+	start-Sleep -Seconds 1
 }
 while ($true)
 
