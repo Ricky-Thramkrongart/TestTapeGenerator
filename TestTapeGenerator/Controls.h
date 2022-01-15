@@ -7,7 +7,7 @@
 
 std::string StatusControl(double trashhold, double LeftLevel, double RightLevel)
 {
-	char stringbuffer[] = "=:=";
+    char stringbuffer[] = "=:=";
     if (LeftLevel < -trashhold)
     {
         stringbuffer[0] = '<';
@@ -239,12 +239,88 @@ class RTC_Helper
 };
 
 
-
-class Menu
+class BasePanel
 {
     protected:
-        Timer<Menu> TimerClock;
-        Timer<Menu> TimerLCD;
+        Timer<BasePanel> TimerClock;
+        Timer<BasePanel> TimerLCD;
+    public:
+        RTC_Helper rtchelper;
+        LCD_Helper lcdhelper;
+
+    public:
+        ButtonPanel<BasePanel> buttonPanel;
+
+        virtual void OnTimerClock (Timer<BasePanel> *timer)
+        {
+            digitalWrite(8, HIGH);
+            lcdhelper.lcd.setCursor(32, 0);
+            lcdhelper.lcd.print(rtchelper.ToString().c_str());
+        }
+        virtual void OnTimerLCD (Timer<BasePanel> *timer)
+        {
+            lcdhelper.lcd.setBacklight(LOW);  // SET LCD LYS ON / OFF
+        }
+        virtual void OnButtonUp (ButtonPanel<BasePanel> *buttonPanel)
+        {
+            TimerLCD.enable();
+        }
+        virtual void OnButtonDown (ButtonPanel<BasePanel> *buttonPanel)
+        {
+            TimerLCD.enable();
+        }
+        virtual void OnButtonRight (ButtonPanel<BasePanel> *buttonPanel)
+        {
+            TimerLCD.enable();
+        }
+        virtual void OnButtonLeft (ButtonPanel<BasePanel> *buttonPanel)
+        {
+            TimerLCD.enable();
+        }
+        virtual void OnButtonPageUp (ButtonPanel<BasePanel> *buttonPanel)
+        {
+            TimerLCD.enable();
+        }
+        virtual void OnButtonPageDown (ButtonPanel<BasePanel> *buttonPanel)
+        {
+            TimerLCD.enable();
+        }
+        virtual void OnButtonEscape (ButtonPanel<BasePanel> *buttonPanel)
+        {
+            TimerLCD.enable();
+        }
+        virtual void OnButtonOk (ButtonPanel<BasePanel> *buttonPanel)
+        {
+            TimerLCD.enable();
+        }
+        virtual void OnUpdate (ButtonPanel<BasePanel> *buttonPanel) {
+            FullUpdate();
+            lcdhelper.line[0].resize(32, ' ');
+            lcdhelper.line[0] += rtchelper.ToString();
+            lcdhelper.Show();
+        }
+        virtual void OnLoop (ButtonPanel<BasePanel> *buttonPanel)
+        {
+            TimerClock.process();
+            TimerLCD.process();
+        }
+        virtual void FullUpdate() = 0;
+        BasePanel() : lcdhelper(false), buttonPanel(this), TimerClock(this), TimerLCD(this)
+        {
+            TimerClock.period = 1000;
+            TimerClock.OnTimer = & BasePanel::OnTimerClock;
+            TimerClock.enable();
+
+            TimerLCD.period = 120000;
+            TimerLCD.OnTimer = & BasePanel::OnTimerLCD;
+            TimerLCD.enable();
+        }
+
+};
+
+class Menu : public BasePanel
+{
+    protected:
         uint16_t Inc()
         {
             if (Current + 1 <  End) {
@@ -261,84 +337,84 @@ class Menu
         }
 
     public:
-        ButtonPanel<Menu> buttonPanel;
-        void OnTimerClock (Timer<Menu> *timer)
+        virtual void OnButtonUp (ButtonPanel<BasePanel> *buttonPanel)
         {
-            digitalWrite(8, HIGH);
-            lcdhelper.lcd.setCursor(32, 0);
-            lcdhelper.lcd.print(rtchelper.ToString().c_str());
-        }
-        void OnTimerLCD (Timer<Menu> *timer)
-        {
-            lcdhelper.lcd.setBacklight(LOW);  // SET LCD LYS ON / OFF
-        }
-        void OnButtonUp (ButtonPanel<Menu> *buttonPanel)
-        {
-            TimerLCD.enable();
+            BasePanel::OnButtonUp(buttonPanel);
             Inc();
         }
-        void OnButtonDown (ButtonPanel<Menu> *buttonPanel)
+        virtual void OnButtonDown (ButtonPanel<BasePanel> *buttonPanel)
         {
-            TimerLCD.enable();
+            BasePanel::OnButtonDown(buttonPanel);
             Dec();
         }
-        void OnButtonPageUp (ButtonPanel<Menu> *buttonPanel)
+        virtual void OnButtonPageUp (ButtonPanel<BasePanel> *buttonPanel)
         {
-            TimerLCD.enable();
+            BasePanel::OnButtonPageUp(buttonPanel);
             for (int i = 0; i != 10; ++i) {
                 Inc();
             }
         }
-        void OnButtonPageDown (ButtonPanel<Menu> *buttonPanel)
+        virtual void OnButtonPageDown (ButtonPanel<BasePanel> *buttonPanel)
         {
-            TimerLCD.enable();
+            BasePanel::OnButtonPageDown(buttonPanel);
             for (int i = 0; i != 10; ++i) {
                 Dec();
             }
         }
-        void OnUpdate (ButtonPanel<Menu> *buttonPanel)
+        virtual void OnUpdate (ButtonPanel<BasePanel> *buttonPanel)
         {
+            BasePanel::OnUpdate(buttonPanel);
             if (Current != Display) {
-                FullUpdate();
-                lcdhelper.line[0].resize(32, ' ');
-                lcdhelper.line[0] += rtchelper.ToString();
-                lcdhelper.Show();
+                BasePanel::OnUpdate(buttonPanel);
                 Display = Current;
             }
         }
-        void OnLoop (ButtonPanel<Menu> *buttonPanel)
-        {
-            TimerClock.process();
-            TimerLCD.process();
-        }
-        RTC_Helper rtchelper;
+
         uint16_t End;
         uint16_t Current;
         uint16_t Display;
-        LCD_Helper lcdhelper;
-        virtual void FullUpdate() = 0;
-        virtual Menu (uint16_t End_): End(End_), Current(0), Display(End_), lcdhelper(false), buttonPanel(this), TimerClock(this), TimerLCD(this)
+        virtual Menu (uint16_t End_): End(End_), Current(0), Display(End_)
         {
-            buttonPanel.OnButtonUp = & Menu::OnButtonUp;
-            buttonPanel.OnButtonDown = & Menu::OnButtonDown;
-            buttonPanel.OnButtonPageUp = & Menu::OnButtonPageUp;
-            buttonPanel.OnButtonPageDown = & Menu::OnButtonPageDown;
-            buttonPanel.OnUpdate = & Menu::OnUpdate;
-            buttonPanel.OnLoop = & Menu::OnLoop;
-
-            TimerClock.period = 1000;
-            TimerClock.OnTimer = & Menu::OnTimerClock;
-            TimerClock.enable();
-
-            TimerLCD.period = 120000;
-            TimerLCD.OnTimer = & Menu::OnTimerLCD;
-            TimerLCD.enable();
-
+            buttonPanel.OnButtonUp = & BasePanel::OnButtonUp;
+            buttonPanel.OnButtonDown = & BasePanel::OnButtonDown;
+            buttonPanel.OnButtonPageUp = & BasePanel::OnButtonPageUp;
+            buttonPanel.OnButtonPageDown = & BasePanel::OnButtonPageDown;
+            buttonPanel.OnUpdate = & BasePanel::OnUpdate;
+            buttonPanel.OnLoop = & BasePanel::OnLoop;
         }
 
-        bool Execute()
+        virtual bool Execute()
         {
             return buttonPanel.Execute();
+        }
+};
+
+class Spin: public Menu
+{
+    public:
+        Spin(uint16_t End_): Menu(End_) {
+            buttonPanel.OnButtonRight = & BasePanel::OnButtonRight;
+            buttonPanel.OnButtonLeft = & BasePanel::OnButtonLeft;
+        }
+        virtual void OnButtonRight (ButtonPanel<BasePanel> *buttonPanel)
+        {
+            TimerLCD.enable();
+            lcdhelper.line[0] = "OnButtonRight";
+            lcdhelper.lcd.cursor();
+            lcdhelper.lcd.blink();
+            lcdhelper.Show();
+            delay(1000);
+
+        }
+        virtual void OnButtonLeft (ButtonPanel<BasePanel> *buttonPanel)
+        {
+            TimerLCD.enable();
+            lcdhelper.line[0] = "OnButtonLeft";
+            lcdhelper.lcd.noCursor();
+            lcdhelper.lcd.noBlink();
+            lcdhelper.Show();
+            delay(1000);
+
         }
 };
 
@@ -394,7 +470,6 @@ class DialogOk
 class Dialog
 {
     public:
-        RTC_Helper rtchelper;
         LCD_Helper lcdhelper;
         bool finished;
         enum Buttons {BN_UP, BN_DOWN, BN_RIGHT, BN_LEFT, BN_PAGEUP, BN_PAGEDOWN, BN_ESCAPE, BN_OK};
@@ -402,7 +477,6 @@ class Dialog
         uint16_t _delay;
         virtual Dialog (uint16_t delay_): _delay(delay_), finished(false)
         {
-            DDRL = B00000000; // all inputs PORT-L D42 til D49
         }
 
         bool Execute()

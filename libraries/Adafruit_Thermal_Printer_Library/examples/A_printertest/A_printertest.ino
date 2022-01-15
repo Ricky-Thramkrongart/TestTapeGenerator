@@ -6,9 +6,6 @@
   This is to support newer & more board types, especially ones that don't
   support SoftwareSerial (e.g. Arduino Due).  You can pass any Stream
   (e.g. Serial1) to the printer constructor.  See notes below.
-
-  You may need to edit the PRINTER_FIRMWARE value in Adafruit_Thermal.h
-  to match your printer (hold feed button on powerup for test page).
   ------------------------------------------------------------------------*/
 
 #include "Adafruit_Thermal.h"
@@ -49,6 +46,14 @@ void setup() {
   // anywhere!  They're just here so they run one time and are not printed
   // over and over (which would happen if they were in loop() instead).
   // Some functions will feed a line when called, this is normal.
+
+  // Font options
+  printer.setFont('B');
+  printer.println("FontB");
+  printer.println("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+  printer.setFont('A');
+  printer.println("FontA (default)");
+  printer.println("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 
   // Test inverse on & off
   printer.inverseOn();

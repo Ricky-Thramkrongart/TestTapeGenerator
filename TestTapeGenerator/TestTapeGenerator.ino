@@ -49,7 +49,7 @@ void selftest()
         }
     }
     LCD_Helper().Test();
-    
+
     lcdhelper.line[1] = "DISP:OK EEPROM:OK RTC:OK DATT:OK";
     lcdhelper.Show();
     delay(750);
@@ -77,8 +77,6 @@ class AdjustingReferenceLevelOkDialog : public DialogOk
         }
 
 };
-
-
 
 class AdjustingReferenceLevelMonitor : public DialogOk
 {
@@ -136,6 +134,7 @@ class AdjustingReferenceLevelProgress : public Dialog
         }
 };
 
+
 class AdjustingRecordLevelProgress : public Dialog
 {
     public:
@@ -180,10 +179,10 @@ class RecordTestTape : public Dialog
         }
 };
 
-class MainMenu : public Menu
+class MainMenu : public Spin
 {
     public:
-        MainMenu (): Menu(3) {}
+        MainMenu (): Spin(3) {}
         void FullUpdate() {
             std::string str;
             switch (Current) {
@@ -249,7 +248,31 @@ void NewTestTape()
     }
 }
 
-void setup() {
+int incomingByte = 0; // for incoming serial data
+
+void setup()
+{
+    LCD_Helper lcdhelper;
+    RTC_Helper rtchelper;
+    lcdhelper.line[0] = "Set Time";
+    lcdhelper.Show();
+    Serial.begin(115200); // opens serial port, sets data rate to 9600 bps
+    Serial.setTimeout(500);
+
+    do {
+        if (Serial.available()  0) {
+            std::string datetime(Serial.readString().c_str());
+            std::string str_date = datetime.substr(0, 10);
+            std::string str_time = datetime.substr(11, 8);
+            rtchelper.RTC.setDateTime(str_date.c_str(),str_time.c_str());
+            rtchelper.RTC.get
+            lcdhelper.line[1] = datetime;
+            lcdhelper.line[2] = str_time;
+            lcdhelper.Show();
+            
+        }
+    } while (true);
+ 
     splashscreen();
     selftest();
 
@@ -267,7 +290,8 @@ void setup() {
             };
         }
     } while (1);
+   
 }
 
 void loop() {
-};
+}
