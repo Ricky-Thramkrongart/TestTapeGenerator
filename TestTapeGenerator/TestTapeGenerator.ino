@@ -181,10 +181,10 @@ class RecordTestTape : public Dialog
         }
 };
 
-class MainMenu : public Spin
+class MainMenu : public Menu
 {
     public:
-        MainMenu (): Spin(3) {}
+        MainMenu (): Menu(3) {}
         void FullUpdate() {
             std::string str;
             switch (Current) {

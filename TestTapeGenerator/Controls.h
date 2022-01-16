@@ -361,7 +361,6 @@ class Menu : public BasePanel
         }
         virtual void OnUpdate (ButtonPanel<BasePanel> *buttonPanel)
         {
-            BasePanel::OnUpdate(buttonPanel);
             if (Current != Display) {
                 BasePanel::OnUpdate(buttonPanel);
                 Display = Current;
@@ -384,35 +383,6 @@ class Menu : public BasePanel
         virtual bool Execute()
         {
             return buttonPanel.Execute();
-        }
-};
-
-class Spin: public Menu
-{
-    public:
-        Spin(uint16_t End_): Menu(End_) {
-            buttonPanel.OnButtonRight = & BasePanel::OnButtonRight;
-            buttonPanel.OnButtonLeft = & BasePanel::OnButtonLeft;
-        }
-        virtual void OnButtonRight (ButtonPanel<BasePanel> *buttonPanel)
-        {
-            TimerLCD.enable();
-            lcdhelper.line[0] = "OnButtonRight";
-            lcdhelper.lcd.cursor();
-            lcdhelper.lcd.blink();
-            lcdhelper.Show();
-            delay(1000);
-
-        }
-        virtual void OnButtonLeft (ButtonPanel<BasePanel> *buttonPanel)
-        {
-            TimerLCD.enable();
-            lcdhelper.line[0] = "OnButtonLeft";
-            lcdhelper.lcd.noCursor();
-            lcdhelper.lcd.noBlink();
-            lcdhelper.Show();
-            delay(1000);
-
         }
 };
 
