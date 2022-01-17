@@ -5,7 +5,6 @@
 #include <ArduinoSTL.h>
 #include <bitset>
 #include <ArxSmartPtr.h>
-#include "OutPutTable.h"
 
 #include "TestTapeGenerator.h"
 #include "TapeInfo.h"
@@ -13,6 +12,7 @@
 #include "Controls.h"
 #include "Printer.h"
 #include "SignalGenerator.h"
+#include "dbMeter.h"
 #include <DS3232RTC.h>      // https://github.com/JChristensen/DS3232RTC
 #include <Regexp.h>         // https://github.com/nickgammon/Regexp/
 using namespace std;
@@ -33,8 +33,6 @@ void splashscreen()
     lcdhelper.Show();
     delay(2000);
 }
-
-
 
 #include <Wire.h>
 void selftest()
@@ -86,6 +84,8 @@ class AdjustingReferenceLevelOkDialog : public DialogOk
 
 class AdjustingReferenceLevelMonitor : public DialogOk
 {
+    protected:
+    dBMeter dbMeter;
     public:
         std::shared_ptr<TapeInfo> tapeInfo;
         AdjustingReferenceLevelMonitor(TapeInfo::Tapes Tape): tapeInfo(TapeInfo::Get(Tape))
@@ -94,10 +94,10 @@ class AdjustingReferenceLevelMonitor : public DialogOk
         void Update()
         {
             double Target = tapeInfo->Target;
-            double LeftLevel = randomDouble(-0.55, 0.55);
-            double RightLevel = randomDouble(-1.0, 1.0);
-            std::string statuscontrol = StatusControl(0.5, LeftLevel, RightLevel);
-
+            uint16_t LeftLevel;
+            uint16_t RightLevel;   
+            dbMeter.getdB(Target, RightLevel, LeftLevel);
+            std::string statuscontrol = StatusControl(0.5, LeftLevel-Target, RightLevel-Target);
             char stringbuffer[255];
             char str_target[6];
             dtostrf(Target, 4, 1, str_target);

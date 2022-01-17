@@ -2,6 +2,7 @@
 #define SIGNALGENERATOR_H
 
 #include <AD5254_asukiaaa.h>
+#include "OutPutTable.h"
 class SignalGenerator
 {
     protected:
@@ -16,11 +17,14 @@ class SignalGenerator
         SignalGenerator(): _clkPin(13), _fsyncPin(2), _dataPin(9), potentio(AD5254_ASUKIAAA_ADDR_A0_GND_A1_GND)
         {
             potentio.begin();        // start Didital potmeter
+            
             pinMode(_clkPin,   OUTPUT);
-            pinMode(_fsyncPin, OUTPUT);
-            pinMode(_dataPin,  OUTPUT);
-            digitalWrite(_fsyncPin, HIGH);
             digitalWrite(_clkPin,   LOW);
+            
+            pinMode(_fsyncPin, OUTPUT);
+            digitalWrite(_fsyncPin, HIGH);
+
+            pinMode(_dataPin,  OUTPUT);
         }
         ~SignalGenerator() 
         {
@@ -58,7 +62,7 @@ class SignalGenerator
         void setdB(double dB)
         {
             double dBdiff;
-            double output;
+            uint8_t output;
             if (dB < 5) {
                 digitalWrite(7, LOW);  // -5 db att OFF
                 digitalWrite(10, LOW);  // -10 db att OFF
@@ -82,10 +86,10 @@ class SignalGenerator
                 output = getOutput(dBdiff);
             }
            
-            const uint8_t leftChannel(0);
-            const uint8_t rightChannel(1);
-            potentio.writeRDAC(leftChannel, output);  //Right
-            potentio.writeRDAC(rightChannel, output);  //Left
+            const uint8_t leftChannelOut(0);
+            const uint8_t rightChannelOut(1);
+            potentio.writeRDAC(leftChannelOut, output);  //Right
+            potentio.writeRDAC(rightChannelOut, output);  //Left
         }
 
         void setFreq(double f, double dB)

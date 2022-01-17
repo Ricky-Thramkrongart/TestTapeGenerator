@@ -4,7 +4,7 @@
 #include "LCDHelper.h"
 #include <DS3232RTC.h>
 
-std::string StatusControl(double trashhold, double LeftLevel, double RightLevel)
+std::string StatusControl(double trashhold, uint16_t LeftLevel, uint16_t RightLevel)
 {
     char stringbuffer[] = "=:=";
     if (LeftLevel < -trashhold)
