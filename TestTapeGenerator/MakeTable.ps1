@@ -27,7 +27,7 @@ for ([int] $i = 0; $i -ne $TableDouble.Length; $i++)
 @("#ifndef OUTPUTTABLE_H",
   "#define OUTPUTTABLE_H",
   "", 	
-  "const PROGMEM double Table[$($TableDouble.Length)][$($Table.Length)] = {$($row -join ', ')};",
+  "const PROGMEM double OutPutTable[$($TableDouble.Length)][$($Table.Length)] = {$($row -join ', ')};",
 	"",
   "#endif // OUTPUTTABLE_H"
 ) | Set-Content -Path .\OutPutTable.h	
