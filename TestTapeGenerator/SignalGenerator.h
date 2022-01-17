@@ -91,7 +91,7 @@ class SignalGenerator
         void setFreq(double f, double dB)
         {
             setdB(dB);
-            return;  
+
             const uint16_t b28  = (1UL << 13);
             const uint16_t freq = (1UL << 14);
 
