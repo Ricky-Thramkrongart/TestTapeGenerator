@@ -1,7 +1,7 @@
 #Requires -Version 7
 
-[array]$Header = @('A00', 'A05', 'A10', 'A15')
-$Table = import-csv '.\OutPut.csv' -Delimiter ';' -Header $Header
+[array]$Header = @('A00')
+$Table = import-csv '.\OutPutTable.csv' -Delimiter ';' -Header $Header
 [array]$TableDouble
 
 foreach ($h in $Header)
@@ -27,7 +27,7 @@ for ([int] $i = 0; $i -ne $TableDouble.Length; $i++)
 @("#ifndef OUTPUTTABLE_H",
   "#define OUTPUTTABLE_H",
   "", 	
-  "const PROGMEM double OutPutTable[$($TableDouble.Length)][$($Table.Length)] = {$($row -join ', ')};",
+  "const PROGMEM double OutPutTable[$($Table.Length)] = $($row -join ', ');",
 	"",
   "#endif // OUTPUTTABLE_H"
 ) | Set-Content -Path .\OutPutTable.h	

@@ -12,61 +12,10 @@
 #include "LCDHelper.h"
 #include "Controls.h"
 #include "Printer.h"
+#include "SignalGenerator.h"
 #include <DS3232RTC.h>      // https://github.com/JChristensen/DS3232RTC
 #include <Regexp.h>         // https://github.com/nickgammon/Regexp/
 using namespace std;
-
-class SignalGenerator
-{
-  protected:
-        // for chip info see https://www.analog.com/en/products/ad9833.html
-        // SPI code taken from https://github.com/MajicDesigns/MD_AD9833/
-        const uint8_t _clkPin;
-        const uint8_t _fsyncPin;
-        const uint8_t _dataPin;
-    public:
-        SignalGenerator(): _clkPin(13), _fsyncPin(2), _dataPin(9)
-        {
-            pinMode(_clkPin,   OUTPUT);
-            pinMode(_fsyncPin, OUTPUT);
-            pinMode(_dataPin,  OUTPUT);
-            digitalWrite(_fsyncPin, HIGH);
-            digitalWrite(_clkPin,   LOW);
-        }
-
-        void spiSend(const uint16_t data)
-        {
-            digitalWrite(_fsyncPin, LOW);
-
-            uint16_t m = 1UL << 15;
-            for (uint8_t i = 0; i < 16; i++)
-            {
-                digitalWrite(_dataPin, data & m ? HIGH : LOW);
-                digitalWrite(_clkPin, LOW); //data is valid on falling edge
-                digitalWrite(_clkPin, HIGH);
-                m >>= 1;
-            }
-            digitalWrite(_dataPin, LOW); //idle low
-            digitalWrite(_fsyncPin, HIGH);
-        }
-
-        void setFreq(double f)
-        {
-            const uint16_t b28  = (1UL << 13);
-            const uint16_t freq = (1UL << 14);
-
-            const double   f_clk = 25e6;
-            const double   scale = 1UL << 28;
-            const uint32_t n_reg = f * scale / f_clk;
-
-            const uint16_t f_low  = n_reg         & 0x3fffUL;
-            const uint16_t f_high = (n_reg >> 14) & 0x3fffUL;
-
-            spiSend(b28);
-            spiSend(f_low  | freq);
-            spiSend(f_high | freq);
-        }
-};
 
 double randomDouble(double minf, double maxf)
 {
@@ -84,6 +33,9 @@ void splashscreen()
     lcdhelper.Show();
     delay(2000);
 }
+
+
+
 #include <Wire.h>
 void selftest()
 {
@@ -108,7 +60,6 @@ void selftest()
     lcdhelper.line[1] = "DISP:OK EEPROM:OK RTC:OK DATT:OK";
     lcdhelper.Show();
     delay(750);
-
 
     lcdhelper.line[2] = "Frequncy response test:";
     lcdhelper.line[3] = "20Hz to 25Khz +/- 0.1 dB :OK";
@@ -248,7 +199,7 @@ class MainMenu : public Menu
                     str = "Set Time";
                     break;
                 case 2:
-                    str = "Mode";
+                    str = "Start Signal Generator";
                     break;
             }
             char buffer[255];
@@ -307,8 +258,8 @@ void SetDateTime()
 {
     LCD_Helper lcdhelper;
     RTC_Helper rtchelper;
-    lcdhelper.line[0] = "Reading Date Time from Serial/COM port";
-    lcdhelper.line[1] = "Format: [yyyy/mm/dd HH.MM.SS] @ (115200)";
+    lcdhelper.line[0] = "Reading Date Time from Serial Port";
+    lcdhelper.line[1] = "Format: [yyyy/mm/dd HH.MM.SS] 115200 Baud";
     lcdhelper.Show();
     Serial.setTimeout(500);
     while (Serial.available() > 0) Serial.read();
@@ -355,12 +306,61 @@ void SetDateTime()
     } while (true);
 }
 
+void StartSignalGenerator()
+{
+    LCD_Helper lcdhelper;
+    lcdhelper.line[0] = "Reading frequency and dB from Serial Port";
+    lcdhelper.line[1] = "Format: [float float] 115200 Baud";
+    lcdhelper.Show();
+    Serial.setTimeout(500);
+    while (Serial.available() > 0) Serial.read();
+    Serial.flush();
+    Serial.println(lcdhelper.line[0].c_str());
+    Serial.println(lcdhelper.line[1].c_str());
+    SignalGenerator signalGenerator;
+
+    do {
+        if (Serial.available()) {
+            MatchState ms;
+            String str(Serial.readString());
+            ms.Target(str.c_str());
+            char result = ms.Match ("([-+]?[0-9]*\.?[0-9]+) ([-+]?[0-9]*\.?[0-9]+)");
+            char cap[256];
+            if (result == REGEXP_MATCHED)
+            {
+                int index = 0;
+                ms.GetCapture (cap, index++);
+                double freq = atof(cap);
+                ms.GetCapture (cap, index++);
+                double dB = atof(cap);
+                signalGenerator.setFreq(freq, dB);
+                char stringbuffer[256];
+                char sz_freq[8];
+                dtostrf(freq, 4, 1, sz_freq);
+                char sz_db[8];
+                dtostrf(dB, 4, 1, sz_db);
+                sprintf(stringbuffer, "Frequency: %s dB: %s", sz_freq, sz_db);
+                lcdhelper.line[2] = "Recieved Frequency and dB.";
+                lcdhelper.line[3] = stringbuffer;
+                lcdhelper.Show();
+                Serial.println(lcdhelper.line[2].c_str());
+                Serial.println(lcdhelper.line[3].c_str());
+                delay(2000);
+                return;
+            }
+            while (Serial.available() > 0) Serial.read();
+        }
+    } while (true);
+
+    lcdhelper.line[0] = "Setting Signal Generator (1000, 5.0)";
+    lcdhelper.Show();
+    delay(60000);
+}
+
 void setup()
 {
     Serial.begin(115200);
-    SignalGenerator signalGenerator;
-    signalGenerator.setFreq(1000);
-        
+
     splashscreen();
     selftest();
 
@@ -376,6 +376,7 @@ void setup()
                     SetDateTime();
                     break;
                 case 2:
+                    StartSignalGenerator();
                     break;
             };
         }
