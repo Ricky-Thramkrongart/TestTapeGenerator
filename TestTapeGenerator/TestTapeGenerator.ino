@@ -5,6 +5,7 @@
 #include <ArduinoSTL.h>
 #include <bitset>
 #include <ArxSmartPtr.h>
+#include "OutPutTable.h"
 
 #include "TestTapeGenerator.h"
 #include "TapeInfo.h"
