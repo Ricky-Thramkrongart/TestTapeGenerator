@@ -144,6 +144,7 @@ class AdjustingReferenceLevelProgress : public Dialog
 class AdjustingRecordLevelProgress : public Dialog
 {
     public:
+        SignalGenerator signalGenerator;
         std::shared_ptr<TapeInfo> tapeInfo;
         std::vector<RecordStep*>::iterator ptr;
         AdjustingRecordLevelProgress(TapeInfo::Tapes Tape): Dialog(1000),  tapeInfo(TapeInfo::Get(Tape)), ptr(tapeInfo->RecordSteps.begin())
@@ -155,6 +156,7 @@ class AdjustingRecordLevelProgress : public Dialog
             lcdhelper.line[0] = "Record Level";
             lcdhelper.line[1] = tapeInfo->ToString()[0];
             lcdhelper.line[2] = stringbuffer;
+            signalGenerator.setFreq((*ptr)->Frequency, (*ptr)->Level);
             ptr++;
             if (ptr == tapeInfo->RecordSteps.end()) {
                 finished = true;
