@@ -28,21 +28,9 @@ class dBMeter
           //Mute Output
         }
 
-        uint8_t getInput(double dB)
-        {
-            for (int i = 0; i != 256; ++i)
-            {
-                if (dB > InPutTable[i]) {
-                    {
-                        return i;
-                    }
-                }
-            }
-        }
-
         void getdB(double startdB, uint16_t& dBRight, uint16_t& dBLeft)
         {
-            uint8_t input(getInput(startdB));
+            uint8_t input(InPutTableFit(startdB));
             const uint8_t leftChannelIn(2);
             const uint8_t rightChannelIn(3);
             potentio.writeRDAC(leftChannelIn, input);  
