@@ -85,7 +85,7 @@ class AdjustingReferenceLevelOkDialog : public DialogOk
 class AdjustingReferenceLevelMonitor : public DialogOk
 {
     protected:
-    dBMeter dbMeter;
+        dBMeter dbMeter;
     public:
         std::shared_ptr<TapeInfo> tapeInfo;
         AdjustingReferenceLevelMonitor(TapeInfo::Tapes Tape): tapeInfo(TapeInfo::Get(Tape))
@@ -95,9 +95,9 @@ class AdjustingReferenceLevelMonitor : public DialogOk
         {
             double Target = tapeInfo->Target;
             uint16_t LeftLevel;
-            uint16_t RightLevel;   
+            uint16_t RightLevel;
             dbMeter.getdB(Target, RightLevel, LeftLevel);
-            std::string statuscontrol = StatusControl(0.5, LeftLevel-Target, RightLevel-Target);
+            std::string statuscontrol = StatusControl(0.5, LeftLevel - Target, RightLevel - Target);
             char stringbuffer[255];
             char str_target[6];
             dtostrf(Target, 4, 1, str_target);
@@ -351,11 +351,10 @@ void StartSignalGenerator()
                 lcdhelper.Show();
                 Serial.println(lcdhelper.line[2].c_str());
                 Serial.println(lcdhelper.line[3].c_str());
-                delay(2000);
-                return;
             }
             while (Serial.available() > 0) Serial.read();
         }
+        delay(1000);
     } while (true);
 
     lcdhelper.line[0] = "Setting Signal Generator (1000, 5.0)";
