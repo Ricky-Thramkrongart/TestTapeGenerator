@@ -47,18 +47,6 @@ class SignalGenerator
             digitalWrite(_fsyncPin, HIGH);
         }
 
-        uint8_t getOutput(double dB)
-        {
-            for (int i = 0; i != 256; ++i)
-            {
-                if (dB > OutPutTable[i]) {
-                    {
-                        return i;
-                    }
-                }
-            }
-        }
-
         void setdB(double dB)
         {
             double dBdiff;
@@ -67,25 +55,21 @@ class SignalGenerator
                 digitalWrite(7, LOW);  // -5 db att OFF
                 digitalWrite(10, LOW);  // -10 db att OFF
                 dBdiff = dB;
-                output = getOutput(dBdiff);
             } else if (dB >= 5 && dB < 10) {
                 digitalWrite(7, HIGH);  // -5 db att ON
                 digitalWrite(10, LOW);  // -10 db att OFF
                 dBdiff = dB - 5;  // beregn rest att fra digi-pot
-                output = getOutput(dBdiff);
             } else if (dB >= 10 && dB < 15) {
                 digitalWrite(7, LOW);   // -5 db att OFF
                 digitalWrite(10, HIGH); // -10 db att ON
                 dBdiff = dB - 10; // beregn rest att fra digi-pot
-                output = getOutput(dBdiff);
             }
             else if (dB >= 15) {
                 digitalWrite(7, HIGH);  // -5 db att ON
                 digitalWrite(10, HIGH); // -10 db att ON
                 dBdiff = dB - 15 ; // beregn rest att fra digi-pot
-                output = getOutput(dBdiff);
             }
-           
+            output = OutPutTableFit(dBdiff);
             const uint8_t leftChannelOut(0);
             const uint8_t rightChannelOut(1);
             potentio.writeRDAC(leftChannelOut, output);  //Right
