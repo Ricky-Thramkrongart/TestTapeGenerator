@@ -133,6 +133,7 @@ void StartSignalGenerator()
     Serial.println(lcdhelper.line[0].c_str());
     Serial.println(lcdhelper.line[1].c_str());
     SignalGenerator signalGenerator;
+    signalGenerator.UnMute();
 
     do {
         if (Serial.available()) {

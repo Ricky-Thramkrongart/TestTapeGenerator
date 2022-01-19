@@ -78,15 +78,27 @@ class SignalGenerator
       potentio.writeRDAC(rightChannelOut, output);  //Left
     }
 
-    void ManualOutPut(uint8_t output)
-    {
-      setFreq(1000, 0); //ATTNUATOR OFF
-      
+    void UnMute() {
       pinMode(_outputonoffPin,   OUTPUT);
       digitalWrite(_outputonoffPin, HIGH); 
       
       pinMode(_calibrationtonoffPin,   OUTPUT);
       digitalWrite(_calibrationtonoffPin, LOW);
+    }
+
+    void Mute() {
+      pinMode(_outputonoffPin,   OUTPUT);
+      digitalWrite(_outputonoffPin, LOW); 
+      
+      pinMode(_calibrationtonoffPin,   OUTPUT);
+      digitalWrite(_calibrationtonoffPin, LOW);
+    }
+
+    void ManualOutPut(uint8_t output)
+    {
+      setFreq(1000, 0); //ATTNUATOR OFF
+      
+      UnMute();
 
       const uint8_t leftChannelOut(0);
       const uint8_t rightChannelOut(1);
