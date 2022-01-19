@@ -32,7 +32,7 @@ class PotentioMeterOutputSelection : public Menu
         void FullUpdate() {
             char buffer[255];
             sprintf(buffer, "Potention Meter Output: %i", Current);
-            signalGenerator.ManualOutPut(0);
+            signalGenerator.ManualOutPut(Current);
             lcdhelper.line[0] = buffer;
         }
 };
