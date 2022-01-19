@@ -1,8 +1,6 @@
 #ifndef PRINTER_H
 #define PRINTER_H
-//-------------------------------------------------------------------------
-// TIL PRINTER
-//-------------------------------------------------------------------------
+
 #include "adaqrcode.h"
 #include <Adafruit_Thermal.h>
 #include "SoftwareSerial.h"

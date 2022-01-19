@@ -76,6 +76,15 @@ class SignalGenerator
             potentio.writeRDAC(rightChannelOut, output);  //Left
         }
 
+        void ManualOutPut(uint8_t output)
+        {
+            setFreq(1000, 0);
+            const uint8_t leftChannelOut(0);
+            const uint8_t rightChannelOut(1);
+            potentio.writeRDAC(leftChannelOut, output);  //Right
+            potentio.writeRDAC(rightChannelOut, output);  //Left
+        }
+
         void setFreq(double f, double dB)
         {
             setdB(dB);
