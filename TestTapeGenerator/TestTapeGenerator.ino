@@ -192,7 +192,7 @@ void SetOutPutFit()
     int i = FIT_ORDER;
     std::vector<float64_t> fit64(FIT64_SIZE);
 
-    /*
+   /*
             fit64[6] = fp64_atof("-3.809064014720473935e-07");
             fit64[5] = fp64_atof("7.447576786624759059e-05");
             fit64[4] = fp64_atof("-4.762255097120195527e-03");
@@ -201,8 +201,8 @@ void SetOutPutFit()
             fit64[1] = fp64_atof("-1.385114186899055966e+01");
             fit64[0] = fp64_atof("2.541634568978011544e+02");
     */
-    /*
-        do {
+    
+       do {
 
             if (Serial.available()) {
                 String str(Serial.readString());
@@ -232,9 +232,9 @@ void SetOutPutFit()
             }
             delay(1000);
         } while (true);
-    */
-//    signalGenerator.fit64 = fit64;
-//    signalGenerator.WriteFit64ToEEPROM();
+    
+    signalGenerator.fit64 = fit64;
+    signalGenerator.WriteFit64ToEEPROM();
     signalGenerator.ReadFit64FromEEPROM();
     for (double d = 32.0; d > -0.1; d -= 0.1) {
         char stringbuffer[255];
@@ -252,7 +252,6 @@ void setup()
     Serial.begin(115200);
     splashscreen();
     selftest();
-    SetOutPutFit();
 
     do {
         MainMenu mainMenu;

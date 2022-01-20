@@ -68,6 +68,8 @@ class SignalGenerator
 
         SignalGenerator(): _clkPin(13), _fsyncPin(2), _dataPin(9), _outputonoffPin(28), _calibrationtonoffPin(26), potentio(AD5254_ASUKIAAA_ADDR_A0_GND_A1_GND)
         {
+            ReadFit64FromEEPROM();
+            
             potentio.begin();        // start Didital potmeter
 
             pinMode(_clkPin,   OUTPUT);
