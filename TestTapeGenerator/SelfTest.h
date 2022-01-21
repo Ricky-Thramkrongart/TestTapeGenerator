@@ -30,17 +30,6 @@ void selftest()
   lcdhelper.line[3] = "20Hz to 25Khz +/- 0.1 dB :OK";
   lcdhelper.Show();
 
-/*
-  for (double d = 32.0; d >= 0.0; d -= 0.1) {
-    char stringbuffer[255];
-    char sz_d[8];
-    dtostrf(d, 4, 1, sz_d);
-
-    sprintf(stringbuffer, "%s %i" , sz_d, OutPutTableFit(d));
-    Serial.println(stringbuffer);
-    delay(500);
-  }
-*/
   delay(2000);
 }
 
