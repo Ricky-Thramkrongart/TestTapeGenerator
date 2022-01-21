@@ -6,15 +6,12 @@
 #include <bitset>
 #include <ArxSmartPtr.h>
 
-
-#include "OutPutTable.h"
 #include "TestTapeGenerator.h"
 #include "TapeInfo.h"
 #include "LCDHelper.h"
 #include "Controls.h"
 #include "Printer.h"
 #include "SignalGenerator.h"
-#include "dbMeter.h"
 #include <EEPROM.h>
 #include <DS3232RTC.h>      // https://github.com/JChristensen/DS3232RTC
 #include <Regexp.h>         // https://github.com/nickgammon/Regexp/
@@ -42,7 +39,7 @@ class PotentioMeterOutputSelection : public Menu
 class MainMenu : public Menu
 {
     public:
-        MainMenu (): Menu(5) {}
+        MainMenu (): Menu(6) {}
         void FullUpdate() {
             std::string str;
             switch (Current) {
@@ -60,6 +57,9 @@ class MainMenu : public Menu
                     break;
                 case 4:
                     str = "Output Poly Fit";
+                    break;
+                case 5:
+                    str = "Input Hardware Calibration";
                     break;
             }
             char buffer[255];
@@ -124,6 +124,12 @@ void SetDateTime()
 void OutputHardwareCalibration (void)
 {
     PotentioMeterOutputSelection().Execute();
+}
+
+void InputHardwareCalibration (void)
+{
+    dBMeter dbMeter;
+    dbMeter.Scan();
 }
 
 void StartSignalGenerator()
@@ -192,47 +198,47 @@ void SetOutPutFit()
     int i = FIT_ORDER;
     std::vector<float64_t> fit64(FIT64_SIZE);
 
-   /*
-            fit64[6] = fp64_atof("-3.809064014720473935e-07");
-            fit64[5] = fp64_atof("7.447576786624759059e-05");
-            fit64[4] = fp64_atof("-4.762255097120195527e-03");
-            fit64[3] = fp64_atof("1.282484008085452432e-01");
-            fit64[2] = fp64_atof("-1.083059585213202114e+00");
-            fit64[1] = fp64_atof("-1.385114186899055966e+01");
-            fit64[0] = fp64_atof("2.541634568978011544e+02");
+    /*
+             fit64[6] = fp64_atof("-3.809064014720473935e-07");
+             fit64[5] = fp64_atof("7.447576786624759059e-05");
+             fit64[4] = fp64_atof("-4.762255097120195527e-03");
+             fit64[3] = fp64_atof("1.282484008085452432e-01");
+             fit64[2] = fp64_atof("-1.083059585213202114e+00");
+             fit64[1] = fp64_atof("-1.385114186899055966e+01");
+             fit64[0] = fp64_atof("2.541634568978011544e+02");
     */
-    
-       do {
 
-            if (Serial.available()) {
-                String str(Serial.readString());
-                MatchState ms;
+    do {
 
-                ms.Target(str.c_str());
-                char result = ms.Match ("([+%-]?%d+%.?%d*[eE+%-]*%d?%d?)");
-                char cap[256];
-                if (result == REGEXP_MATCHED && ms.level == 1)
-                {
-                    int index = 0;
-                    ms.GetCapture (cap, index++);
-                    fit64[i] = fp64_atof(str.c_str());
-                    char stringbuffer[256];
-                    //dtostre(fit[i], sz_a, 20, NULL);
-                    sprintf(stringbuffer, "Recieved a%i: %s", i--, fp64_to_string( fit64[i], 30, 2));
-                    lcdhelper.line[2] = stringbuffer;
-                    lcdhelper.Show();
-                    Serial.println(lcdhelper.line[2].c_str());
-                    if (i == -1) {
-                        break;
-                    }
+        if (Serial.available()) {
+            String str(Serial.readString());
+            MatchState ms;
+
+            ms.Target(str.c_str());
+            char result = ms.Match ("([+%-]?%d+%.?%d*[eE+%-]*%d?%d?)");
+            char cap[256];
+            if (result == REGEXP_MATCHED && ms.level == 1)
+            {
+                int index = 0;
+                ms.GetCapture (cap, index++);
+                fit64[i] = fp64_atof(str.c_str());
+                char stringbuffer[256];
+                //dtostre(fit[i], sz_a, 20, NULL);
+                sprintf(stringbuffer, "Recieved a%i: %s", i--, fp64_to_string( fit64[i], 30, 2));
+                lcdhelper.line[2] = stringbuffer;
+                lcdhelper.Show();
+                Serial.println(lcdhelper.line[2].c_str());
+                if (i == -1) {
+                    break;
                 }
-
-                while (Serial.available() > 0) Serial.read();
-                delay(100);
             }
-            delay(1000);
-        } while (true);
-    
+
+            while (Serial.available() > 0) Serial.read();
+            delay(100);
+        }
+        delay(1000);
+    } while (true);
+
     signalGenerator.fit64 = fit64;
     signalGenerator.WriteFit64ToEEPROM();
     signalGenerator.ReadFit64FromEEPROM();
@@ -240,7 +246,7 @@ void SetOutPutFit()
         char stringbuffer[255];
         char sz_d[8];
         dtostrf(d, 4, 1, sz_d);
-        sprintf(stringbuffer, "%s %i" , sz_d, signalGenerator.OutPutTableFit64(d));
+        sprintf(stringbuffer, "%s %i" , sz_d, signalGenerator.OutPutFit64(d));
         Serial.println(stringbuffer);
         delay(50);
     }
@@ -270,8 +276,11 @@ void setup()
                 case 3:
                     OutputHardwareCalibration();
                     break;
-                case 5:
+                case 4:
                     SetOutPutFit();
+                    break;
+                case 5:
+                    InputHardwareCalibration();
                     break;
             };
         }

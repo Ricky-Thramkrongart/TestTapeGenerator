@@ -34,7 +34,7 @@ class SignalGenerator
             {
                 EEPROM.put(addrOffset, fit64[i]);
                 addrOffset += sizeof(float64_t);
-           }
+            }
         }
         void ReadFit64FromEEPROM (void)
         {
@@ -44,14 +44,14 @@ class SignalGenerator
             addrOffset += sizeof(size_);
             fit64.resize(size_);
             for (int i = 0; i != size_; i++)
-            {   
+            {
                 EEPROM.get(addrOffset, fit64[i]);
                 addrOffset += sizeof(float64_t);
             }
         }
 
 
-        uint16_t OutPutTableFit64 (double dB)
+        uint16_t OutPutFit64 (double dB)
         {
             float64_t dB64 = fp64_sd(dB);
             float64_t rv = fp64_add(fit64[0], fp64_mul(fit64[1], dB64));
@@ -69,7 +69,7 @@ class SignalGenerator
         SignalGenerator(): _clkPin(13), _fsyncPin(2), _dataPin(9), _outputonoffPin(28), _calibrationtonoffPin(26), potentio(AD5254_ASUKIAAA_ADDR_A0_GND_A1_GND)
         {
             ReadFit64FromEEPROM();
-            
+
             potentio.begin();        // start Didital potmeter
 
             pinMode(_clkPin,   OUTPUT);
@@ -123,7 +123,7 @@ class SignalGenerator
                 digitalWrite(10, HIGH); // -10 db att ON
                 dBdiff = dB - 15 ; // beregn rest att fra digi-pot
             }
-            output = OutPutTableFit64(dBdiff);
+            output = OutPutFit64(dBdiff);
             const uint8_t leftChannelOut(0);
             const uint8_t rightChannelOut(1);
             potentio.writeRDAC(leftChannelOut, output);  //Right
@@ -144,6 +144,14 @@ class SignalGenerator
 
             pinMode(_calibrationtonoffPin,   OUTPUT);
             digitalWrite(_calibrationtonoffPin, LOW);
+        }
+
+        void CalibrationMode() {
+            pinMode(_outputonoffPin,   OUTPUT);
+            digitalWrite(_outputonoffPin, LOW);
+
+            pinMode(_calibrationtonoffPin,   OUTPUT);
+            digitalWrite(_calibrationtonoffPin, HIGH);
         }
 
         void ManualOutPut(uint8_t output)
@@ -177,5 +185,125 @@ class SignalGenerator
             spiSend(f_high | freq);
         }
 };
+
+class dBMeter
+{
+    protected:
+        // for chip info see https://www.analog.com/en/products/ad9833.html
+        // SPI code taken from https://github.com/MajicDesigns/MD_AD9833/
+        const uint8_t _inputpregainPin;
+        const uint8_t _calmodePin;
+        AD5254_asukiaaa potentio;
+
+    public:
+        std::vector<float64_t> fit64;
+        void WriteFit64ToEEPROM (void)
+        {
+            //Add output fit data size
+            int addrOffset = sizeof(byte) + FIT64_SIZE * sizeof(float64_t);
+            byte size_ = fit64.size();
+            EEPROM.put(addrOffset, size_);
+            addrOffset += sizeof(size_);
+            for (int i = 0; i != size_; i++)
+            {
+                EEPROM.put(addrOffset, fit64[i]);
+                addrOffset += sizeof(float64_t);
+            }
+        }
+        void ReadFit64FromEEPROM (void)
+        {
+            int addrOffset = sizeof(byte) + FIT64_SIZE * sizeof(float64_t);
+            byte size_;
+            EEPROM.get(addrOffset, size_);
+            addrOffset += sizeof(size_);
+            fit64.resize(size_);
+            for (int i = 0; i != size_; i++)
+            {
+                EEPROM.get(addrOffset, fit64[i]);
+                addrOffset += sizeof(float64_t);
+            }
+        }
+        uint16_t InPutFit64 (double dB)
+        {
+            float64_t dB64 = fp64_sd(dB);
+            float64_t rv = fp64_add(fit64[0], fp64_mul(fit64[1], dB64));
+            for (int i = FIT_ORDER; i != 1 ; i--)
+            {
+                rv = fp64_add(rv, fp64_mul(fit64[i], fp64_pow(dB64, fp64_sd(i))));
+            }
+
+            //rv = fp64_round(rv);
+            rv = fp64_fmin(rv, fp64_sd(255));
+            rv = fp64_fmax(rv, fp64_sd(0));
+            return atoi(fp64_to_string( rv, 15, 2));
+        }
+
+
+        dBMeter(): _inputpregainPin(30), _calmodePin(26), potentio(AD5254_ASUKIAAA_ADDR_A0_GND_A1_GND)
+        {
+            potentio.begin();        // start Didital potmeter
+
+            pinMode(_inputpregainPin,   OUTPUT);
+            digitalWrite(_inputpregainPin, LOW);
+
+            pinMode(_calmodePin,   OUTPUT);
+            digitalWrite(_calmodePin, HIGH);
+        }
+        ~dBMeter()
+        {
+            //Mute Output
+        }
+
+        void getdB(double startdB, uint16_t& dBRight, uint16_t& dBLeft)
+        {
+            
+            uint8_t input(InPutFit64(startdB));
+            const uint8_t leftChannelIn(2);
+            const uint8_t rightChannelIn(3);
+            potentio.writeRDAC(leftChannelIn, input);
+            potentio.writeRDAC(rightChannelIn, input);
+            dBLeft = analogRead(leftChannelIn);
+            dBRight = analogRead(rightChannelIn);
+        }
+
+        void ManualInPut(uint8_t input, int& dBLeft, int& dBRight)
+        {
+            //setFreq(1000, 0); //ATTNUATOR OFF
+
+            ///UnMute();
+
+            const uint8_t leftChannelIn(2);
+            const uint8_t rightChannelIn(3);
+            potentio.writeRDAC(leftChannelIn, input);  //Right
+            potentio.writeRDAC(rightChannelIn, input);  //Left
+
+            dBLeft = analogRead(leftChannelIn);
+            dBRight = analogRead(rightChannelIn);
+        }
+
+        void Scan()
+        {
+            SignalGenerator signalGenerator;
+            signalGenerator.CalibrationMode();
+            for (double d = 16.0; d > -0.1; d -= 0.1) {
+                signalGenerator.setFreq(1000.0, d);
+
+                int dBLeft;
+                int dBRight;
+                ManualInPut(145, dBLeft, dBRight);
+
+                char stringbuffer[255];
+                char sz_d[8];
+                dtostrf(d, 4, 1, sz_d);
+                sprintf(stringbuffer, "%s %i %i" ,sz_d, dBLeft, dBRight);
+                Serial.println(stringbuffer);
+                delay(50);
+            }
+        }
+
+
+};
+
+
 
 #endif // SIGNALGENERATOR_H

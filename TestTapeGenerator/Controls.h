@@ -131,6 +131,9 @@ class ButtonPanel
                             keycount = 1;
                         }
                         pinl = PINL;
+                        if (OnButtonPressed) {
+                            (t->*OnButtonPressed)(this);
+                        }
                     } else {
                         keycount = 0;
                         pinl = 0;
@@ -188,6 +191,7 @@ class ButtonPanel
         }
 
         ButtonPanel(T *t_): t(t_),
+            OnButtonPressed(0),
             OnButtonUp(0),
             OnButtonDown(0),
             OnButtonRight(0),
@@ -202,6 +206,7 @@ class ButtonPanel
             DDRL = B00000000; // all inputs PORT-L D42 til D49
         }
         typedef void (T::*MyTypedef)(ButtonPanel*);
+        MyTypedef OnButtonPressed;
         MyTypedef OnButtonUp;
         MyTypedef OnButtonDown;
         MyTypedef OnButtonRight;
@@ -259,37 +264,34 @@ class BasePanel
         {
             lcdhelper.lcd.setBacklight(LOW);  // SET LCD LYS ON / OFF
         }
+        virtual void OnButtonPressed (ButtonPanel<BasePanel> *buttonPanel)
+        {
+            lcdhelper.lcd.setBacklight(HIGH);  // SET LCD LYS ON / OFF
+            TimerLCD.enable();
+        }
         virtual void OnButtonUp (ButtonPanel<BasePanel> *buttonPanel)
         {
-            TimerLCD.enable();
         }
         virtual void OnButtonDown (ButtonPanel<BasePanel> *buttonPanel)
         {
-            TimerLCD.enable();
         }
         virtual void OnButtonRight (ButtonPanel<BasePanel> *buttonPanel)
         {
-            TimerLCD.enable();
         }
         virtual void OnButtonLeft (ButtonPanel<BasePanel> *buttonPanel)
         {
-            TimerLCD.enable();
         }
         virtual void OnButtonPageUp (ButtonPanel<BasePanel> *buttonPanel)
         {
-            TimerLCD.enable();
         }
         virtual void OnButtonPageDown (ButtonPanel<BasePanel> *buttonPanel)
         {
-            TimerLCD.enable();
         }
         virtual void OnButtonEscape (ButtonPanel<BasePanel> *buttonPanel)
         {
-            TimerLCD.enable();
         }
         virtual void OnButtonOk (ButtonPanel<BasePanel> *buttonPanel)
         {
-            TimerLCD.enable();
         }
         virtual void OnUpdate (ButtonPanel<BasePanel> *buttonPanel) {
             FullUpdate();
@@ -364,6 +366,11 @@ class Menu : public BasePanel
             if (Current != Display) {
                 BasePanel::OnUpdate(buttonPanel);
                 Display = Current;
+                char stringbuffer[255];
+                sprintf(stringbuffer, "(%i/%i)", Current + 1, End);
+                digitalWrite(8, LOW);
+                lcdhelper.lcd.setCursor(33, 1);
+                lcdhelper.lcd.print(stringbuffer);
             }
         }
 
@@ -372,6 +379,7 @@ class Menu : public BasePanel
         uint16_t Display;
         virtual Menu (uint16_t End_): End(End_), Current(0), Display(End_)
         {
+            buttonPanel.OnButtonPressed = & BasePanel::OnButtonPressed;
             buttonPanel.OnButtonUp = & BasePanel::OnButtonUp;
             buttonPanel.OnButtonDown = & BasePanel::OnButtonDown;
             buttonPanel.OnButtonPageUp = & BasePanel::OnButtonPageUp;
