@@ -289,19 +289,19 @@ class dBMeter
         {
             SignalGenerator signalGenerator;
             signalGenerator.UnmutedCalibrationMode();
+            int i = 44;
             for (float d = 0.0; d < 32.1; d += .1) {
                 signalGenerator.setFreq(1000.0, d);
-                for (int i = 44; i != 256; i++) {
+                for (; i != 256; i++) {
                     uint16_t dBLeft;
                     uint16_t dBRight;
                     SetInPut(i, dBLeft, dBRight);
                     if (dBLeft == 1023 || dBLeft == 1023) {
-                        int found_i = i - 1;
-                        SetInPut(found_i, dBLeft, dBRight);
+                        SetInPut(--i, dBLeft, dBRight);
                         char stringbuffer[255];
                         char sz_d[8];
                         dtostrf(d, 4, 1, sz_d);
-                        sprintf(stringbuffer, "RV:%i dB:%s Left:%i Right:%i" , found_i, sz_d, dBLeft, dBRight);
+                        sprintf(stringbuffer, "RV:%i dB:%s Left:%i Right:%i" , i, sz_d, dBLeft, dBRight);
                         Serial.println(stringbuffer);
                         break;
                     }
