@@ -197,6 +197,7 @@ class SignalGenerator
 class dBMeter
 {
     protected:
+        uint8_t current_input;
         // for chip info see https://www.analog.com/en/products/ad9833.html
         // SPI code taken from https://github.com/MajicDesigns/MD_AD9833/
         const uint8_t _inputpregainPin;
@@ -264,26 +265,19 @@ class dBMeter
 
         void getdB(double startdB, uint16_t& dBRight, uint16_t& dBLeft)
         {
-
-            uint8_t input(InPutFit64(startdB));
-            const uint8_t leftChannelIn(2);
-            const uint8_t rightChannelIn(3);
-            potentio.writeRDAC(leftChannelIn, input);
-            potentio.writeRDAC(rightChannelIn, input);
-            dBLeft = analogRead(leftChannelIn);
-            dBRight = analogRead(rightChannelIn);
+            SetInPut(InPutFit64(startdB), dBRight, dBLeft);
         }
 
-        void ManualInPut(uint8_t input, int& dBLeft, int& dBRight)
+        void SetInPut(uint8_t input, uint16_t& dBRight, uint16_t& dBLeft)
         {
-            //setFreq(1000, 0); //ATTNUATOR OFF
-
-            ///UnMute();
-
-            const uint8_t leftChannelIn(2);
-            const uint8_t rightChannelIn(3);
-            potentio.writeRDAC(leftChannelIn, input);  //Right
-            potentio.writeRDAC(rightChannelIn, input);  //Left
+            if (current_input != input) {
+                const uint8_t leftChannelIn(2);
+                const uint8_t rightChannelIn(3);
+                potentio.writeRDAC(leftChannelIn, input);
+                potentio.writeRDAC(rightChannelIn, input);
+                current_input = input;
+                delay(500);
+            }
 
             const int CH1(A0);
             const int CH2(A1);
@@ -295,18 +289,23 @@ class dBMeter
         {
             SignalGenerator signalGenerator;
             signalGenerator.UnmutedCalibrationMode();
-            signalGenerator.setFreq(1000.0, 0.0);
-            float d = 0.0;
-            for (int i = 0; i != 256; i++) {
-                int dBLeft;
-                int dBRight;
-                ManualInPut(i, dBLeft, dBRight);
-
-                char stringbuffer[255];
-                char sz_d[8];
-                dtostrf(d, 4, 1, sz_d);
-                sprintf(stringbuffer, "%i %s %i %i" , i, sz_d, dBLeft, dBRight);
-                Serial.println(stringbuffer);
+            for (float d = 0.0; d < 32.1; d += .1) {
+                signalGenerator.setFreq(1000.0, d);
+                for (int i = 44; i != 256; i++) {
+                    uint16_t dBLeft;
+                    uint16_t dBRight;
+                    SetInPut(i, dBLeft, dBRight);
+                    if (dBLeft == 1023 || dBLeft == 1023) {
+                        int found_i = i - 1;
+                        SetInPut(found_i, dBLeft, dBRight);
+                        char stringbuffer[255];
+                        char sz_d[8];
+                        dtostrf(d, 4, 1, sz_d);
+                        sprintf(stringbuffer, "RV:%i dB:%s Left:%i Right:%i" , found_i, sz_d, dBLeft, dBRight);
+                        Serial.println(stringbuffer);
+                        break;
+                    }
+                }
             }
         }
 
