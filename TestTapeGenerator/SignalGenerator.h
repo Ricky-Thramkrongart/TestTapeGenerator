@@ -154,6 +154,14 @@ class SignalGenerator
             digitalWrite(_calibrationtonoffPin, HIGH);
         }
 
+        void UnmutedCalibrationMode() {
+            pinMode(_outputonoffPin,   OUTPUT);
+            digitalWrite(_outputonoffPin, HIGH);
+
+            pinMode(_calibrationtonoffPin,   OUTPUT);
+            digitalWrite(_calibrationtonoffPin, HIGH);
+        }
+
         void ManualOutPut(uint8_t output)
         {
             setFreq(1000, 0); //ATTNUATOR OFF
@@ -256,7 +264,7 @@ class dBMeter
 
         void getdB(double startdB, uint16_t& dBRight, uint16_t& dBLeft)
         {
-            
+
             uint8_t input(InPutFit64(startdB));
             const uint8_t leftChannelIn(2);
             const uint8_t rightChannelIn(3);
@@ -277,27 +285,28 @@ class dBMeter
             potentio.writeRDAC(leftChannelIn, input);  //Right
             potentio.writeRDAC(rightChannelIn, input);  //Left
 
-            dBLeft = analogRead(leftChannelIn);
-            dBRight = analogRead(rightChannelIn);
+            const int CH1(A0);
+            const int CH2(A1);
+            dBLeft = analogRead(CH1);
+            dBRight = analogRead(CH2);
         }
 
         void Scan()
         {
             SignalGenerator signalGenerator;
-            signalGenerator.CalibrationMode();
-            for (double d = 16.0; d > -0.1; d -= 0.1) {
-                signalGenerator.setFreq(1000.0, d);
-
+            signalGenerator.UnmutedCalibrationMode();
+            signalGenerator.setFreq(1000.0, 0.0);
+            float d = 0.0;
+            for (int i = 0; i != 256; i++) {
                 int dBLeft;
                 int dBRight;
-                ManualInPut(145, dBLeft, dBRight);
+                ManualInPut(i, dBLeft, dBRight);
 
                 char stringbuffer[255];
                 char sz_d[8];
                 dtostrf(d, 4, 1, sz_d);
-                sprintf(stringbuffer, "%s %i %i" ,sz_d, dBLeft, dBRight);
+                sprintf(stringbuffer, "%i %s %i %i" , i, sz_d, dBLeft, dBRight);
                 Serial.println(stringbuffer);
-                delay(50);
             }
         }
 

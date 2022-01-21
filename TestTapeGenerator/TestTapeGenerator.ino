@@ -199,13 +199,13 @@ void SetOutPutFit()
     std::vector<float64_t> fit64(FIT64_SIZE);
 
     /*
-             fit64[6] = fp64_atof("-3.809064014720473935e-07");
-             fit64[5] = fp64_atof("7.447576786624759059e-05");
-             fit64[4] = fp64_atof("-4.762255097120195527e-03");
-             fit64[3] = fp64_atof("1.282484008085452432e-01");
-             fit64[2] = fp64_atof("-1.083059585213202114e+00");
-             fit64[1] = fp64_atof("-1.385114186899055966e+01");
-             fit64[0] = fp64_atof("2.541634568978011544e+02");
+             fit64[6] = fp64_atof("2.600890117485789397e-05");
+             fit64[5] = fp64_atof("-1.382974224325811971e-03");
+             fit64[4] = fp64_atof("2.582426183357029378e-02");
+             fit64[3] = fp64_atof("-1.628642044710132131e-01");
+             fit64[2] = fp64_atof("5.232081299714196748e-02");
+             fit64[1] = fp64_atof("-1.763286858580261196e+01");
+             fit64[0] = fp64_atof("2.552888852916538838e+02");
     */
 
     do {
@@ -242,7 +242,8 @@ void SetOutPutFit()
     signalGenerator.fit64 = fit64;
     signalGenerator.WriteFit64ToEEPROM();
     signalGenerator.ReadFit64FromEEPROM();
-    for (double d = 32.0; d > -0.1; d -= 0.1) {
+    
+    for (double d = 16.0; d > -0.1; d -= 0.1) {
         char stringbuffer[255];
         char sz_d[8];
         dtostrf(d, 4, 1, sz_d);
