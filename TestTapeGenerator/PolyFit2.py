@@ -15,6 +15,7 @@ def fit(basename):
 
 
 fit("RV44")
+fit("RV45")
 fit("RV99")
 fit("RV194")
 fit("RV254")

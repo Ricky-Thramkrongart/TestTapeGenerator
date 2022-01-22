@@ -129,7 +129,7 @@ void OutputHardwareCalibration (void)
 void InputHardwareCalibration (void)
 {
     dBMeter dbMeter;
-    dbMeter.RVSweep();
+    dbMeter.RVSweep45();
 }
 
 void StartSignalGenerator()

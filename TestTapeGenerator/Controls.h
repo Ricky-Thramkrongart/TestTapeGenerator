@@ -311,7 +311,7 @@ class BasePanel
             TimerClock.OnTimer = & BasePanel::OnTimerClock;
             TimerClock.enable();
 
-            TimerLCD.period = 120000;
+            TimerLCD.period = 240000;
             TimerLCD.OnTimer = & BasePanel::OnTimerLCD;
             TimerLCD.enable();
         }

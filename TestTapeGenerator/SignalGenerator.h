@@ -302,14 +302,22 @@ class dBMeter
         double GetdB45RV (uint16_t AnalogRead)
         {
             std::vector<float64_t> fit6445RV(FIT64_SIZE);
-            fit6445RV[6] = fp64_atof("9.177664501133567186e-16");
-            fit6445RV[5] = fp64_atof("-3.015839356036458996e-12");
-            fit6445RV[4] = fp64_atof("3.876236544269143392e-09");
-            fit6445RV[3] = fp64_atof("-2.484042595539778830e-06");
-            fit6445RV[2] = fp64_atof("8.545058773937712219e-04");
-            fit6445RV[1] = fp64_atof("-1.766822726221720374e-01");
-            fit6445RV[0] = fp64_atof("2.834985420527437583e+01");
-
+        /*    
+            fit6445RV[6] = fp64_atof("8.213445203525542896e-16");
+            fit6445RV[5] = fp64_atof("-3.516280429832908025e-12");
+            fit6445RV[4] = fp64_atof("6.220316548106305250e-09");
+            fit6445RV[3] = fp64_atof("-5.824117802733188175e-06");
+            fit6445RV[2] = fp64_atof("3.055317159880055911e-03");
+            fit6445RV[1] = fp64_atof("-8.699673953056390463e-01");
+            fit6445RV[0] = fp64_atof("1.131057223665053613e+02");
+        */
+            fit6445RV[6] = fp64_atof("2.380560187449659372e-15");
+            fit6445RV[5] = fp64_atof("-7.737644429946968462e-12");
+            fit6445RV[4] = fp64_atof("9.907876544913139965e-09");
+            fit6445RV[3] = fp64_atof("-6.364225979394382238e-06");
+            fit6445RV[2] = fp64_atof("2.177099620579266408e-03");
+            fit6445RV[1] = fp64_atof("-4.064625658563530419e-01");
+            fit6445RV[0] = fp64_atof("4.537370556334850846e+01");
             float64_t x = fp64_sd(AnalogRead);
             float64_t y = fp64_add(fit6445RV[0], fp64_mul(fit6445RV[1], x));
             for (int i = FIT_ORDER; i != 1 ; i--)
@@ -373,7 +381,20 @@ class dBMeter
                 GetInPut(m);
                 Serial.println(m.ToStringData().c_str());
             }
+        }
 
+        void RVSweep45()
+        {
+            SignalGenerator signalGenerator;
+            signalGenerator.UnmutedCalibrationMode();
+
+            Serial.println("Sweep RV = 45");
+            for (float d = 0.0; d < 32.0; d += 0.1) {
+                signalGenerator.setFreq(1000.0, d);
+                Measurement m(d, 45);
+                GetInPut(m);
+                Serial.println(m.ToStringData().c_str());
+            }
         }
         void Scan()
         {
