@@ -129,7 +129,7 @@ void OutputHardwareCalibration (void)
 void InputHardwareCalibration (void)
 {
     dBMeter dbMeter;
-    dbMeter.Scan();
+    dbMeter.RVSweep();
 }
 
 void StartSignalGenerator()
@@ -145,6 +145,7 @@ void StartSignalGenerator()
     Serial.println(lcdhelper.line[1].c_str());
     SignalGenerator signalGenerator;
     signalGenerator.UnMute();
+    dBMeter dbMeter;
 
     do {
         if (Serial.available()) {
@@ -161,14 +162,22 @@ void StartSignalGenerator()
                 ms.GetCapture (cap, index++);
                 double dB = atof(cap);
                 signalGenerator.setFreq(freq, dB);
+                dBMeter::Measurement m(dB, 45);
+                dbMeter.GetInPut(m);
+                char sz_dBLeft[255];
+                char sz_dBRight[255];
+                dtostrf(dbMeter.GetdB45RV(m.dBLeft), 4, 1, sz_dBLeft);
+                dtostrf(dbMeter.GetdB45RV(m.dBRight), 4, 1, sz_dBRight);
+                
                 char stringbuffer[256];
                 char sz_freq[8];
                 dtostrf(freq, 4, 1, sz_freq);
                 char sz_db[8];
                 dtostrf(dB, 4, 1, sz_db);
-                sprintf(stringbuffer, "Frequency: %s dB: %s", sz_freq, sz_db);
-                lcdhelper.line[2] = "Recieved Frequency and dB.";
+                sprintf(stringbuffer, "Measured dB(L/R): %s/%s", sz_dBLeft, sz_dBRight);
                 lcdhelper.line[3] = stringbuffer;
+                sprintf(stringbuffer, "Frequency: %s dB: %s", sz_freq, sz_db);
+                lcdhelper.line[2] = stringbuffer;
                 lcdhelper.Show();
                 Serial.println(lcdhelper.line[2].c_str());
                 Serial.println(lcdhelper.line[3].c_str());
@@ -197,16 +206,6 @@ void SetOutPutFit()
     SignalGenerator signalGenerator;
     int i = FIT_ORDER;
     std::vector<float64_t> fit64(FIT64_SIZE);
-
-    /*
-             fit64[6] = fp64_atof("2.600890117485789397e-05");
-             fit64[5] = fp64_atof("-1.382974224325811971e-03");
-             fit64[4] = fp64_atof("2.582426183357029378e-02");
-             fit64[3] = fp64_atof("-1.628642044710132131e-01");
-             fit64[2] = fp64_atof("5.232081299714196748e-02");
-             fit64[1] = fp64_atof("-1.763286858580261196e+01");
-             fit64[0] = fp64_atof("2.552888852916538838e+02");
-    */
 
     do {
 
@@ -242,7 +241,7 @@ void SetOutPutFit()
     signalGenerator.fit64 = fit64;
     signalGenerator.WriteFit64ToEEPROM();
     signalGenerator.ReadFit64FromEEPROM();
-    
+
     for (double d = 16.0; d > -0.1; d -= 0.1) {
         char stringbuffer[255];
         char sz_d[8];

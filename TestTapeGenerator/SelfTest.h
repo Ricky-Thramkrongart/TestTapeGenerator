@@ -7,7 +7,7 @@ void selftest()
   LCD_Helper lcdhelper;
   lcdhelper.line[0] = "Self Test";
   lcdhelper.Show();
-  byte devices[] = {0x25, 0x2C, 0x50, 0x68};
+  byte devices[] = {0x25 /*Disp*/, 0x2C/*DATT*/, 0x50/*EEPROM*/, 0x68/*RTC*/};
   for (int i = 0; i != sizeof(devices) / sizeof(byte); i++)
   {
     Wire.begin();

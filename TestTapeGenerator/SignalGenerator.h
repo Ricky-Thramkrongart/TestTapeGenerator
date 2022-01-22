@@ -7,6 +7,7 @@
 #include <ArduinoSTL.h>
 #include <algorithm>
 #include <iterator>
+#include <I2C_eeprom.h>
 
 #define FIT_ORDER 6
 #define FIT64_SIZE (FIT_ORDER+1)
@@ -196,8 +197,38 @@ class SignalGenerator
 
 class dBMeter
 {
-    protected:
-        uint8_t current_input;
+    public:
+        struct Measurement {
+            bool IsSaturated(const uint16_t Saturation = 1023) {
+                if (dBLeft >= Saturation || dBRight >= Saturation)
+                    return true;
+                return false;
+            }
+            Measurement() {}
+            Measurement(const double dB_, const uint8_t RV_): dB(dB_), RV(RV_) {
+            }
+            std::string ToString() {
+                char stringbuffer[255];
+                char sz_dB[8];
+                dtostrf(dB, 4, 1, sz_dB);
+
+                int bitsLeft = ceil(log(dBLeft) / log(2));
+                int bitsRight = ceil(log(dBRight) / log(2));
+                sprintf(stringbuffer, "RV:%i dB:%s Left:%i Right:%i Bits (L/R): %i/%i " , RV, sz_dB, dBLeft, dBRight, bitsLeft, bitsRight);
+                return stringbuffer;
+            }
+            std::string ToStringData() {
+                char stringbuffer[255];
+                char sz_dB[8];
+                dtostrf(dB, 4, 1, sz_dB);
+                sprintf(stringbuffer, "%s,%i" , sz_dB, (dBLeft + dBRight) / 2);
+                return stringbuffer;
+            }
+            double dB;
+            uint8_t RV;
+            uint16_t dBLeft;
+            uint16_t dBRight;
+        };
         // for chip info see https://www.analog.com/en/products/ad9833.html
         // SPI code taken from https://github.com/MajicDesigns/MD_AD9833/
         const uint8_t _inputpregainPin;
@@ -263,53 +294,130 @@ class dBMeter
             //Mute Output
         }
 
-        void getdB(double startdB, uint16_t& dBRight, uint16_t& dBLeft)
+        void getdB(double startdB, uint16_t& dBLeft, uint16_t& dBRight)
         {
-            SetInPut(InPutFit64(startdB), dBRight, dBLeft);
+            //SetInPut(InPutFit64(startdB), dBLeft, dBRight);
         }
 
-        void SetInPut(uint8_t input, uint16_t& dBRight, uint16_t& dBLeft)
+        double GetdB45RV (uint16_t AnalogRead)
         {
-            if (current_input != input) {
-                const uint8_t leftChannelIn(2);
-                const uint8_t rightChannelIn(3);
-                potentio.writeRDAC(leftChannelIn, input);
-                potentio.writeRDAC(rightChannelIn, input);
-                current_input = input;
-                delay(500);
+            std::vector<float64_t> fit6445RV(FIT64_SIZE);
+            fit6445RV[6] = fp64_atof("9.177664501133567186e-16");
+            fit6445RV[5] = fp64_atof("-3.015839356036458996e-12");
+            fit6445RV[4] = fp64_atof("3.876236544269143392e-09");
+            fit6445RV[3] = fp64_atof("-2.484042595539778830e-06");
+            fit6445RV[2] = fp64_atof("8.545058773937712219e-04");
+            fit6445RV[1] = fp64_atof("-1.766822726221720374e-01");
+            fit6445RV[0] = fp64_atof("2.834985420527437583e+01");
+
+            float64_t x = fp64_sd(AnalogRead);
+            float64_t y = fp64_add(fit6445RV[0], fp64_mul(fit6445RV[1], x));
+            for (int i = FIT_ORDER; i != 1 ; i--)
+            {
+                y = fp64_add(y, fp64_mul(fit6445RV[i], fp64_pow(x, fp64_sd(i))));
             }
+
+            y = fp64_fmin(y, fp64_sd(29.2));
+            y = fp64_fmax(y, fp64_sd(0));
+
+            return atof(fp64_to_string( y, 15, 2));
+        }
+
+        void GetInPut(Measurement& m)
+        {
+            const uint8_t leftChannelIn(2);
+            const uint8_t rightChannelIn(3);
+            potentio.writeRDAC(leftChannelIn, m.RV);
+            potentio.writeRDAC(rightChannelIn, m.RV);
+            delay(500);
 
             const int CH1(A0);
             const int CH2(A1);
-            dBLeft = analogRead(CH1);
-            dBRight = analogRead(CH2);
+            m.dBLeft = analogRead(CH1);
+            m.dBRight = analogRead(CH2);
         }
 
-        void Scan()
+        void RVSweep()
         {
             SignalGenerator signalGenerator;
             signalGenerator.UnmutedCalibrationMode();
-            int i = 44;
-            for (float d = 0.0; d < 32.1; d += .1) {
+
+            Serial.println("Sweep RV = 44 for 0 dB to 6 dB");
+            for (float d = 0.0; d < 6.0; d += 0.1) {
                 signalGenerator.setFreq(1000.0, d);
-                for (; i != 256; i++) {
-                    uint16_t dBLeft;
-                    uint16_t dBRight;
-                    SetInPut(i, dBLeft, dBRight);
-                    if (dBLeft == 1023 || dBLeft == 1023) {
-                        SetInPut(--i, dBLeft, dBRight);
-                        char stringbuffer[255];
-                        char sz_d[8];
-                        dtostrf(d, 4, 1, sz_d);
-                        sprintf(stringbuffer, "RV:%i dB:%s Left:%i Right:%i" , i, sz_d, dBLeft, dBRight);
-                        Serial.println(stringbuffer);
-                        break;
-                    }
+                Measurement m(d, 44);
+                GetInPut(m);
+                Serial.println(m.ToStringData().c_str());
+            }
+
+            Serial.println("Sweep RV = 99 for 6.0 dB to 12");
+            for (float d = 6.0; d < 12.0; d += .1) {
+                signalGenerator.setFreq(1000.0, d);
+                Measurement m(d, 99);
+                GetInPut(m);
+                Serial.println(m.ToStringData().c_str());
+            }
+
+            Serial.println("Sweep RV = 194 for 12.0 dB to 15.5");
+            for (float d = 12.0; d < 15.5; d += .1) {
+                signalGenerator.setFreq(1000.0, d);
+                Measurement m(d, 194);
+                GetInPut(m);
+                Serial.println(m.ToStringData().c_str());
+            }
+
+            Serial.println("Sweep RV = 254 for 15.5 dB to 32");
+            for (float d = 15.5; d < 32.0; d += .1) {
+                signalGenerator.setFreq(1000.0, d);
+                Measurement m(d, 254);
+                GetInPut(m);
+                Serial.println(m.ToStringData().c_str());
+            }
+
+        }
+        void Scan()
+        {
+            /*
+                        I2C_eeprom ee(0x50, I2C_DEVICESIZE_24LC512);
+
+
+                        signalGenerator.setFreq(1000.0, 0.0);
+                        GetDb();
+                        signalGenerator.setFreq(1000.0, 32.0);
+                        GetDb();
+                        signalGenerator.setFreq(1000.0, 16.0);
+                        GetDb();
+                        signalGenerator.setFreq(1000.0, 32.0);
+                        GetDb();
+                        signalGenerator.setFreq(1000.0, 0.0);
+                        GetDb();
+                        signalGenerator.setFreq(1000.0, 16.0);
+            */
+            SignalGenerator signalGenerator;
+            signalGenerator.UnmutedCalibrationMode();
+            signalGenerator.setFreq(1000.0, 15.0);
+            int i = 45;
+            for (float d = 0.0; d < 32.1; d += .1) {
+                //for (float d = 0.0; d < 32.1; d += 1.0) {
+                signalGenerator.setFreq(1000.0, d);
+                Measurement next(d, i);
+                GetInPut(next);
+                Measurement prev(next);
+
+                while (next.RV != 255 && !next.IsSaturated()) {
+                    prev = next;
+                    next.RV += 1;
+                    GetInPut(next);
+                };
+                Measurement unSaturated(prev);
+                if (!next.IsSaturated()) {
+                    unSaturated = next;
                 }
+                i = unSaturated.RV;
+                Serial.println(unSaturated.ToString().c_str());
+
             }
         }
-
-
 };
 
 
