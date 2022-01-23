@@ -1,6 +1,7 @@
 #ifndef SIGNALGENERATOR_H
 #define SIGNALGENERATOR_H
 
+
 #include <AD5254_asukiaaa.h>
 #include <fp64lib.h>
 #include <EEPROM.h>
@@ -195,6 +196,10 @@ class SignalGenerator
         }
 };
 
+
+#include <CircularBuffer.h>
+#define CIRCULARBUFFERSIZE 20
+
 class dBMeter
 {
     public:
@@ -221,7 +226,7 @@ class dBMeter
                 char stringbuffer[255];
                 char sz_dB[8];
                 dtostrf(dB, 4, 1, sz_dB);
-                sprintf(stringbuffer, "%s,%i" , sz_dB, (dBLeft + dBRight) / 2);
+                sprintf(stringbuffer, "%s,%i,%i" , sz_dB, dBLeft, dBRight);
                 return stringbuffer;
             }
             double dB;
@@ -302,15 +307,15 @@ class dBMeter
         double GetdB45RV (uint16_t AnalogRead)
         {
             std::vector<float64_t> fit6445RV(FIT64_SIZE);
-        /*    
-            fit6445RV[6] = fp64_atof("8.213445203525542896e-16");
-            fit6445RV[5] = fp64_atof("-3.516280429832908025e-12");
-            fit6445RV[4] = fp64_atof("6.220316548106305250e-09");
-            fit6445RV[3] = fp64_atof("-5.824117802733188175e-06");
-            fit6445RV[2] = fp64_atof("3.055317159880055911e-03");
-            fit6445RV[1] = fp64_atof("-8.699673953056390463e-01");
-            fit6445RV[0] = fp64_atof("1.131057223665053613e+02");
-        */
+            /*
+                fit6445RV[6] = fp64_atof("8.213445203525542896e-16");
+                fit6445RV[5] = fp64_atof("-3.516280429832908025e-12");
+                fit6445RV[4] = fp64_atof("6.220316548106305250e-09");
+                fit6445RV[3] = fp64_atof("-5.824117802733188175e-06");
+                fit6445RV[2] = fp64_atof("3.055317159880055911e-03");
+                fit6445RV[1] = fp64_atof("-8.699673953056390463e-01");
+                fit6445RV[0] = fp64_atof("1.131057223665053613e+02");
+            */
             fit6445RV[6] = fp64_atof("2.380560187449659372e-15");
             fit6445RV[5] = fp64_atof("-7.737644429946968462e-12");
             fit6445RV[4] = fp64_atof("9.907876544913139965e-09");
@@ -337,12 +342,29 @@ class dBMeter
             const uint8_t rightChannelIn(3);
             potentio.writeRDAC(leftChannelIn, m.RV);
             potentio.writeRDAC(rightChannelIn, m.RV);
-            delay(500);
 
-            const int CH1(A0);
-            const int CH2(A1);
-            m.dBLeft = analogRead(CH1);
-            m.dBRight = analogRead(CH2);
+            bool measure_again;
+            CircularBuffer<Measurement, CIRCULARBUFFERSIZE> buffer;
+            do {
+                const int CH1(A0);
+                const int CH2(A1);
+                m.dBLeft = analogRead(CH1);
+                m.dBRight = analogRead(CH2);
+                buffer.push(m);
+                delay(50);
+
+                if (buffer.isFull()) {
+                    using index_t = decltype(buffer)::index_t;
+                    for (index_t i = 0; i < buffer.size(); i++) {
+                        if (buffer[0].dBLeft != buffer[i].dBLeft || buffer[0].dBRight != buffer[i].dBRight) {
+                            measure_again = true;
+                            break;
+                        }
+                    }
+                    measure_again = false;
+                } else
+                    measure_again = true;
+            } while (measure_again);
         }
 
         void RVSweep()
@@ -396,35 +418,37 @@ class dBMeter
                 Serial.println(m.ToStringData().c_str());
             }
         }
+
+
+        /*
+                    I2C_eeprom ee(0x50, I2C_DEVICESIZE_24LC512);
+
+
+                    signalGenerator.setFreq(1000.0, 0.0);
+                    GetDb();
+                    signalGenerator.setFreq(1000.0, 32.0);
+                    GetDb();
+                    signalGenerator.setFreq(1000.0, 16.0);
+                    GetDb();
+                    signalGenerator.setFreq(1000.0, 32.0);
+                    GetDb();
+                    signalGenerator.setFreq(1000.0, 0.0);
+                    GetDb();
+                    signalGenerator.setFreq(1000.0, 16.0);
+        */
+
+
+
         void Scan()
         {
-            /*
-                        I2C_eeprom ee(0x50, I2C_DEVICESIZE_24LC512);
-
-
-                        signalGenerator.setFreq(1000.0, 0.0);
-                        GetDb();
-                        signalGenerator.setFreq(1000.0, 32.0);
-                        GetDb();
-                        signalGenerator.setFreq(1000.0, 16.0);
-                        GetDb();
-                        signalGenerator.setFreq(1000.0, 32.0);
-                        GetDb();
-                        signalGenerator.setFreq(1000.0, 0.0);
-                        GetDb();
-                        signalGenerator.setFreq(1000.0, 16.0);
-            */
             SignalGenerator signalGenerator;
             signalGenerator.UnmutedCalibrationMode();
-            signalGenerator.setFreq(1000.0, 15.0);
             int i = 45;
             for (float d = 0.0; d < 32.1; d += .1) {
-                //for (float d = 0.0; d < 32.1; d += 1.0) {
                 signalGenerator.setFreq(1000.0, d);
                 Measurement next(d, i);
                 GetInPut(next);
                 Measurement prev(next);
-
                 while (next.RV != 255 && !next.IsSaturated()) {
                     prev = next;
                     next.RV += 1;
@@ -436,7 +460,6 @@ class dBMeter
                 }
                 i = unSaturated.RV;
                 Serial.println(unSaturated.ToString().c_str());
-
             }
         }
 };

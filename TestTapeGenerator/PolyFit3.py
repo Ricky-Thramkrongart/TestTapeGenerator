@@ -1,5 +1,6 @@
 import numpy
 from io import StringIO
+from matplotlib import pyplot as plt
 
 def fit(basename):
     csvfile = basename + ".csv"
@@ -8,16 +9,29 @@ def fit(basename):
     s = open(csvfile, mode='r').read()
 
     b = numpy.genfromtxt(StringIO(s), delimiter=",")
-    exit	
+
     r=b[:,2]
     l=b[:,1]
     db=b[:,0]
 
-    data = numpy.polyfit(r, db, 6)
-    numpy.savetxt(fitfileright, data, delimiter=",")
 
-    data = numpy.polyfit(l, db, 6)
-    numpy.savetxt(fitfileleft, data, delimiter=",")
+
+    data = numpy.polyfit(l, db ,1)
+    data2 = numpy.polyval(data, l)-db
+    plt.plot(l, data2)
+    plt.show()       
+#
+
+    #numpy.savetxt(fitfileleft, data, delimiter=",")
+
+    #data = numpy.polyfit(numpy.log(r), db,1)
+    #numpy.savetxt(fitfileright, data, delimiter=",")
+
+
+
+
+
+
 
 
 fit("d")
