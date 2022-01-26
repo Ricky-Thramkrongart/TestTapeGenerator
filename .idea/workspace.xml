@@ -2,11 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="6d0579eb-ecb0-4bcd-bcab-740ae4d7c280" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TestTapeGenerator/PolyFit3.py" beforeDir="false" afterPath="$PROJECT_DIR$/TestTapeGenerator/PolyFit3.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/SignalGenerator.h" beforeDir="false" afterPath="$PROJECT_DIR$/TestTapeGenerator/SignalGenerator.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/TapeInfo.h" beforeDir="false" afterPath="$PROJECT_DIR$/TestTapeGenerator/TapeInfo.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/TestTapeGenerator.h" beforeDir="false" afterPath="$PROJECT_DIR$/TestTapeGenerator/TestTapeGenerator.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/TestTapeGenerator.ino" beforeDir="false" afterPath="$PROJECT_DIR$/TestTapeGenerator/TestTapeGenerator.ino" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -75,5 +72,16 @@
       <updated>1643191213703</updated>
     </task>
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>
