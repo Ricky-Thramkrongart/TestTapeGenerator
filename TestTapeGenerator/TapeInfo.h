@@ -3,7 +3,7 @@
 
 #include <ArduinoSTL.h>
 
-const char *TAPELIST_VERSION = "TapeList: 2022/01/11";
+const char *TAPELIST_VERSION = "TapeList: " __DATE__ " " __TIME__;
 
 class RecordStep
 {

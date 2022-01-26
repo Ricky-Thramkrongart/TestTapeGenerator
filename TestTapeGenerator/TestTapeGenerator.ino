@@ -129,8 +129,7 @@ void OutputHardwareCalibration (void)
 void InputHardwareCalibration (void)
 {
     dBMeter dbMeter;
-    dbMeter.RVSweep45();
-    //dbMeter.Scan();
+    dbMeter.RVSweep();
 }
 
 void StartSignalGenerator()
@@ -169,7 +168,7 @@ void StartSignalGenerator()
                 char sz_dBRight[255];
                 dtostrf(dbMeter.GetdB45RV(m.dBLeft), 4, 1, sz_dBLeft);
                 dtostrf(dbMeter.GetdB45RV(m.dBRight), 4, 1, sz_dBRight);
-                
+
                 char stringbuffer[256];
                 char sz_freq[8];
                 dtostrf(freq, 4, 1, sz_freq);
@@ -259,6 +258,16 @@ void setup()
     Serial.begin(115200);
     splashscreen();
     selftest();
+
+    Serial.setTimeout(500);
+    Serial.println("Prompt>");
+    String str(Serial.readString());
+    str.trim();
+    if (str.length()) {
+        MatchState ms(str.c_str());
+        if (REGEXP_MATCHED == ms.Match ("RVSweep"))
+            InputHardwareCalibration();
+    }
 
     do {
         MainMenu mainMenu;
