@@ -5,17 +5,19 @@ from matplotlib import pyplot as plt
 import serial
 
 
-def write_array(hfile, data):
+def write_array(hfile, data, rv_):
+    RV = str(int(rv_))
     s = open(hfile, mode='wb')
-    s.write('    std::vector <float64_t> fit64(14);\r\n'.encode())
-    i = len(data)-1
+    s.write(    str('            std::vector <float64_t> fit64RV' + RV + '(' + str(len(data)) + ');\r\n').encode())
+    i = len(data) - 1
     for d in data:
-        s.write(str('    fit64[' + str(i) + '] = fp64_atof("' + str(d) + '")\r\n').encode())
+        s.write(str('            fit64RV' + RV + '[' + str(i) + '] = fp64_atof("' + str(d) + '");\r\n').encode())
         i -= 1
     s.close()
 
 
-def fit(basename):
+def fit(basename, rv_):
+    basename = basename + str(int(rv_))
     hfile = basename + ".h"
     csvfile = basename + ".csv"
     fitfile = basename + ".fit"
@@ -30,23 +32,22 @@ def fit(basename):
     rv = b[:, 0]
     current_deltaerror = 1000000.0
 
-
     for i in range(18):
         d = (r + l) / 2
         data = numpy.polyfit(d, db, i)
         delta = numpy.polyval(data, d) - db
         deltaerror = sqrt(numpy.dot(delta, delta)) / delta.size
-        error_change = (current_deltaerror-deltaerror)/current_deltaerror
+        error_change = (current_deltaerror - deltaerror) / current_deltaerror
         current_deltaerror = deltaerror
         if (error_change < 0.1):
             numpy.savetxt(fitfile, data, delimiter=",")
             numpy.savetxt(deltafile, delta, delimiter=",")
-            write_array(hfile, data)
+            write_array(hfile, data, rv_)
             print(str(i) + " - " + str(deltaerror) + " - " + str(error_change))
             break
-        #plt.plot(d, delta, linewidth=1)
-        #plt.title(str(i) + " - " + str(deltaerror))
-        #plt.show()
+        # plt.plot(d, delta, linewidth=1)
+        # plt.title(str(i) + " - " + str(deltaerror))
+        # plt.show()
 
 
 def readserial(basename):
@@ -96,6 +97,7 @@ def readserial(basename):
         textfile.write((element + "\n").encode('utf-8'))
     textfile.close()
 
+
 def get_array(b, val):
     for row in b:
         if (row[0] == val):
@@ -104,6 +106,7 @@ def get_array(b, val):
             else:
                 a = row
     return a
+
 
 def remove_last_value(b):
     repeat_count = 0
@@ -114,6 +117,7 @@ def remove_last_value(b):
         return b[0:-repeat_count]
     else:
         return b
+
 
 def filtercsv(basename):
     csvfile = basename + ".csv"
@@ -129,7 +133,8 @@ def filtercsv(basename):
         numpy.savetxt(filteredcsvfile, f, delimiter=",", fmt=fmt)
     return rvs
 
-#readserial('rv')
+
+# readserial('rv')
 rvs = filtercsv('rv')
 for rv in rvs:
-    fit("rv" + str(int(rv)))
+    fit("rv", rv)

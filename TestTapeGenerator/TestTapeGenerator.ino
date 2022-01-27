@@ -166,14 +166,14 @@ void StartSignalGenerator()
                 dbMeter.GetInPut(m);
                 char sz_dBLeft[255];
                 char sz_dBRight[255];
-                dtostrf(dbMeter.GetdB45RV(m.dBLeft), 4, 1, sz_dBLeft);
-                dtostrf(dbMeter.GetdB45RV(m.dBRight), 4, 1, sz_dBRight);
+                dtostrf(dbMeter.GetdB45RV(m.dBLeft), 4, 2, sz_dBLeft);
+                dtostrf(dbMeter.GetdB45RV(m.dBRight), 4, 2, sz_dBRight);
 
                 char stringbuffer[256];
                 char sz_freq[8];
-                dtostrf(freq, 4, 1, sz_freq);
+                dtostrf(freq, 4, 2, sz_freq);
                 char sz_db[8];
-                dtostrf(dB, 4, 1, sz_db);
+                dtostrf(dB, 4, 2, sz_db);
                 sprintf(stringbuffer, "Measured dB(L/R): %s/%s", sz_dBLeft, sz_dBRight);
                 lcdhelper.line[3] = stringbuffer;
                 sprintf(stringbuffer, "Frequency: %s dB: %s", sz_freq, sz_db);

@@ -315,26 +315,27 @@ class dBMeter
 
         double GetdB45RV (uint16_t AnalogRead)
         {
-            std::vector<float64_t> fit6445RV(14);
-            fit6445RV[13] = fp64_atof("-1.198929770659723449e-33");
-            fit6445RV[12] = fp64_atof("8.080832628216005802e-30");
-            fit6445RV[11] = fp64_atof("-2.422666907520262609e-26");
-            fit6445RV[10] = fp64_atof("4.259389575429843194e-23");
-            fit6445RV[9] = fp64_atof("-4.875055197093268408e-20");
-            fit6445RV[8] = fp64_atof("3.813392684398106314e-17");
-            fit6445RV[7] = fp64_atof("-2.083377554541882115e-14");
-            fit6445RV[6] = fp64_atof("7.990387228624255763e-12");
-            fit6445RV[5] = fp64_atof("-2.136464487216916322e-09");
-            fit6445RV[4] = fp64_atof("3.920270257327244797e-07");
-            fit6445RV[3] = fp64_atof("-4.851125896442322577e-05");
-            fit6445RV[2] = fp64_atof("4.087568164514145119e-03");
-            fit6445RV[1] = fp64_atof("-2.841351240460026073e-01");
-            fit6445RV[0] = fp64_atof("2.927927129026994990e+01");
+            std::vector <float64_t> fit64RV45(15);
+            fit64RV45[14] = fp64_atof("1.9641068060904303e-36");
+            fit64RV45[13] = fp64_atof("-1.4585097977363076e-32");
+            fit64RV45[12] = fp64_atof("4.867984654851966e-29");
+            fit64RV45[11] = fp64_atof("-9.644396870142373e-26");
+            fit64RV45[10] = fp64_atof("1.2617613050797498e-22");
+            fit64RV45[9] = fp64_atof("-1.1474505614383382e-19");
+            fit64RV45[8] = fp64_atof("7.437312842511726e-17");
+            fit64RV45[7] = fp64_atof("-3.467585135989197e-14");
+            fit64RV45[6] = fp64_atof("1.1604920051276885e-11");
+            fit64RV45[5] = fp64_atof("-2.7569457595169114e-09");
+            fit64RV45[4] = fp64_atof("4.5690544957818214e-07");
+            fit64RV45[3] = fp64_atof("-5.19995972871389e-05");
+            fit64RV45[2] = fp64_atof("0.00413435825154928");
+            fit64RV45[1] = fp64_atof("-0.2817694641822397");
+            fit64RV45[0] = fp64_atof("29.22597524304486");
             float64_t x = fp64_sd(AnalogRead);
-            float64_t y = fp64_add(fit6445RV[0], fp64_mul(fit6445RV[1], x));
-            for (int i = fit6445RV.size() - 1; i != 1 ; i--)
+            float64_t y = fp64_add(fit64RV45[0], fp64_mul(fit64RV45[1], x));
+            for (int i = fit64RV45.size() - 1; i != 1 ; i--)
             {
-                y = fp64_add(y, fp64_mul(fit6445RV[i], fp64_pow(x, fp64_sd(i))));
+                y = fp64_add(y, fp64_mul(fit64RV45[i], fp64_pow(x, fp64_sd(i))));
             }
 
             y = fp64_fmin(y, fp64_sd(29.2));
