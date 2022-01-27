@@ -4,7 +4,19 @@ from math import sqrt
 from matplotlib import pyplot as plt
 import serial
 
+
+def write_array(hfile, data):
+    s = open(hfile, mode='wb')
+    s.write('    std::vector <float64_t> fit64(14);\r\n'.encode())
+    i = len(data)-1
+    for d in data:
+        s.write(str('    fit64[' + str(i) + '] = fp64_atof("' + str(d) + '")\r\n').encode())
+        i -= 1
+    s.close()
+
+
 def fit(basename):
+    hfile = basename + ".h"
     csvfile = basename + ".csv"
     fitfile = basename + ".fit"
     deltafile = basename + ".err"
@@ -29,6 +41,7 @@ def fit(basename):
         if (error_change < 0.1):
             numpy.savetxt(fitfile, data, delimiter=",")
             numpy.savetxt(deltafile, delta, delimiter=",")
+            write_array(hfile, data)
             print(str(i) + " - " + str(deltaerror) + " - " + str(error_change))
             break
         #plt.plot(d, delta, linewidth=1)
