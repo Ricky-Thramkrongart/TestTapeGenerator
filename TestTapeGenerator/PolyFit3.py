@@ -1,17 +1,8 @@
-import os
-
-abspath = os.path.abspath(__file__)
-dname = os.path.dirname(abspath)
-os.chdir(dname)
-
 from io import StringIO
-import csv
 import numpy
 from math import sqrt
 from matplotlib import pyplot as plt
 import serial
-import time
-
 
 def fit(basename):
     csvfile = basename + ".csv"
@@ -25,20 +16,27 @@ def fit(basename):
     l = b[:, 2]
     db = b[:, 1]
     rv = b[:, 0]
+    current_deltaerror = 1000000.0
+
 
     for i in range(18):
         d = (r + l) / 2
         data = numpy.polyfit(d, db, i)
         delta = numpy.polyval(data, d) - db
         deltaerror = sqrt(numpy.dot(delta, delta)) / delta.size
-        numpy.savetxt(fitfile + str(i), data, delimiter=",")
-        numpy.savetxt(deltafile, delta, delimiter=",")
-        plt.plot(d, delta, linewidth=1)
-        plt.title(str(i) + " - " + str(deltaerror))
-        plt.show()
+        error_change = (current_deltaerror-deltaerror)/current_deltaerror
+        current_deltaerror = deltaerror
+        if (error_change < 0.1):
+            numpy.savetxt(fitfile, data, delimiter=",")
+            numpy.savetxt(deltafile, delta, delimiter=",")
+            print(str(i) + " - " + str(deltaerror) + " - " + str(error_change))
+            break
+        #plt.plot(d, delta, linewidth=1)
+        #plt.title(str(i) + " - " + str(deltaerror))
+        #plt.show()
 
 
-def readserial():
+def readserial(basename):
     serialPort = serial.Serial(
         port="COM4", baudrate=115200, bytesize=8, timeout=2, stopbits=serial.STOPBITS_ONE
     )
@@ -46,7 +44,6 @@ def readserial():
     cal_list = []
 
     serialString = ""  # Used to hold data coming over UART
-
 
     while 1:
         if serialPort.in_waiting > 0:
@@ -81,17 +78,45 @@ def readserial():
             except:
                 pass
 
-    textfile = open('cal.csv', "wb")
+    textfile = open(csvfile, "wb")
     for element in cal_list:
         textfile.write((element + "\n").encode('utf-8'))
     textfile.close()
 
+def get_array(b, val):
+    for row in b:
+        if (row[0] == val):
+            if 'a' in locals():
+                a = numpy.vstack([a, row])
+            else:
+                a = row
+    return a
 
-readserial()
-# fit('cal')
+def remove_last_value(b):
+    repeat_count = 0
+    for row in reversed(b[0:b.shape[0] - 1]):
+        if b[-1][2] == row[2] or b[-1][3] == row[3]:
+            repeat_count += 1
+    if repeat_count > 1:
+        return b[0:-repeat_count]
+    else:
+        return b
 
-# fit("RV44")
-# fit("RV45")
-# fit("RV99")
-# fit("RV194")
-# fit("RV254")
+def filtercsv(basename):
+    csvfile = basename + ".csv"
+    s = open(csvfile, mode='r').read()
+    b = numpy.genfromtxt(StringIO(s), delimiter=",")
+
+    rvs = numpy.unique(b[0:-1, 0:1])
+    for rv in rvs:
+        f = remove_last_value(get_array(b, rv))
+        filteredcsvfile = basename + str(int(rv)) + ".csv"
+
+        fmt = '%d,%1.2f,%d,%d'
+        numpy.savetxt(filteredcsvfile, f, delimiter=",", fmt=fmt)
+    return rvs
+
+#readserial('rv')
+rvs = filtercsv('rv')
+for rv in rvs:
+    fit("rv" + str(int(rv)))
