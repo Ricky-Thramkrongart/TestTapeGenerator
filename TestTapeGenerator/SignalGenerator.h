@@ -315,6 +315,27 @@ class dBMeter
 
         double GetdB45RV (uint16_t AnalogRead)
         {
+#define DEVICE1
+#ifdef DEVICE1
+            std::vector <float64_t> fit64RV45(15);
+            fit64RV45[14] = fp64_atof("1.9641068060904303e-36");
+            fit64RV45[13] = fp64_atof("-1.4585097977363076e-32");
+            fit64RV45[12] = fp64_atof("4.867984654851966e-29");
+            fit64RV45[11] = fp64_atof("-9.644396870142373e-26");
+            fit64RV45[10] = fp64_atof("1.2617613050797498e-22");
+            fit64RV45[9] = fp64_atof("-1.1474505614383382e-19");
+            fit64RV45[8] = fp64_atof("7.437312842511726e-17");
+            fit64RV45[7] = fp64_atof("-3.467585135989197e-14");
+            fit64RV45[6] = fp64_atof("1.1604920051276885e-11");
+            fit64RV45[5] = fp64_atof("-2.7569457595169114e-09");
+            fit64RV45[4] = fp64_atof("4.5690544957818214e-07");
+            fit64RV45[3] = fp64_atof("-5.19995972871389e-05");
+            fit64RV45[2] = fp64_atof("0.00413435825154928");
+            fit64RV45[1] = fp64_atof("-0.2817694641822397");
+            fit64RV45[0] = fp64_atof("29.22597524304486");
+#endif //DEVICE1
+
+#ifdef DEVICE2
             std::vector <float64_t> fit64RV45(17);
             fit64RV45[16] = fp64_atof("9.736316905219124e-41");
             fit64RV45[15] = fp64_atof("-8.268140819033462e-37");
@@ -333,6 +354,11 @@ class dBMeter
             fit64RV45[2] = fp64_atof("0.07985825939678247");
             fit64RV45[1] = fp64_atof("-3.5291243105849697");
             fit64RV45[0] = fp64_atof("99.27627812349272");
+#endif //DEVICE2
+
+
+
+
             float64_t x = fp64_sd(AnalogRead);
             float64_t y = fp64_add(fit64RV45[0], fp64_mul(fit64RV45[1], x));
             for (int i = fit64RV45.size() - 1; i != 1 ; i--)

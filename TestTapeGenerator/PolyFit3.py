@@ -8,7 +8,7 @@ import serial
 def write_array(hfile, data, rv_):
     RV = str(int(rv_))
     s = open(hfile, mode='wb')
-    s.write(    str('            std::vector <float64_t> fit64RV' + RV + '(' + str(len(data)) + ');\r\n').encode())
+    s.write(str('            std::vector <float64_t> fit64RV' + RV + '(' + str(len(data)) + ');\r\n').encode())
     i = len(data) - 1
     for d in data:
         s.write(str('            fit64RV' + RV + '[' + str(i) + '] = fp64_atof("' + str(d) + '");\r\n').encode())
@@ -17,9 +17,10 @@ def write_array(hfile, data, rv_):
 
 
 def fit(basename, rv_):
-    basename = basename + str(int(rv_))
-    hfile = basename + ".h"
+
+    basename = basename + '_' + str(int(rv_)).zfill(3)
     csvfile = basename + ".csv"
+    hfile = basename + ".h"
     fitfile = basename + ".fit"
     deltafile = basename + ".err"
     s = open(csvfile, mode='r').read()
@@ -127,7 +128,7 @@ def filtercsv(basename):
     rvs = numpy.unique(b[0:-1, 0:1])
     for rv in rvs:
         f = remove_last_value(get_array(b, rv))
-        filteredcsvfile = basename + str(int(rv)) + ".csv"
+        filteredcsvfile = basename + '_' + str(int(rv)).zfill(3) + ".csv"
 
         fmt = '%d,%1.2f,%d,%d'
         numpy.savetxt(filteredcsvfile, f, delimiter=",", fmt=fmt)
@@ -135,6 +136,7 @@ def filtercsv(basename):
 
 
 # readserial('rv')
-rvs = filtercsv('rv')
-for rv in rvs:
-    fit("rv", rv)
+for n in ['rv1', 'rv2']:
+    rvs = filtercsv(n)
+    for rv in rvs:
+        fit(n, rv)
