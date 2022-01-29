@@ -39,7 +39,7 @@ class PotentioMeterOutputSelection : public Menu
 class MainMenu : public Menu
 {
     public:
-        MainMenu (): Menu(6) {}
+        MainMenu (): Menu(7) {}
         void FullUpdate() {
             std::string str;
             switch (Current) {
@@ -60,6 +60,9 @@ class MainMenu : public Menu
                     break;
                 case 5:
                     str = "Input Hardware Calibration";
+                    break;
+                case 6:
+                    str = "dBMeter Scan";
                     break;
             }
             char buffer[255];
@@ -124,6 +127,12 @@ void SetDateTime()
 void OutputHardwareCalibration (void)
 {
     PotentioMeterOutputSelection().Execute();
+}
+
+void dBMeterScan (void)
+{
+    dBMeter dbMeter;
+    dbMeter.Scan();
 }
 
 void InputHardwareCalibration (void)
@@ -294,6 +303,10 @@ void setup()
                 case 5:
                     InputHardwareCalibration();
                     break;
+                case 6:
+                    dBMeterScan();
+                    break;
+                    
             };
         }
     } while (1);

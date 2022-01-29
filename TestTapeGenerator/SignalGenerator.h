@@ -10,8 +10,6 @@
 #include <iterator>
 #include <I2C_eeprom.h>
 
-
-
 double PolyVal (const std::vector <float64_t>&fit64, uint16_t v)
 {
     float64_t x = fp64_sd(v);
@@ -26,18 +24,6 @@ double PolyVal (const std::vector <float64_t>&fit64, uint16_t v)
 
     return atof(fp64_to_string( y, 15, 2));
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 #define FIT_ORDER 6
 #define FIT64_SIZE (FIT_ORDER+1)
@@ -80,7 +66,6 @@ class SignalGenerator
                 addrOffset += sizeof(float64_t);
             }
         }
-
 
         uint16_t OutPutFit64 (double dB)
         {
@@ -387,8 +372,6 @@ class dBMeter
                 dBRight = PolyVal(fit64RV45_r, m.dBRight) + 12.0;
                 digitalWrite(_inputpregainPin, LOW);
             }
-
-
         }
 
         void GetInPut(Measurement& m)
@@ -425,7 +408,7 @@ class dBMeter
         void RVSweep()
         {
             LCD_Helper lcdhelper;
-            lcdhelper.line[0] = "RVSweep";
+            lcdhelper.line[0] = "dBMeter RVSweep";
             lcdhelper.Show();
             SignalGenerator signalGenerator;
             signalGenerator.UnmutedCalibrationMode();
@@ -447,9 +430,12 @@ class dBMeter
 
         void Scan()
         {
+            LCD_Helper lcdhelper;
+            lcdhelper.line[0] = "dBMeter Scan";
+            lcdhelper.Show();
             SignalGenerator signalGenerator;
             signalGenerator.UnmutedCalibrationMode();
-            int i = 45;
+            int i = 44;
             for (float d = 0.0; d < 32.1; d += .1) {
                 signalGenerator.setFreq(1000.0, d);
                 Measurement next(d, i);
@@ -465,8 +451,11 @@ class dBMeter
                     unSaturated = next;
                 }
                 i = unSaturated.RV;
+                lcdhelper.lcd.setCursor(0, 0);
+                lcdhelper.lcd.print(unSaturated.ToString().c_str());
                 Serial.println(unSaturated.ToString().c_str());
             }
+            Serial.println("Finished");
         }
 };
 
