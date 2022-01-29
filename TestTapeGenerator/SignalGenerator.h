@@ -412,7 +412,8 @@ class dBMeter
             lcdhelper.Show();
             SignalGenerator signalGenerator;
             signalGenerator.UnmutedCalibrationMode();
-            std::vector<int> rv{45, 146, 255};
+            //std::vector<int> rv{45, 146, 255};
+            std::vector<int> rv{45};
             for (std::vector<int>::iterator r = rv.begin(); r != rv.end(); r++) {
                 for (float d = 0.0; d < 32.1; d += 0.05) {
                     signalGenerator.setFreq(1000.0, d);
