@@ -7,6 +7,7 @@ void selftest()
     LCD_Helper lcdhelper;
     lcdhelper.line[0] = "Self Test";
     lcdhelper.Show();
+    Serial.println(lcdhelper.line[0].c_str());
     byte devices[] = {0x25 /*Disp*/, 0x2C/*DATT*/, 0x50/*EEPROM*/, 0x68/*RTC*/};
     for (int i = 0; i != sizeof(devices) / sizeof(byte); i++)
     {
@@ -25,6 +26,8 @@ void selftest()
     lcdhelper.line[1] = "DISP:OK EEPROM:OK RTC:OK DATT:OK";
     lcdhelper.line[2] = "Frequncy response test";
     lcdhelper.Show();
+    Serial.println(lcdhelper.line[1].c_str());
+    Serial.println(lcdhelper.line[2].c_str());
 
     SignalGenerator signalGenerator;
     signalGenerator.UnmutedCalibrationMode();
@@ -52,6 +55,9 @@ void selftest()
             sprintf(stringbuffer, "Frequency: %s dB: %s", sz_freq, sz_db);
             lcdhelper.line[2] = stringbuffer;
             lcdhelper.Show();
+            Serial.println(lcdhelper.line[2].c_str());
+            Serial.println(lcdhelper.line[3].c_str());
+
         }
     }
     delay(2000);
