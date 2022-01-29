@@ -1,4 +1,4 @@
-            std::vector <float64_t> fit64RV45_r(15);
+            fit64RV45_r = std::vector <float64_t>(15);
             fit64RV45_r[14] = fp64_atof("1.4436231649486664e-35");
             fit64RV45_r[13] = fp64_atof("-1.0489683655067018e-31");
             fit64RV45_r[12] = fp64_atof("3.4395003093908697e-28");

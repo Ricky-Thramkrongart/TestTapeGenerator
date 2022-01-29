@@ -10,6 +10,35 @@
 #include <iterator>
 #include <I2C_eeprom.h>
 
+
+
+double PolyVal (const std::vector <float64_t>&fit64, uint16_t v)
+{
+    float64_t x = fp64_sd(v);
+    float64_t y = fp64_add(fit64[0], fp64_mul(fit64[1], x));
+    for (int i = fit64.size() - 1; i != 1 ; i--)
+    {
+        y = fp64_add(y, fp64_mul(fit64[i], fp64_pow(x, fp64_sd(i))));
+    }
+
+    y = fp64_fmin(y, fp64_sd(29.2));
+    y = fp64_fmax(y, fp64_sd(0));
+
+    return atof(fp64_to_string( y, 15, 2));
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 #define FIT_ORDER 6
 #define FIT64_SIZE (FIT_ORDER+1)
 class SignalGenerator
@@ -246,6 +275,8 @@ class dBMeter
         const uint8_t _calmodePin;
         AD5254_asukiaaa potentio;
         I2C_eeprom i2C_eeprom;
+        std::vector <float64_t> fit64RV45_l;
+        std::vector <float64_t> fit64RV45_r;
 
     public:
         std::vector<float64_t> fit64;
@@ -302,74 +333,62 @@ class dBMeter
 
             pinMode(_calmodePin,   OUTPUT);
             digitalWrite(_calmodePin, HIGH);
+
+            fit64RV45_l = std::vector <float64_t>(15);
+            fit64RV45_l[14] = fp64_atof("1.677923585110501e-36");
+            fit64RV45_l[13] = fp64_atof("-1.2560653304131632e-32");
+            fit64RV45_l[12] = fp64_atof("4.227894224574707e-29");
+            fit64RV45_l[11] = fp64_atof("-8.45064378915242e-26");
+            fit64RV45_l[10] = fp64_atof("1.115804991376365e-22");
+            fit64RV45_l[9] = fp64_atof("-1.0244379036302585e-19");
+            fit64RV45_l[8] = fp64_atof("6.705683940884093e-17");
+            fit64RV45_l[7] = fp64_atof("-3.158402453382945e-14");
+            fit64RV45_l[6] = fp64_atof("1.0682418823283996e-11");
+            fit64RV45_l[5] = fp64_atof("-2.566411400535807e-09");
+            fit64RV45_l[4] = fp64_atof("4.3066302928320864e-07");
+            fit64RV45_l[3] = fp64_atof("-4.9748269797742075e-05");
+            fit64RV45_l[2] = fp64_atof("0.004030972379686488");
+            fit64RV45_l[1] = fp64_atof("-0.28074280452148");
+            fit64RV45_l[0] = fp64_atof("29.355779672332574");
+
+            fit64RV45_r = std::vector <float64_t>(15);
+            fit64RV45_r[14] = fp64_atof("2.1287535929115348e-36");
+            fit64RV45_r[13] = fp64_atof("-1.5748997961393054e-32");
+            fit64RV45_r[12] = fp64_atof("5.235180407213225e-29");
+            fit64RV45_r[11] = fp64_atof("-1.0326522313620901e-25");
+            fit64RV45_r[10] = fp64_atof("1.3446707593535264e-22");
+            fit64RV45_r[9] = fp64_atof("-1.2167590034249164e-19");
+            fit64RV45_r[8] = fp64_atof("7.84515584960287e-17");
+            fit64RV45_r[7] = fp64_atof("-3.6376381048261166e-14");
+            fit64RV45_r[6] = fp64_atof("1.2103995770781873e-11");
+            fit64RV45_r[5] = fp64_atof("-2.8579468570036992e-09");
+            fit64RV45_r[4] = fp64_atof("4.704431961655748e-07");
+            fit64RV45_r[3] = fp64_atof("-5.3107745275726005e-05");
+            fit64RV45_r[2] = fp64_atof("0.004178304781667345");
+            fit64RV45_r[1] = fp64_atof("-0.28128607980332293");
+            fit64RV45_r[0] = fp64_atof("29.084007135068532");
         }
         ~dBMeter()
         {
             //Mute Output
         }
 
-        void getdB(double startdB, uint16_t& dBLeft, uint16_t& dBRight)
+        double GetdB (Measurement &m, double& dBLeft, double& dBRight)
         {
-            //SetInPut(InPutFit64(startdB), dBLeft, dBRight);
-        }
-
-        double GetdB45RV (uint16_t AnalogRead)
-        {
-#define DEVICE1
-#ifdef DEVICE1
-            std::vector <float64_t> fit64RV45(15);
-            fit64RV45[14] = fp64_atof("1.9641068060904303e-36");
-            fit64RV45[13] = fp64_atof("-1.4585097977363076e-32");
-            fit64RV45[12] = fp64_atof("4.867984654851966e-29");
-            fit64RV45[11] = fp64_atof("-9.644396870142373e-26");
-            fit64RV45[10] = fp64_atof("1.2617613050797498e-22");
-            fit64RV45[9] = fp64_atof("-1.1474505614383382e-19");
-            fit64RV45[8] = fp64_atof("7.437312842511726e-17");
-            fit64RV45[7] = fp64_atof("-3.467585135989197e-14");
-            fit64RV45[6] = fp64_atof("1.1604920051276885e-11");
-            fit64RV45[5] = fp64_atof("-2.7569457595169114e-09");
-            fit64RV45[4] = fp64_atof("4.5690544957818214e-07");
-            fit64RV45[3] = fp64_atof("-5.19995972871389e-05");
-            fit64RV45[2] = fp64_atof("0.00413435825154928");
-            fit64RV45[1] = fp64_atof("-0.2817694641822397");
-            fit64RV45[0] = fp64_atof("29.22597524304486");
-#endif //DEVICE1
-
-#ifdef DEVICE2
-            std::vector <float64_t> fit64RV45(17);
-            fit64RV45[16] = fp64_atof("9.736316905219124e-41");
-            fit64RV45[15] = fp64_atof("-8.268140819033462e-37");
-            fit64RV45[14] = fp64_atof("3.21342657192747e-33");
-            fit64RV45[13] = fp64_atof("-7.572547225886504e-30");
-            fit64RV45[12] = fp64_atof("1.208449742841e-26");
-            fit64RV45[11] = fp64_atof("-1.3814930062472293e-23");
-            fit64RV45[10] = fp64_atof("1.1672695548879611e-20");
-            fit64RV45[9] = fp64_atof("-7.414731785607239e-18");
-            fit64RV45[8] = fp64_atof("3.567827639358584e-15");
-            fit64RV45[7] = fp64_atof("-1.3007818241317573e-12");
-            fit64RV45[6] = fp64_atof("3.5709554657068854e-10");
-            fit64RV45[5] = fp64_atof("-7.28678461573734e-08");
-            fit64RV45[4] = fp64_atof("1.0824606383816508e-05");
-            fit64RV45[3] = fp64_atof("-0.0011341120354899526");
-            fit64RV45[2] = fp64_atof("0.07985825939678247");
-            fit64RV45[1] = fp64_atof("-3.5291243105849697");
-            fit64RV45[0] = fp64_atof("99.27627812349272");
-#endif //DEVICE2
-
-
-
-
-            float64_t x = fp64_sd(AnalogRead);
-            float64_t y = fp64_add(fit64RV45[0], fp64_mul(fit64RV45[1], x));
-            for (int i = fit64RV45.size() - 1; i != 1 ; i--)
-            {
-                y = fp64_add(y, fp64_mul(fit64RV45[i], fp64_pow(x, fp64_sd(i))));
+            m.RV = 45;
+            digitalWrite(_inputpregainPin, LOW);
+            GetInPut(m);
+            dBLeft = PolyVal(fit64RV45_l, m.dBLeft);
+            dBRight = PolyVal(fit64RV45_r, m.dBRight);
+            if (dBLeft > 28 || dBRight > 28) {
+                digitalWrite(_inputpregainPin, HIGH);
+                GetInPut(m);
+                dBLeft = PolyVal(fit64RV45_l, m.dBLeft) + 12.0;
+                dBRight = PolyVal(fit64RV45_r, m.dBRight) + 12.0;
+                digitalWrite(_inputpregainPin, LOW);
             }
 
-            y = fp64_fmin(y, fp64_sd(29.2));
-            y = fp64_fmax(y, fp64_sd(0));
 
-            return atof(fp64_to_string( y, 15, 2));
         }
 
         void GetInPut(Measurement& m)
@@ -426,7 +445,6 @@ class dBMeter
             Serial.println("Finished");
         }
 
-
         void Scan()
         {
             SignalGenerator signalGenerator;
@@ -451,7 +469,5 @@ class dBMeter
             }
         }
 };
-
-
 
 #endif // SIGNALGENERATOR_H

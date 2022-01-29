@@ -1,27 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6d0579eb-ecb0-4bcd-bcab-740ae4d7c280" name="Changes" comment="">
+    <list default="true" id="6d0579eb-ecb0-4bcd-bcab-740ae4d7c280" name="Changes" comment="Research fit for two input channels versus one.&#10;Two channels should be better">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/NewTestTape.h" beforeDir="false" afterPath="$PROJECT_DIR$/TestTapeGenerator/NewTestTape.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TestTapeGenerator/PolyFit3.py" beforeDir="false" afterPath="$PROJECT_DIR$/TestTapeGenerator/PolyFit3.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_045.err" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_045.fit" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_045.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_146.err" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_146.fit" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_146.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_255.err" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_255.fit" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_255.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_045.err" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_045.fit" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_045.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_146.err" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_146.fit" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_146.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_255.err" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_255.fit" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_255.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/SignalGenerator.h" beforeDir="false" afterPath="$PROJECT_DIR$/TestTapeGenerator/SignalGenerator.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/TestTapeGenerator.ino" beforeDir="false" afterPath="$PROJECT_DIR$/TestTapeGenerator/TestTapeGenerator.ino" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_045_l.h" beforeDir="false" afterPath="$PROJECT_DIR$/TestTapeGenerator/rv1_045_l.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_045_m.err" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_045_m.fit" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_045_m.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_045_r.h" beforeDir="false" afterPath="$PROJECT_DIR$/TestTapeGenerator/rv1_045_r.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_045_l.h" beforeDir="false" afterPath="$PROJECT_DIR$/TestTapeGenerator/rv2_045_l.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_045_m.err" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_045_m.fit" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_045_m.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_045_r.h" beforeDir="false" afterPath="$PROJECT_DIR$/TestTapeGenerator/rv2_045_r.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -85,6 +80,21 @@
       <option name="presentableId" value="Default" />
       <updated>1643191213703</updated>
     </task>
+    <task id="LOCAL-00001" summary="Research fit for two input channels versus one.&#10;Two channels should be better">
+      <created>1643432245418</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1643432245418</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Research fit for two input channels versus one.&#10;Two channels should be better">
+      <created>1643432334354</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1643432334354</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -108,5 +118,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Research fit for two input channels versus one.&#10;Two channels should be better" />
+    <option name="LAST_COMMIT_MESSAGE" value="Research fit for two input channels versus one.&#10;Two channels should be better" />
   </component>
 </project>

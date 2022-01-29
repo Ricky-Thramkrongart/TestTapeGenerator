@@ -162,12 +162,14 @@ void StartSignalGenerator()
                 ms.GetCapture (cap, index++);
                 double dB = atof(cap);
                 signalGenerator.setFreq(freq, dB);
-                dBMeter::Measurement m(dB, 45);
-                dbMeter.GetInPut(m);
+                dBMeter::Measurement m;
+                m.dB = dB;
+                double dBLeft, dBRight;
+                dbMeter.GetdB(m, dBLeft, dBRight);
                 char sz_dBLeft[255];
                 char sz_dBRight[255];
-                dtostrf(dbMeter.GetdB45RV(m.dBLeft), 4, 2, sz_dBLeft);
-                dtostrf(dbMeter.GetdB45RV(m.dBRight), 4, 2, sz_dBRight);
+                dtostrf(dBLeft, 4, 2, sz_dBLeft);
+                dtostrf(dBRight, 4, 2, sz_dBRight);
 
                 char stringbuffer[256];
                 char sz_freq[8];

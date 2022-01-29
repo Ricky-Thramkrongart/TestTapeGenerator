@@ -35,9 +35,11 @@ class AdjustingReferenceLevelMonitor : public DialogOk
         void Update()
         {
             double Target = tapeInfo->Target;
-            uint16_t LeftLevel;
-            uint16_t RightLevel;
-            dbMeter.getdB(Target, RightLevel, LeftLevel);
+            double LeftLevel;
+            double RightLevel;
+            dBMeter::Measurement m;
+            m.dB = Target;
+            dbMeter.GetdB(m, RightLevel, LeftLevel);
             std::string statuscontrol = StatusControl(0.5, LeftLevel - Target, RightLevel - Target);
             char stringbuffer[255];
             char str_target[6];

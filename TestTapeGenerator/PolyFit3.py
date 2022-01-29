@@ -8,7 +8,7 @@ import serial
 def write_array(hfile, data, rv_, c):
     RV = str(int(rv_))
     s = open(hfile, mode='wb')
-    s.write(str('            std::vector <float64_t> fit64RV' + RV + c + '(' + str(len(data)) + ');\r\n').encode())
+    s.write(str('            fit64RV' + RV + c + ' = std::vector <float64_t>(' + str(len(data)) + ');\r\n').encode())
     i = len(data) - 1
     for d in data:
         s.write(str('            fit64RV' + RV + c + '[' + str(i) + '] = fp64_atof("' + str(d) + '");\r\n').encode())
@@ -53,7 +53,7 @@ def fit(basename, rv_):
     db = b[:, 1]
     rv = b[:, 0]
 
-    do_fit(basename, '_m', (r + l) / 2, db, rv_)
+#    do_fit(basename, '_m', (r + l) / 2, db, rv_)
     do_fit(basename, '_r', r, db, rv_)
     do_fit(basename, '_l', l, db, rv_)
 
