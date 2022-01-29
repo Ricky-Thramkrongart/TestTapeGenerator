@@ -10,6 +10,7 @@
 #include <iterator>
 #include <I2C_eeprom.h>
 
+
 double PolyVal (const std::vector <float64_t>&fit64, uint16_t v)
 {
     float64_t x = fp64_sd(v);
@@ -260,8 +261,8 @@ class dBMeter
         const uint8_t _calmodePin;
         AD5254_asukiaaa potentio;
         I2C_eeprom i2C_eeprom;
-        std::vector <float64_t> fit64RV45_l;
-        std::vector <float64_t> fit64RV45_r;
+        static std::vector<float64_t> fit64RV45_l;
+        static std::vector<float64_t> fit64RV45_r;
 
     public:
         std::vector<float64_t> fit64;
@@ -307,7 +308,6 @@ class dBMeter
             return atoi(fp64_to_string( rv, 15, 2));
         }
 
-
         dBMeter(): _inputpregainPin(30), _calmodePin(26), potentio(AD5254_ASUKIAAA_ADDR_A0_GND_A1_GND), i2C_eeprom(0x50, I2C_DEVICESIZE_24LC512)
 
         {
@@ -318,8 +318,27 @@ class dBMeter
 
             pinMode(_calmodePin,   OUTPUT);
             digitalWrite(_calmodePin, HIGH);
-/* 
-            //Device 
+
+            if (fit64RV45_l.empty() || fit64RV45_r.empty()) {
+                Device2();
+                SignalGenerator signalGenerator;
+                signalGenerator.UnmutedCalibrationMode();
+                double dB = 0.0;
+                signalGenerator.setFreq(1000, dB);
+                Measurement m(dB, 45);
+                double dBLeft, dBRight;
+                GetdB(m, dBLeft, dBRight);
+                if (dBLeft - dB > 1 || dBRight - dB > 1) {
+                    Device1();
+                }
+            }
+        }
+        ~dBMeter()
+        {
+            //Mute Output
+        }
+
+        void Device1(void) {
             fit64RV45_l = std::vector <float64_t>(15);
             fit64RV45_l[14] = fp64_atof("1.677923585110501e-36");
             fit64RV45_l[13] = fp64_atof("-1.2560653304131632e-32");
@@ -353,8 +372,10 @@ class dBMeter
             fit64RV45_r[2] = fp64_atof("0.004178304781667345");
             fit64RV45_r[1] = fp64_atof("-0.28128607980332293");
             fit64RV45_r[0] = fp64_atof("29.084007135068532");
-*/            
-            //Device 2
+        }
+
+
+        void Device2(void) {
             fit64RV45_l = std::vector <float64_t>(15);
             fit64RV45_l[14] = fp64_atof("1.3012260559125937e-35");
             fit64RV45_l[13] = fp64_atof("-9.494262059115952e-32");
@@ -389,11 +410,6 @@ class dBMeter
             fit64RV45_r[1] = fp64_atof("-2.3465342934877804");
             fit64RV45_r[0] = fp64_atof("82.24086926718981");
         }
-        ~dBMeter()
-        {
-            //Mute Output
-        }
-
         double GetdB (Measurement &m, double& dBLeft, double& dBRight)
         {
             m.RV = 45;
@@ -496,4 +512,6 @@ class dBMeter
         }
 };
 
+std::vector<float64_t> dBMeter::fit64RV45_l;
+std::vector<float64_t> dBMeter::fit64RV45_r;
 #endif // SIGNALGENERATOR_H
