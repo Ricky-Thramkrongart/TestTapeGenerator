@@ -5,24 +5,45 @@ from matplotlib import pyplot as plt
 import serial
 
 
-def write_array(hfile, data, rv_):
+def write_array(hfile, data, rv_, c):
     RV = str(int(rv_))
     s = open(hfile, mode='wb')
-    s.write(str('            std::vector <float64_t> fit64RV' + RV + '(' + str(len(data)) + ');\r\n').encode())
+    s.write(str('            std::vector <float64_t> fit64RV' + RV + c + '(' + str(len(data)) + ');\r\n').encode())
     i = len(data) - 1
     for d in data:
-        s.write(str('            fit64RV' + RV + '[' + str(i) + '] = fp64_atof("' + str(d) + '");\r\n').encode())
+        s.write(str('            fit64RV' + RV + c + '[' + str(i) + '] = fp64_atof("' + str(d) + '");\r\n').encode())
         i -= 1
     s.close()
 
 
-def fit(basename, rv_):
-
-    basename = basename + '_' + str(int(rv_)).zfill(3)
-    csvfile = basename + ".csv"
+def do_fit(basename, d, x, y, rv_):
+    basename = basename + d
     hfile = basename + ".h"
     fitfile = basename + ".fit"
     deltafile = basename + ".err"
+
+    current_deltaerror = 1000000.0
+    for i in range(18):
+        data = numpy.polyfit(x, y, i)
+        delta = numpy.polyval(data, x) - y
+        deltaerror = sqrt(numpy.dot(delta, delta)) / delta.size
+        error_change = (current_deltaerror - deltaerror) / current_deltaerror
+        current_deltaerror = deltaerror
+
+        if (error_change < 0.08):
+            numpy.savetxt(fitfile, data, delimiter=",")
+            numpy.savetxt(deltafile, delta, delimiter=",")
+            write_array(hfile, data, rv_, d)
+            print(basename + str(i) + " - " + str(deltaerror) + " - " + str(error_change))
+            break
+        # plt.plot(d, delta, linewidth=1)
+        # plt.title(str(i) + " - " + str(deltaerror))
+        # plt.show()
+
+
+def fit(basename, rv_):
+    basename = basename + '_' + str(int(rv_)).zfill(3)
+    csvfile = basename + ".csv"
     s = open(csvfile, mode='r').read()
 
     b = numpy.genfromtxt(StringIO(s), delimiter=",")
@@ -31,24 +52,10 @@ def fit(basename, rv_):
     l = b[:, 2]
     db = b[:, 1]
     rv = b[:, 0]
-    current_deltaerror = 1000000.0
 
-    for i in range(18):
-        d = (r + l) / 2
-        data = numpy.polyfit(d, db, i)
-        delta = numpy.polyval(data, d) - db
-        deltaerror = sqrt(numpy.dot(delta, delta)) / delta.size
-        error_change = (current_deltaerror - deltaerror) / current_deltaerror
-        current_deltaerror = deltaerror
-        if (error_change < 0.1):
-            numpy.savetxt(fitfile, data, delimiter=",")
-            numpy.savetxt(deltafile, delta, delimiter=",")
-            write_array(hfile, data, rv_)
-            print(str(i) + " - " + str(deltaerror) + " - " + str(error_change))
-            break
-        # plt.plot(d, delta, linewidth=1)
-        # plt.title(str(i) + " - " + str(deltaerror))
-        # plt.show()
+    do_fit(basename, '_m', (r + l) / 2, db, rv_)
+    do_fit(basename, '_r', r, db, rv_)
+    do_fit(basename, '_l', l, db, rv_)
 
 
 def readserial(basename):
@@ -138,5 +145,6 @@ def filtercsv(basename):
 # readserial('rv')
 for n in ['rv1', 'rv2']:
     rvs = filtercsv(n)
-    for rv in rvs:
-        fit(n, rv)
+    # for rv in rvs:
+    #    fit(n, rv)
+    fit(n, 45)

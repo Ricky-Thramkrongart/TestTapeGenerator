@@ -4,20 +4,24 @@
     <list default="true" id="6d0579eb-ecb0-4bcd-bcab-740ae4d7c280" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TestTapeGenerator/PolyFit3.py" beforeDir="false" afterPath="$PROJECT_DIR$/TestTapeGenerator/PolyFit3.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/SignalGenerator.h" beforeDir="false" afterPath="$PROJECT_DIR$/TestTapeGenerator/SignalGenerator.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/TestTapeGenerator.ino" beforeDir="false" afterPath="$PROJECT_DIR$/TestTapeGenerator/TestTapeGenerator.ino" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv146.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv146.err" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv146.fit" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv146.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv255.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv255.err" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv255.fit" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv255.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv45.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv45.err" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv45.fit" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv45.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_045.err" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_045.fit" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_045.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_146.err" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_146.fit" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_146.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_255.err" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_255.fit" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_255.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_045.err" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_045.fit" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_045.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_146.err" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_146.fit" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_146.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_255.err" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_255.fit" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_255.h" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -82,6 +86,17 @@
       <updated>1643191213703</updated>
     </task>
     <servers />
+  </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ID_ORDER">
+      <list>
+        <option value="Default.Root" />
+        <option value="Default.Author" />
+        <option value="Default.Date" />
+        <option value="Default.Subject" />
+        <option value="Space.CommitStatus" />
+      </list>
+    </option>
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
