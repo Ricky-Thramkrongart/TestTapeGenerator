@@ -5,16 +5,10 @@ def fit(basename):
     csvfile = basename + ".csv"
     fitfile = basename + ".fit"
     s = open(csvfile, mode='r', encoding='utf-8-sig').read()
-    open(csvfile, mode='w', encoding='utf-8').write(s)
-    with open(csvfile, 'r') as file :
-      filedata = file.read()
+    s = s.replace(',', '.')
+    s = s.replace(';', ',')
 
-
-    # Replace the target string
-    filedata = filedata.replace(',', '.')
-    filedata = filedata.replace(';', ',')
-
-    b = numpy.genfromtxt(csvfile, delimiter=",")
+    b = numpy.genfromtxt(StringIO(s), delimiter=",")
     y=b[:,1]
     x=b[:,0]
 
@@ -23,3 +17,4 @@ def fit(basename):
 
 
 fit("OutPutTable1")
+fit("OutPutTable2")

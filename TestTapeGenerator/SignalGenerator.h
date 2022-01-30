@@ -26,8 +26,10 @@ double PolyVal (const std::vector <float64_t>&fit64, uint16_t v)
     return atof(fp64_to_string( y, 15, 2));
 }
 
-#define FIT_ORDER 6
+constexpr auto FIT_ORDER = 6;
 #define FIT64_SIZE (FIT_ORDER+1)
+
+
 class SignalGenerator
 {
     protected:
@@ -40,7 +42,9 @@ class SignalGenerator
         const uint8_t _calibrationtonoffPin;
         AD5254_asukiaaa potentio;
 
-    public:
+        static bool mute;
+        static bool calibration;
+public:
         std::vector<float64_t> fit64;
         void WriteFit64ToEEPROM (void)
         {
@@ -85,6 +89,8 @@ class SignalGenerator
 
         SignalGenerator(): _clkPin(13), _fsyncPin(2), _dataPin(9), _outputonoffPin(28), _calibrationtonoffPin(26), potentio(AD5254_ASUKIAAA_ADDR_A0_GND_A1_GND)
         {
+            UnMute();
+
             ReadFit64FromEEPROM();
 
             potentio.begin();        // start Didital potmeter
@@ -147,38 +153,69 @@ class SignalGenerator
             potentio.writeRDAC(rightChannelOut, output);  //Left
         }
 
-        void UnMute() {
-            pinMode(_outputonoffPin,   OUTPUT);
+        void UnMute() 
+        {
+            DisableMute();
+            DisableCalibration();
+        }
+
+        void Mute() 
+        {
+            EnableMute();
+            DisableCalibration();
+        }
+
+        void CalibrationMode() 
+        {
+            EnableMute();
+            EnableCalibration();
+        }
+
+        void UnmutedCalibrationMode() 
+        {
+            DisableMute();
+            EnableCalibration();
+        }
+
+        void EnableMute()
+        {
+            mute = true;
+            pinMode(_outputonoffPin, OUTPUT);
+            digitalWrite(_outputonoffPin, LOW);
+        }
+
+        void DisableMute()
+        {
+            mute = false;
+            pinMode(_outputonoffPin, OUTPUT);
             digitalWrite(_outputonoffPin, HIGH);
-
-            pinMode(_calibrationtonoffPin,   OUTPUT);
-            digitalWrite(_calibrationtonoffPin, LOW);
         }
 
-        void Mute() {
-            pinMode(_outputonoffPin,   OUTPUT);
-            digitalWrite(_outputonoffPin, LOW);
-
-            pinMode(_calibrationtonoffPin,   OUTPUT);
-            digitalWrite(_calibrationtonoffPin, LOW);
-        }
-
-        void CalibrationMode() {
-            pinMode(_outputonoffPin,   OUTPUT);
-            digitalWrite(_outputonoffPin, LOW);
-
-            pinMode(_calibrationtonoffPin,   OUTPUT);
+        void EnableCalibration()
+        {
+            calibration = true;
+            pinMode(_calibrationtonoffPin, OUTPUT);
             digitalWrite(_calibrationtonoffPin, HIGH);
         }
 
-        void UnmutedCalibrationMode() {
-            pinMode(_outputonoffPin,   OUTPUT);
-            digitalWrite(_outputonoffPin, HIGH);
-
-            pinMode(_calibrationtonoffPin,   OUTPUT);
+        void DisableCalibration()
+        {
+            calibration = false;
+            pinMode(_calibrationtonoffPin, OUTPUT);
             digitalWrite(_calibrationtonoffPin, HIGH);
         }
 
+        static bool GetMute()
+        {
+            return  mute;
+
+        }
+
+        static bool GetCalibration()
+        {
+            return  calibration;
+
+        }
         void ManualOutPut(uint8_t output)
         {
             setFreq(1000, 0); //ATTNUATOR OFF
@@ -210,6 +247,9 @@ class SignalGenerator
             spiSend(f_high | freq);
         }
 };
+bool SignalGenerator::mute = false;
+bool SignalGenerator::calibration = false;
+
 
 
 #include <CircularBuffer.h>
@@ -410,7 +450,7 @@ class dBMeter
             fit64RV45_r[1] = fp64_atof("-2.3465342934877804");
             fit64RV45_r[0] = fp64_atof("82.24086926718981");
         }
-        double GetdB (Measurement &m, double& dBLeft, double& dBRight)
+        double GetdB(Measurement& m, double& dBLeft, double& dBRight)
         {
             m.RV = 45;
             digitalWrite(_inputpregainPin, LOW);
@@ -452,10 +492,43 @@ class dBMeter
                         }
                     }
                     measure_again = false;
-                } else
+                }
+                else
                     measure_again = true;
             } while (measure_again);
         }
+
+
+        //void GetInPut(Measurement& m)
+        //{
+        //    const uint8_t leftChannelIn(2);
+        //    const uint8_t rightChannelIn(3);
+        //    potentio.writeRDAC(leftChannelIn, m.RV);
+        //    potentio.writeRDAC(rightChannelIn, m.RV);
+        //    delay(600);
+
+        //    CircularBuffer<Measurement, CIRCULARBUFFERSIZE> buffer;
+        //    do {
+        //        const int CH1(A0);
+        //        const int CH2(A1);
+        //        m.dBLeft = analogRead(CH1);
+        //        m.dBRight = analogRead(CH2);
+        //        buffer.push(m);
+        //        delay(50);
+        //    } while (!buffer.isFull());
+
+        //    using index_t = decltype(buffer)::index_t;
+        //    float64_t dBLeftSum = fp64_sd(0.0);
+        //    float64_t dBRightSum = fp64_sd(0.0);
+        //    for (index_t i = 0; i < buffer.size(); i++) {
+        //        dBLeftSum = fp64_add(dBLeftSum, fp64_sd(buffer[i].dBLeft));
+        //        dBRightSum = fp64_add(dBRightSum, fp64_sd(buffer[i].dBRight));
+        //    }
+        //    float64_t dBLeftMean = fp64_div(dBLeftSum, fp64_sd(buffer.size()));
+        //    float64_t dBRightMean = fp64_div(dBRightSum, fp64_sd(buffer.size()));
+        //    m.dBLeft = atoi(fp64_to_string( dBLeftMean, 15, 2));
+        //    m.dBRight = atoi(fp64_to_string( dBRightMean, 15, 2));
+        //}
 
         void RVSweep()
         {
@@ -463,7 +536,7 @@ class dBMeter
             lcdhelper.line[0] = "dBMeter RVSweep";
             lcdhelper.Show();
             SignalGenerator signalGenerator;
-            signalGenerator.UnmutedCalibrationMode();
+            signalGenerator.UnmutedCalibrationMode();;
             //std::vector<int> rv{45, 146, 255};
             std::vector<int> rv{45};
             for (std::vector<int>::iterator r = rv.begin(); r != rv.end(); r++) {
@@ -487,7 +560,7 @@ class dBMeter
             lcdhelper.line[0] = "dBMeter Scan";
             lcdhelper.Show();
             SignalGenerator signalGenerator;
-            signalGenerator.UnmutedCalibrationMode();
+            signalGenerator.UnmutedCalibrationMode();;
             int i = 44;
             for (float d = 0.0; d < 32.1; d += .1) {
                 signalGenerator.setFreq(1000.0, d);

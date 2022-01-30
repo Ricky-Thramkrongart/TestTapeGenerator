@@ -1,3 +1,4 @@
+
 // *********************************************************************
 //  Test software for Analyzer
 // *********************************************************************
@@ -39,7 +40,7 @@ class PotentioMeterOutputSelection : public Menu
 class MainMenu : public Menu
 {
     public:
-        MainMenu (): Menu(7) {}
+        MainMenu (): Menu(8) {}
         void FullUpdate() {
             std::string str;
             switch (Current) {
@@ -53,16 +54,19 @@ class MainMenu : public Menu
                     str = "Start Signal Generator";
                     break;
                 case 3:
-                    str = "Output Hardware Calibration";
+                    str = "Start dBMeter";
                     break;
                 case 4:
-                    str = "Output Poly Fit";
+                    str = "Output Hardware Calibration";
                     break;
                 case 5:
-                    str = "Input Hardware Calibration";
+                    str = "Output Poly Fit";
                     break;
                 case 6:
-                    str = "dBMeter Scan";
+                    str = "Input Hardware Calibration";
+                    break;
+                case 7:
+                    str = "dBMeter RV Scan";
                     break;
             }
             char buffer[255];
@@ -144,8 +148,9 @@ void InputHardwareCalibration (void)
 void StartSignalGenerator()
 {
     LCD_Helper lcdhelper;
-    lcdhelper.line[0] = "Reading frequency and dB from Serial Port";
+    lcdhelper.line[0] = "Signal Generator";
     lcdhelper.line[1] = "Format: [float float] 115200 Baud";
+
     lcdhelper.Show();
     Serial.setTimeout(500);
     while (Serial.available() > 0) Serial.read();
@@ -163,6 +168,7 @@ void StartSignalGenerator()
             ms.Target(str.c_str());
             char result = ms.Match ("([-+]?[0-9]*\.?[0-9]+) ([-+]?[0-9]*\.?[0-9]+)");
             char cap[256];
+
             if (result == REGEXP_MATCHED)
             {
                 int index = 0;
@@ -195,6 +201,38 @@ void StartSignalGenerator()
             }
             while (Serial.available() > 0) Serial.read();
         }
+        delay(1000);
+    } while (true);
+
+    lcdhelper.line[0] = "Setting Signal Generator (1000, 5.0)";
+    lcdhelper.Show();
+    delay(60000);
+}
+
+void StartdBMeter()
+{
+    LCD_Helper lcdhelper;
+    lcdhelper.line[0] = "dBMeter";
+    lcdhelper.Show();
+    Serial.println(lcdhelper.line[0].c_str());
+    SignalGenerator().Mute();
+
+    dBMeter dbMeter;
+
+    do {
+        dBMeter::Measurement m;
+        double dBLeft, dBRight;
+        dbMeter.GetdB(m, dBLeft, dBRight);
+        char sz_dBLeft[255];
+        char sz_dBRight[255];
+        dtostrf(dBLeft, 4, 2, sz_dBLeft);
+        dtostrf(dBRight, 4, 2, sz_dBRight);
+
+        char stringbuffer[256];
+        sprintf(stringbuffer, "Measured dB(L/R): %s/%s", sz_dBLeft, sz_dBRight);
+        lcdhelper.line[3] = stringbuffer;
+        lcdhelper.Show();
+        Serial.println(lcdhelper.line[3].c_str());
         delay(1000);
     } while (true);
 
@@ -295,18 +333,21 @@ void setup()
                     StartSignalGenerator();
                     break;
                 case 3:
-                    OutputHardwareCalibration();
+                    StartdBMeter();
                     break;
                 case 4:
-                    SetOutPutFit();
+                    OutputHardwareCalibration();
                     break;
                 case 5:
-                    InputHardwareCalibration();
+                    SetOutPutFit();
                     break;
                 case 6:
+                    InputHardwareCalibration();
+                    break;
+                case 7:
                     dBMeterScan();
                     break;
-                    
+
             };
         }
     } while (1);

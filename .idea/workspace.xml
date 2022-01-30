@@ -1,23 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6d0579eb-ecb0-4bcd-bcab-740ae4d7c280" name="Changes" comment="Research fit for two input channels versus one.&#10;Two channels should be better">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/NewTestTape.h" beforeDir="false" afterPath="$PROJECT_DIR$/TestTapeGenerator/NewTestTape.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/PolyFit3.py" beforeDir="false" afterPath="$PROJECT_DIR$/TestTapeGenerator/PolyFit3.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/SignalGenerator.h" beforeDir="false" afterPath="$PROJECT_DIR$/TestTapeGenerator/SignalGenerator.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/TestTapeGenerator.ino" beforeDir="false" afterPath="$PROJECT_DIR$/TestTapeGenerator/TestTapeGenerator.ino" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_045_l.h" beforeDir="false" afterPath="$PROJECT_DIR$/TestTapeGenerator/rv1_045_l.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_045_m.err" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_045_m.fit" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_045_m.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv1_045_r.h" beforeDir="false" afterPath="$PROJECT_DIR$/TestTapeGenerator/rv1_045_r.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_045_l.h" beforeDir="false" afterPath="$PROJECT_DIR$/TestTapeGenerator/rv2_045_l.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_045_m.err" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_045_m.fit" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_045_m.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestTapeGenerator/rv2_045_r.h" beforeDir="false" afterPath="$PROJECT_DIR$/TestTapeGenerator/rv2_045_r.h" afterDir="false" />
-    </list>
+    <list default="true" id="6d0579eb-ecb0-4bcd-bcab-740ae4d7c280" name="Changes" comment="Implement preamp gain and dual channel" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -94,7 +78,14 @@
       <option name="project" value="LOCAL" />
       <updated>1643432334354</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Research fit for two input channels versus one.&#10;Two channels should be better">
+      <created>1643436379131</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1643436379131</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -121,6 +112,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Research fit for two input channels versus one.&#10;Two channels should be better" />
-    <option name="LAST_COMMIT_MESSAGE" value="Research fit for two input channels versus one.&#10;Two channels should be better" />
+    <MESSAGE value="Implement preamp gain and dual channel" />
+    <option name="LAST_COMMIT_MESSAGE" value="Implement preamp gain and dual channel" />
   </component>
 </project>
