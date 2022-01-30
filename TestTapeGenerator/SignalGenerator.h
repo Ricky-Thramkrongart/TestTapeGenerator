@@ -288,12 +288,12 @@ public:
         struct Measurement {
             bool IsSaturated(void) {
                 const uint16_t Saturation = 1023;
-                if (dBLeft == Saturation || dBRight >= Saturation)
+                if (RawLeft == Saturation || RawRight >= Saturation)
                     return true;
                 return false;
             }
             bool HasNull(void) {
-                if (dBLeft == 0 || dBRight == 0)
+                if (RawLeft == 0 || RawRight == 0)
                     return true;
                 return false;
             }
@@ -305,22 +305,26 @@ public:
                 char sz_dB[8];
                 dtostrf(dB, 4, 2, sz_dB);
 
-                int bitsLeft = ceil(log(dBLeft) / log(2));
-                int bitsRight = ceil(log(dBRight) / log(2));
-                sprintf(stringbuffer, "RV:%i dB:%s Left:%i Right:%i Bits (L/R): %i/%i " , RV, sz_dB, dBLeft, dBRight, bitsLeft, bitsRight);
+                int bitsLeft = ceil(log(RawLeft) / log(2));
+                int bitsRight = ceil(log(RawRight) / log(2));
+                sprintf(stringbuffer, "RV:%i Raw:%s Left:%i Right:%i Bits (L/R): %i/%i " , RV, sz_dB, RawLeft, RawRight, bitsLeft, bitsRight);
                 return stringbuffer;
             }
             std::string ToStringData() {
                 char stringbuffer[255];
                 char sz_dB[8];
                 dtostrf(dB, 4, 2, sz_dB);
-                sprintf(stringbuffer, "%i,%s,%i,%i" , RV, sz_dB, dBLeft, dBRight);
+                sprintf(stringbuffer, "%i,%s,%i,%i" , RV, sz_dB, RawLeft, RawRight);
                 return stringbuffer;
             }
             double dB;
             uint8_t RV;
-            uint16_t dBLeft;
-            uint16_t dBRight;
+            uint16_t RawLeft;
+            uint16_t RawRight;
+            bool RawLeftGain;
+            bool RawRightGain;
+            double dBLeft;
+            double dBRight;
         };
         // for chip info see https://www.analog.com/en/products/ad9833.html
         // SPI code taken from https://github.com/MajicDesigns/MD_AD9833/
@@ -477,16 +481,29 @@ public:
             m.RV = 45;
             inputpregainRelay.Disable();
             GetRawInputType GetRawInput = System::GetCalibration() ? &GetRawInputInternal : &GetRawInputExternal;
+            m.RawLeftGain = false;
+            m.RawRightGain = false;
             (this->*GetRawInput)(m);
-            dBLeft = PolyVal(fit64RV45_l, m.dBLeft);
-            dBRight = PolyVal(fit64RV45_r, m.dBRight);
-            if (dBLeft > 28 && dBRight > 28) {
+            m.dBLeft = PolyVal(fit64RV45_l, m.RawLeft);
+            m.dBRight = PolyVal(fit64RV45_r, m.RawRight);
+            if (m.dBLeft > 28 || m.dBRight > 28) {
                 inputpregainRelay.Enable();
-                (this->*GetRawInput)(m);
-                dBLeft = PolyVal(fit64RV45_l, m.dBLeft) + 12.0;
-                dBRight = PolyVal(fit64RV45_r, m.dBRight) + 12.0;
+                Measurement n(m);
+                (this->*GetRawInput)(n);
+                if (m.dBLeft > 28) {
+                    m.RawLeftGain = true;
+                    m.RawLeft = n.RawLeft;
+                    m.dBLeft = PolyVal(fit64RV45_l, m.RawLeft) + 12.0;
+                }
+                if (m.dBRight > 28) {
+                    m.RawRightGain = true;
+                    m.RawRight = n.RawLeft;
+                    m.dBRight = PolyVal(fit64RV45_r, m.RawRight) + 12.0;
+                }
                 inputpregainRelay.Disable();
             }
+            dBLeft = m.dBLeft;
+            dBRight = m.dBRight;
         }
 
         void GetRawInputInternal(Measurement& m)
@@ -501,15 +518,15 @@ public:
             do {
                 const int CH1(A0);
                 const int CH2(A1);
-                m.dBLeft = analogRead(CH1);
-                m.dBRight = analogRead(CH2);
+                m.RawLeft = analogRead(CH1);
+                m.RawRight = analogRead(CH2);
                 buffer.push(m);
                 delay(50);
 
                 if (buffer.isFull()) {
                     using index_t = decltype(buffer)::index_t;
                     for (index_t i = 0; i < buffer.size(); i++) {
-                        if (buffer[0].dBLeft != buffer[i].dBLeft || buffer[0].dBRight != buffer[i].dBRight) {
+                        if (buffer[0].RawLeft != buffer[i].RawLeft || buffer[0].RawRight != buffer[i].RawRight) {
                             measure_again = true;
                             break;
                         }
@@ -533,8 +550,8 @@ public:
             do {
                 const int CH1(A0);
                 const int CH2(A1);
-                m.dBLeft = analogRead(CH1);
-                m.dBRight = analogRead(CH2);
+                m.RawLeft = analogRead(CH1);
+                m.RawRight = analogRead(CH2);
                 buffer.push(m);
                 delay(50);
             } while (!buffer.isFull());
@@ -543,13 +560,13 @@ public:
             float64_t dBLeftSum = fp64_sd(0.0);
             float64_t dBRightSum = fp64_sd(0.0);
             for (index_t i = 0; i < buffer.size(); i++) {
-                dBLeftSum = fp64_add(dBLeftSum, fp64_sd(buffer[i].dBLeft));
-                dBRightSum = fp64_add(dBRightSum, fp64_sd(buffer[i].dBRight));
+                dBLeftSum = fp64_add(dBLeftSum, fp64_sd(buffer[i].RawLeft));
+                dBRightSum = fp64_add(dBRightSum, fp64_sd(buffer[i].RawRight));
             }
             float64_t dBLeftMean = fp64_div(dBLeftSum, fp64_sd(buffer.size()));
             float64_t dBRightMean = fp64_div(dBRightSum, fp64_sd(buffer.size()));
-            m.dBLeft = atoi(fp64_to_string( dBLeftMean, 15, 2));
-            m.dBRight = atoi(fp64_to_string( dBRightMean, 15, 2));
+            m.RawLeft = atoi(fp64_to_string( dBLeftMean, 15, 2));
+            m.RawRight = atoi(fp64_to_string( dBRightMean, 15, 2));
         }
 
         void RVSweep()
