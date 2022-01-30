@@ -13,6 +13,9 @@
 
 class Relay
 {
+private:
+    Relay(const Relay&) = delete;
+    Relay& operator=(const Relay&) = delete;
 protected:
     bool enabled;
     const uint8_t pin;
@@ -45,6 +48,9 @@ public:
 
 class System
 {
+private:
+    System(const System&) = delete;
+    System& operator=(const System&) = delete;
 protected:
     static Relay muteRelay;
     static Relay calibrationRelay;
@@ -106,7 +112,10 @@ constexpr auto FIT_ORDER = 6;
 
 class SignalGenerator
 {
-    protected:
+private:
+    SignalGenerator(const SignalGenerator&) = delete;
+    SignalGenerator& operator=(const SignalGenerator&) = delete;
+protected:
         // for chip info see https://www.analog.com/en/products/ad9833.html
         // SPI code taken from https://github.com/MajicDesigns/MD_AD9833/
         static constexpr auto _clkPin = 13;
@@ -262,7 +271,11 @@ public:
 
 class dBMeter
 {
-    public:
+private:
+    dBMeter(const dBMeter&) = delete;
+    dBMeter& operator=(const dBMeter&) = delete;
+
+public:
         struct Measurement {
             bool IsSaturated(void) {
                 const uint16_t Saturation = 1023;

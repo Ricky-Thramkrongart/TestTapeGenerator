@@ -8,7 +8,7 @@ void selftest()
     lcdhelper.line[0] = "Self Test";
     lcdhelper.Show();
     Serial.println(lcdhelper.line[0].c_str());
-    byte devices[] = {0x25 /*Disp*/, 0x2C/*DATT*/, 0x50/*EEPROM*/, 0x68/*RTC*/};
+    byte devices[] = { 0x25 /*Disp*/, 0x2C/*DATT*/, 0x50/*EEPROM*/, 0x68/*RTC*/ };
     for (int i = 0; i != sizeof(devices) / sizeof(byte); i++)
     {
         Wire.begin();
@@ -32,8 +32,8 @@ void selftest()
     SignalGenerator signalGenerator;
     System::UnmutedCalibrationMode();
     dBMeter dbMeter;
-    std::vector<double> freqTest{300, 1000, 10000, 20000.0, 25000.0};
-    std::vector<double> dbTest{0.0, 5.0, 10.0, 25.0, 30.0};
+    std::vector<double> freqTest{ 300, 1000, 10000, 20000.0, 25000.0 };
+    std::vector<double> dbTest{ 0.0, 5.0, 10.0, 25.0, 30.0 };
     for (std::vector<double>::iterator f = freqTest.begin(); f != freqTest.end(); f++) {
         for (std::vector<double>::iterator d = dbTest.begin(); d != dbTest.end(); d++) {
             signalGenerator.setFreq(*f, *d);
