@@ -302,7 +302,7 @@ class dBMeter
         };
         // for chip info see https://www.analog.com/en/products/ad9833.html
         // SPI code taken from https://github.com/MajicDesigns/MD_AD9833/
-        const uint8_t _inputpregainPin;
+        static Relay inputpregainRelay;
         AD5254_asukiaaa potentio;
         I2C_eeprom i2C_eeprom;
         static std::vector<float64_t> fit64RV45_l;
@@ -352,15 +352,12 @@ class dBMeter
             return atoi(fp64_to_string( rv, 15, 2));
         }
 
-        dBMeter(): _inputpregainPin(30), potentio(AD5254_ASUKIAAA_ADDR_A0_GND_A1_GND), i2C_eeprom(0x50, I2C_DEVICESIZE_24LC512)
-
+        dBMeter():potentio(AD5254_ASUKIAAA_ADDR_A0_GND_A1_GND), i2C_eeprom(0x50, I2C_DEVICESIZE_24LC512)
         {
-            potentio.begin();        // start Didital potmeter
+            potentio.begin();
+            inputpregainRelay.Disable();
 
-            pinMode(_inputpregainPin,   OUTPUT);
-            digitalWrite(_inputpregainPin, LOW);
-
-
+            //Determine Device
             if (fit64RV45_l.empty() || fit64RV45_r.empty()) {
                 Device2();
                 SignalGenerator signalGenerator;
@@ -377,7 +374,6 @@ class dBMeter
         }
         ~dBMeter()
         {
-            //Mute Output
         }
 
         void Device1(void) {
@@ -457,17 +453,17 @@ class dBMeter
         double GetdB(Measurement& m, double& dBLeft, double& dBRight)
         {
             m.RV = 45;
-            digitalWrite(_inputpregainPin, LOW);
+            inputpregainRelay.Disable();
             GetRawInputType GetRawInput = System::GetCalibration() ? &GetRawInputInternal : &GetRawInputExternal;
             (this->*GetRawInput)(m);
             dBLeft = PolyVal(fit64RV45_l, m.dBLeft);
             dBRight = PolyVal(fit64RV45_r, m.dBRight);
             if (dBLeft > 28 || dBRight > 28) {
-                digitalWrite(_inputpregainPin, HIGH);
+                inputpregainRelay.Enable();
                 (this->*GetRawInput)(m);
                 dBLeft = PolyVal(fit64RV45_l, m.dBLeft) + 12.0;
                 dBRight = PolyVal(fit64RV45_r, m.dBRight) + 12.0;
-                digitalWrite(_inputpregainPin, LOW);
+				inputpregainRelay.Disable();
             }
         }
 
@@ -588,6 +584,7 @@ class dBMeter
             Serial.println("Finished");
         }
 };
+Relay dBMeter::inputpregainRelay(Relay(30));
 
 std::vector<float64_t> dBMeter::fit64RV45_l;
 std::vector<float64_t> dBMeter::fit64RV45_r;
