@@ -14,11 +14,12 @@
 class Relay
 {
 protected:
-    static bool enabled;
+    bool enabled;
     const uint8_t pin;
+    bool reverse;
 
 public:
-    Relay(const uint8_t pin_) : pin(pin_)
+    Relay(const uint8_t pin_, bool reverse_ = false) : pin(pin_), reverse(reverse_)
     {
         pinMode(pin, OUTPUT);
     }
@@ -26,18 +27,18 @@ public:
 	void Enable(void)
     {
         enabled = true;
-        digitalWrite(pin, LOW);
+		digitalWrite(pin, reverse ? LOW : HIGH);
     }
 
     void Disable(void)
     {
-        enabled = true;
-        digitalWrite(pin, HIGH);
-    }
+        enabled = false;
+		digitalWrite(pin, reverse ? HIGH : LOW);
+	}
 
-    bool IsEnable(void) 
+    bool IsEnabled(void) 
     {
-        return enabled;
+        return reverse ? !enabled : enabled;
     }
 };
 
@@ -45,99 +46,44 @@ public:
 class System
 {
 protected:
-    static bool mute;
-    static bool calibration;
-    static constexpr auto _outputonoffPin = 28;
-    static constexpr auto _calibrationtonoffPin = 26;
+    static Relay muteRelay;
+    static Relay calibrationRelay;
 public:
-    System()
-    {
-    }
     static void UnMute()
     {
-        DisableMute();
-        DisableCalibration();
+        muteRelay.Disable();
+        calibrationRelay.Disable();
     }
 
     static void Mute()
     {
-        EnableMute();
-        DisableCalibration();
+        muteRelay.Enable();
+        calibrationRelay.Disable();
     }
-
-    static void SetupCalibrationPin()
-    {
-        static bool run = true;
-        if (run) {
-            run = false;
-            pinMode(_calibrationtonoffPin, OUTPUT);
-        }
-    }
-
 
     static void CalibrationMode()
     {
-        EnableMute();
-        EnableCalibration();
+        muteRelay.Enable();
+        calibrationRelay.Enable();
     }
 
     static void UnmutedCalibrationMode()
     {
-        DisableMute();
-        EnableCalibration();
-    }
-
-    static void SetupMutePin()
-    {
-        static bool run = true;
-        if (run) {
-            run = false;
-            pinMode(_outputonoffPin, OUTPUT);
-        }
-    }
-
-    static void EnableMute()
-    {
-        mute = true;
-        SetupMutePin();
-        digitalWrite(_outputonoffPin, LOW);
-    }
-
-    static void DisableMute()
-    {
-        mute = false;
-        SetupMutePin();
-        digitalWrite(_outputonoffPin, HIGH);
-    }
-
-    static void EnableCalibration()
-    {
-        calibration = true;
-        SetupCalibrationPin();
-        digitalWrite(_calibrationtonoffPin, HIGH);
-    }
-
-    static void DisableCalibration()
-    {
-        calibration = false;
-        SetupCalibrationPin();
-        digitalWrite(_calibrationtonoffPin, LOW);
-    }
-
-    static bool GetMute()
-    {
-        return  mute;
-
+        muteRelay.Disable();
+        calibrationRelay.Enable();
     }
 
     static bool GetCalibration()
     {
-        return  calibration;
-
+        return  calibrationRelay.IsEnabled();
+    }
+    static bool GetMute()
+    {
+        return  muteRelay.IsEnabled();
     }
 };
-bool System::mute = false;
-bool System::calibration = false;
+Relay System::muteRelay(Relay(28, true));
+Relay System::calibrationRelay(Relay(26));
 
 double PolyVal (const std::vector <float64_t>&fit64, uint16_t v)
 {
