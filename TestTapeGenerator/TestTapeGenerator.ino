@@ -158,7 +158,7 @@ void StartSignalGenerator()
     Serial.println(lcdhelper.line[0].c_str());
     Serial.println(lcdhelper.line[1].c_str());
     SignalGenerator signalGenerator;
-    signalGenerator.UnMute();
+    System::UnMute();
     dBMeter dbMeter;
 
     do {
@@ -215,7 +215,7 @@ void StartdBMeter()
     lcdhelper.line[0] = "dBMeter";
     lcdhelper.Show();
     Serial.println(lcdhelper.line[0].c_str());
-    SignalGenerator().Mute();
+    System::Mute();
 
     dBMeter dbMeter;
 

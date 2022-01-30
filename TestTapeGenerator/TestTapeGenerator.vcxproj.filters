@@ -36,18 +36,6 @@
     <ClInclude Include="Printer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="rv1_045_l.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rv1_045_r.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rv2_045_l.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rv2_045_r.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="SelfTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>

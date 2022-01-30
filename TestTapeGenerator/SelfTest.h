@@ -30,7 +30,7 @@ void selftest()
     Serial.println(lcdhelper.line[2].c_str());
 
     SignalGenerator signalGenerator;
-    signalGenerator.UnmutedCalibrationMode();
+    System::UnmutedCalibrationMode();
     dBMeter dbMeter;
     std::vector<double> freqTest{300, 1000, 10000, 20000.0, 25000.0};
     std::vector<double> dbTest{0.0, 5.0, 10.0, 25.0, 30.0};

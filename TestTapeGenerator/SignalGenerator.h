@@ -11,6 +11,103 @@
 #include <I2C_eeprom.h>
 
 
+class System
+{
+protected:
+    static bool mute;
+    static bool calibration;
+    static constexpr auto _outputonoffPin = 28;
+    static constexpr auto _calibrationtonoffPin = 26;
+public:
+    System()
+    {
+    }
+    static void UnMute()
+    {
+        DisableMute();
+        DisableCalibration();
+    }
+
+    static void Mute()
+    {
+        EnableMute();
+        DisableCalibration();
+    }
+
+    static void SetupCalibrationPin()
+    {
+        static bool run = true;
+        if (run) {
+            run = false;
+            pinMode(_calibrationtonoffPin, OUTPUT);
+        }
+    }
+
+
+    static void CalibrationMode()
+    {
+        EnableMute();
+        EnableCalibration();
+    }
+
+    static void UnmutedCalibrationMode()
+    {
+        DisableMute();
+        EnableCalibration();
+    }
+
+    static void SetupMutePin()
+    {
+        static bool run = true;
+        if (run) {
+            run = false;
+            pinMode(_outputonoffPin, OUTPUT);
+        }
+    }
+
+    static void EnableMute()
+    {
+        mute = true;
+        SetupMutePin();
+        digitalWrite(_outputonoffPin, LOW);
+    }
+
+    static void DisableMute()
+    {
+        mute = false;
+        SetupMutePin();
+        digitalWrite(_outputonoffPin, HIGH);
+    }
+
+    static void EnableCalibration()
+    {
+        calibration = true;
+        SetupCalibrationPin();
+        digitalWrite(_calibrationtonoffPin, HIGH);
+    }
+
+    static void DisableCalibration()
+    {
+        calibration = false;
+        SetupCalibrationPin();
+        digitalWrite(_calibrationtonoffPin, LOW);
+    }
+
+    static bool GetMute()
+    {
+        return  mute;
+
+    }
+
+    static bool GetCalibration()
+    {
+        return  calibration;
+
+    }
+};
+bool System::mute = false;
+bool System::calibration = false;
+
 double PolyVal (const std::vector <float64_t>&fit64, uint16_t v)
 {
     float64_t x = fp64_sd(v);
@@ -35,15 +132,11 @@ class SignalGenerator
     protected:
         // for chip info see https://www.analog.com/en/products/ad9833.html
         // SPI code taken from https://github.com/MajicDesigns/MD_AD9833/
-        const uint8_t _clkPin;
-        const uint8_t _fsyncPin;
-        const uint8_t _dataPin;
-        const uint8_t _outputonoffPin;
-        const uint8_t _calibrationtonoffPin;
+        static constexpr auto _clkPin = 13;
+        static constexpr auto _fsyncPin = 2;
+        static constexpr auto _dataPin = 9;
         AD5254_asukiaaa potentio;
 
-        static bool mute;
-        static bool calibration;
 public:
         std::vector<float64_t> fit64;
         void WriteFit64ToEEPROM (void)
@@ -87,9 +180,9 @@ public:
             return atoi(fp64_to_string( rv, 15, 2));
         }
 
-        SignalGenerator(): _clkPin(13), _fsyncPin(2), _dataPin(9), _outputonoffPin(28), _calibrationtonoffPin(26), potentio(AD5254_ASUKIAAA_ADDR_A0_GND_A1_GND)
+        SignalGenerator(): potentio(AD5254_ASUKIAAA_ADDR_A0_GND_A1_GND)
         {
-            UnMute();
+            System::UnMute();
 
             ReadFit64FromEEPROM();
 
@@ -153,74 +246,11 @@ public:
             potentio.writeRDAC(rightChannelOut, output);  //Left
         }
 
-        void UnMute() 
-        {
-            DisableMute();
-            DisableCalibration();
-        }
-
-        void Mute() 
-        {
-            EnableMute();
-            DisableCalibration();
-        }
-
-        void CalibrationMode() 
-        {
-            EnableMute();
-            EnableCalibration();
-        }
-
-        void UnmutedCalibrationMode() 
-        {
-            DisableMute();
-            EnableCalibration();
-        }
-
-        void EnableMute()
-        {
-            mute = true;
-            pinMode(_outputonoffPin, OUTPUT);
-            digitalWrite(_outputonoffPin, LOW);
-        }
-
-        void DisableMute()
-        {
-            mute = false;
-            pinMode(_outputonoffPin, OUTPUT);
-            digitalWrite(_outputonoffPin, HIGH);
-        }
-
-        void EnableCalibration()
-        {
-            calibration = true;
-            pinMode(_calibrationtonoffPin, OUTPUT);
-            digitalWrite(_calibrationtonoffPin, HIGH);
-        }
-
-        void DisableCalibration()
-        {
-            calibration = false;
-            pinMode(_calibrationtonoffPin, OUTPUT);
-            digitalWrite(_calibrationtonoffPin, HIGH);
-        }
-
-        static bool GetMute()
-        {
-            return  mute;
-
-        }
-
-        static bool GetCalibration()
-        {
-            return  calibration;
-
-        }
         void ManualOutPut(uint8_t output)
         {
             setFreq(1000, 0); //ATTNUATOR OFF
 
-            UnMute();
+            System::UnMute();
 
             const uint8_t leftChannelOut(0);
             const uint8_t rightChannelOut(1);
@@ -247,8 +277,6 @@ public:
             spiSend(f_high | freq);
         }
 };
-bool SignalGenerator::mute = false;
-bool SignalGenerator::calibration = false;
 
 
 
@@ -298,7 +326,6 @@ class dBMeter
         // for chip info see https://www.analog.com/en/products/ad9833.html
         // SPI code taken from https://github.com/MajicDesigns/MD_AD9833/
         const uint8_t _inputpregainPin;
-        const uint8_t _calmodePin;
         AD5254_asukiaaa potentio;
         I2C_eeprom i2C_eeprom;
         static std::vector<float64_t> fit64RV45_l;
@@ -348,7 +375,7 @@ class dBMeter
             return atoi(fp64_to_string( rv, 15, 2));
         }
 
-        dBMeter(): _inputpregainPin(30), _calmodePin(26), potentio(AD5254_ASUKIAAA_ADDR_A0_GND_A1_GND), i2C_eeprom(0x50, I2C_DEVICESIZE_24LC512)
+        dBMeter(): _inputpregainPin(30), potentio(AD5254_ASUKIAAA_ADDR_A0_GND_A1_GND), i2C_eeprom(0x50, I2C_DEVICESIZE_24LC512)
 
         {
             potentio.begin();        // start Didital potmeter
@@ -356,13 +383,11 @@ class dBMeter
             pinMode(_inputpregainPin,   OUTPUT);
             digitalWrite(_inputpregainPin, LOW);
 
-            pinMode(_calmodePin,   OUTPUT);
-            digitalWrite(_calmodePin, HIGH);
 
             if (fit64RV45_l.empty() || fit64RV45_r.empty()) {
                 Device2();
                 SignalGenerator signalGenerator;
-                signalGenerator.UnmutedCalibrationMode();
+                System::UnmutedCalibrationMode();
                 double dB = 0.0;
                 signalGenerator.setFreq(1000, dB);
                 Measurement m(dB, 45);
@@ -536,7 +561,7 @@ class dBMeter
             lcdhelper.line[0] = "dBMeter RVSweep";
             lcdhelper.Show();
             SignalGenerator signalGenerator;
-            signalGenerator.UnmutedCalibrationMode();;
+            System::UnmutedCalibrationMode();;
             //std::vector<int> rv{45, 146, 255};
             std::vector<int> rv{45};
             for (std::vector<int>::iterator r = rv.begin(); r != rv.end(); r++) {
@@ -560,7 +585,7 @@ class dBMeter
             lcdhelper.line[0] = "dBMeter Scan";
             lcdhelper.Show();
             SignalGenerator signalGenerator;
-            signalGenerator.UnmutedCalibrationMode();;
+            System::UnmutedCalibrationMode();;
             int i = 44;
             for (float d = 0.0; d < 32.1; d += .1) {
                 signalGenerator.setFreq(1000.0, d);

@@ -119,18 +119,6 @@
     <ClInclude Include="Printer.h">
       <FileType>CppCode</FileType>
     </ClInclude>
-    <ClInclude Include="rv1_045_l.h">
-      <FileType>CppCode</FileType>
-    </ClInclude>
-    <ClInclude Include="rv1_045_r.h">
-      <FileType>CppCode</FileType>
-    </ClInclude>
-    <ClInclude Include="rv2_045_l.h">
-      <FileType>CppCode</FileType>
-    </ClInclude>
-    <ClInclude Include="rv2_045_r.h">
-      <FileType>CppCode</FileType>
-    </ClInclude>
     <ClInclude Include="SelfTest.h">
       <FileType>CppCode</FileType>
     </ClInclude>
