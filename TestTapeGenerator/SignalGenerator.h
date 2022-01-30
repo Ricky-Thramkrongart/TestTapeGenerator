@@ -508,10 +508,14 @@ public:
 
         void GetRawInputInternal(Measurement& m)
         {
-            const uint8_t leftChannelIn(2);
-            const uint8_t rightChannelIn(3);
-            potentio.writeRDAC(leftChannelIn, m.RV);
-            potentio.writeRDAC(rightChannelIn, m.RV);
+            static uint8_t rv = 0;
+            if (rv != m.RV) {
+                rv = m.RV;
+                const uint8_t leftChannelIn(2);
+                const uint8_t rightChannelIn(3);
+                potentio.writeRDAC(leftChannelIn, rv);
+                potentio.writeRDAC(rightChannelIn, rv);
+            }
 
             bool measure_again;
             CircularBuffer<Measurement, CIRCULARBUFFERSIZE> buffer;
@@ -540,11 +544,15 @@ public:
 
         void GetRawInputExternal(Measurement& m)
         {
-            const uint8_t leftChannelIn(2);
-            const uint8_t rightChannelIn(3);
-            potentio.writeRDAC(leftChannelIn, m.RV);
-            potentio.writeRDAC(rightChannelIn, m.RV);
-            delay(600);
+            static uint8_t rv = 0;
+            if (rv != m.RV) {
+                rv = m.RV;
+                const uint8_t leftChannelIn(2);
+                const uint8_t rightChannelIn(3);
+                potentio.writeRDAC(leftChannelIn, rv);
+                potentio.writeRDAC(rightChannelIn, rv);
+                delay(600);
+            }
 
             CircularBuffer<Measurement, CIRCULARBUFFERSIZE> buffer;
             do {
