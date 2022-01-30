@@ -20,23 +20,32 @@ protected:
     bool enabled;
     const uint8_t pin;
     bool reverse;
+    const uint8_t relay_delay;
 
 public:
-    Relay(const uint8_t pin_, bool reverse_ = false) : pin(pin_), reverse(reverse_)
+    Relay(const uint8_t pin_, bool reverse_ = false, const uint8_t relay_delay_ = 100) : pin(pin_), reverse(reverse_), relay_delay(relay_delay_)
     {
         pinMode(pin, OUTPUT);
+        enabled = true;
+        digitalWrite(pin, reverse ? LOW : HIGH);
     }
 
 	void Enable(void)
     {
-        enabled = true;
-		digitalWrite(pin, reverse ? LOW : HIGH);
+        if (!enabled) {
+            enabled = true;
+            digitalWrite(pin, reverse ? LOW : HIGH);
+            delay(relay_delay);
+        }
     }
 
     void Disable(void)
     {
-        enabled = false;
-		digitalWrite(pin, reverse ? HIGH : LOW);
+        if (enabled) {
+            enabled = false;
+            digitalWrite(pin, reverse ? HIGH : LOW);
+            delay(relay_delay);
+        }
 	}
 
     bool IsEnabled(void) 
@@ -476,7 +485,7 @@ public:
                 (this->*GetRawInput)(m);
                 dBLeft = PolyVal(fit64RV45_l, m.dBLeft) + 12.0;
                 dBRight = PolyVal(fit64RV45_r, m.dBRight) + 12.0;
-				inputpregainRelay.Disable();
+                inputpregainRelay.Disable();
             }
         }
 
