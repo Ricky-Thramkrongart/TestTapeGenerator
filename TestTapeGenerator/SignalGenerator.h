@@ -471,7 +471,7 @@ public:
             (this->*GetRawInput)(m);
             dBLeft = PolyVal(fit64RV45_l, m.dBLeft);
             dBRight = PolyVal(fit64RV45_r, m.dBRight);
-            if (dBLeft > 28 || dBRight > 28) {
+            if (dBLeft > 28 && dBRight > 28) {
                 inputpregainRelay.Enable();
                 (this->*GetRawInput)(m);
                 dBLeft = PolyVal(fit64RV45_l, m.dBLeft) + 12.0;
