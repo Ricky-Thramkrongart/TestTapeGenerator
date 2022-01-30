@@ -11,6 +11,37 @@
 #include <I2C_eeprom.h>
 
 
+class Relay
+{
+protected:
+    static bool enabled;
+    const uint8_t pin;
+
+public:
+    Relay(const uint8_t pin_) : pin(pin_)
+    {
+        pinMode(pin, OUTPUT);
+    }
+
+	void Enable(void)
+    {
+        enabled = true;
+        digitalWrite(pin, LOW);
+    }
+
+    void Disable(void)
+    {
+        enabled = true;
+        digitalWrite(pin, HIGH);
+    }
+
+    bool IsEnable(void) 
+    {
+        return enabled;
+    }
+};
+
+
 class System
 {
 protected:
@@ -475,23 +506,26 @@ class dBMeter
             fit64RV45_r[1] = fp64_atof("-2.3465342934877804");
             fit64RV45_r[0] = fp64_atof("82.24086926718981");
         }
+
+        typedef void (dBMeter::* GetRawInputType)(Measurement&);      
         double GetdB(Measurement& m, double& dBLeft, double& dBRight)
         {
             m.RV = 45;
             digitalWrite(_inputpregainPin, LOW);
-            GetInPut(m);
+            GetRawInputType GetRawInput = System::GetCalibration() ? &GetRawInputInternal : &GetRawInputExternal;
+            (this->*GetRawInput)(m);
             dBLeft = PolyVal(fit64RV45_l, m.dBLeft);
             dBRight = PolyVal(fit64RV45_r, m.dBRight);
             if (dBLeft > 28 || dBRight > 28) {
                 digitalWrite(_inputpregainPin, HIGH);
-                GetInPut(m);
+                (this->*GetRawInput)(m);
                 dBLeft = PolyVal(fit64RV45_l, m.dBLeft) + 12.0;
                 dBRight = PolyVal(fit64RV45_r, m.dBRight) + 12.0;
                 digitalWrite(_inputpregainPin, LOW);
             }
         }
 
-        void GetInPut(Measurement& m)
+        void GetRawInputInternal(Measurement& m)
         {
             const uint8_t leftChannelIn(2);
             const uint8_t rightChannelIn(3);
@@ -523,37 +557,36 @@ class dBMeter
             } while (measure_again);
         }
 
+        void GetRawInputExternal(Measurement& m)
+        {
+            const uint8_t leftChannelIn(2);
+            const uint8_t rightChannelIn(3);
+            potentio.writeRDAC(leftChannelIn, m.RV);
+            potentio.writeRDAC(rightChannelIn, m.RV);
+            delay(600);
 
-        //void GetInPut(Measurement& m)
-        //{
-        //    const uint8_t leftChannelIn(2);
-        //    const uint8_t rightChannelIn(3);
-        //    potentio.writeRDAC(leftChannelIn, m.RV);
-        //    potentio.writeRDAC(rightChannelIn, m.RV);
-        //    delay(600);
+            CircularBuffer<Measurement, CIRCULARBUFFERSIZE> buffer;
+            do {
+                const int CH1(A0);
+                const int CH2(A1);
+                m.dBLeft = analogRead(CH1);
+                m.dBRight = analogRead(CH2);
+                buffer.push(m);
+                delay(50);
+            } while (!buffer.isFull());
 
-        //    CircularBuffer<Measurement, CIRCULARBUFFERSIZE> buffer;
-        //    do {
-        //        const int CH1(A0);
-        //        const int CH2(A1);
-        //        m.dBLeft = analogRead(CH1);
-        //        m.dBRight = analogRead(CH2);
-        //        buffer.push(m);
-        //        delay(50);
-        //    } while (!buffer.isFull());
-
-        //    using index_t = decltype(buffer)::index_t;
-        //    float64_t dBLeftSum = fp64_sd(0.0);
-        //    float64_t dBRightSum = fp64_sd(0.0);
-        //    for (index_t i = 0; i < buffer.size(); i++) {
-        //        dBLeftSum = fp64_add(dBLeftSum, fp64_sd(buffer[i].dBLeft));
-        //        dBRightSum = fp64_add(dBRightSum, fp64_sd(buffer[i].dBRight));
-        //    }
-        //    float64_t dBLeftMean = fp64_div(dBLeftSum, fp64_sd(buffer.size()));
-        //    float64_t dBRightMean = fp64_div(dBRightSum, fp64_sd(buffer.size()));
-        //    m.dBLeft = atoi(fp64_to_string( dBLeftMean, 15, 2));
-        //    m.dBRight = atoi(fp64_to_string( dBRightMean, 15, 2));
-        //}
+            using index_t = decltype(buffer)::index_t;
+            float64_t dBLeftSum = fp64_sd(0.0);
+            float64_t dBRightSum = fp64_sd(0.0);
+            for (index_t i = 0; i < buffer.size(); i++) {
+                dBLeftSum = fp64_add(dBLeftSum, fp64_sd(buffer[i].dBLeft));
+                dBRightSum = fp64_add(dBRightSum, fp64_sd(buffer[i].dBRight));
+            }
+            float64_t dBLeftMean = fp64_div(dBLeftSum, fp64_sd(buffer.size()));
+            float64_t dBRightMean = fp64_div(dBRightSum, fp64_sd(buffer.size()));
+            m.dBLeft = atoi(fp64_to_string( dBLeftMean, 15, 2));
+            m.dBRight = atoi(fp64_to_string( dBRightMean, 15, 2));
+        }
 
         void RVSweep()
         {
@@ -568,7 +601,7 @@ class dBMeter
                 for (float d = 0.0; d < 32.1; d += 0.05) {
                     signalGenerator.setFreq(1000.0, d);
                     Measurement m(d, *r);
-                    GetInPut(m);
+                    GetRawInputInternal(m);
                     lcdhelper.lcd.setCursor(0, 0);
                     lcdhelper.lcd.print(m.ToString().c_str());
                     Beep();
@@ -590,12 +623,12 @@ class dBMeter
             for (float d = 0.0; d < 32.1; d += .1) {
                 signalGenerator.setFreq(1000.0, d);
                 Measurement next(d, i);
-                GetInPut(next);
+                GetRawInputInternal(next);
                 Measurement prev(next);
                 while (next.RV != 255 && !next.IsSaturated()) {
                     prev = next;
                     next.RV += 1;
-                    GetInPut(next);
+                    GetRawInputInternal(next);
                 };
                 Measurement unSaturated(prev);
                 if (!next.IsSaturated()) {
