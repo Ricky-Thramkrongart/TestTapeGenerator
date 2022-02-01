@@ -1,5 +1,4 @@
-#ifndef TAPEINFO_H
-#define TAPEINFO_H
+#pragma once
 
 #include <ArduinoSTL.h>
 
@@ -346,5 +345,3 @@ TapeInfo::Tapes& operator--(TapeInfo::Tapes& t, int)
     }
     return t;
 }
-
-#endif // TAPEINFO_H

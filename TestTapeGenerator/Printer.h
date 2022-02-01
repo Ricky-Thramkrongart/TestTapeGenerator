@@ -1,5 +1,4 @@
-#ifndef PRINTER_H
-#define PRINTER_H
+#pragma once
 
 #include "adaqrcode.h"
 #include <Adafruit_Thermal.h>
@@ -62,5 +61,3 @@ public:
         }
     }
 };
-
-#endif // PRINTER_H

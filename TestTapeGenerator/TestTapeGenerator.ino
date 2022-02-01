@@ -1,8 +1,3 @@
-
-// *********************************************************************
-//  Test software for Analyzer
-// *********************************************************************
-
 #include <ArduinoSTL.h>
 #include <bitset>
 #include <ArxSmartPtr.h>
@@ -11,6 +6,8 @@
 #include "TapeInfo.h"
 #include "LCDHelper.h"
 #include "Controls.h"
+#include "Dialog.h"
+#include "Menu.h"
 #include "Printer.h"
 #include "SignalGenerator.h"
 #include <EEPROM.h>

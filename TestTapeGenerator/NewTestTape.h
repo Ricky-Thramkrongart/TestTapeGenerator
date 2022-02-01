@@ -1,5 +1,4 @@
-#ifndef NEWTESTTAPE_H
-#define NEWTESTTAPE_H
+#pragma once
 
 double randomDouble(double minf, double maxf)
 {
@@ -175,7 +174,3 @@ void NewTestTape()
         return;
     }
 }
-
-
-
-#endif // NEWTESTTAPE_H

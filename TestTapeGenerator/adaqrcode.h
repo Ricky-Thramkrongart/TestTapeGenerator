@@ -1,5 +1,4 @@
-#ifndef _adaqrcode_h_
-#define _adaqrcode_h_
+#pragma once
 
 #define adaqrcode_width 135
 #define adaqrcode_height 135
@@ -198,5 +197,3 @@ static const uint8_t PROGMEM adaqrcode_data[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00
 };
-
-#endif // _adaqrcode_h_

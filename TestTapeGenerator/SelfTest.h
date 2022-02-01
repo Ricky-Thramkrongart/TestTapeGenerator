@@ -2,6 +2,8 @@
 #define SELFTEST_H
 
 #include <Wire.h>
+#include "dBMeter.h"
+
 void selftest()
 {
     LCD_Helper lcdhelper;
@@ -64,4 +66,5 @@ void selftest()
     }
     delay(2000);
 }
+
 #endif // SELFTEST_H
