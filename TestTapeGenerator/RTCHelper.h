@@ -1,6 +1,7 @@
 #pragma once
 
 #include <DS3232RTC.h>
+#include <SafeString.h>
 
 class RTC_Helper
 {
@@ -9,16 +10,57 @@ public:
         RTC.begin();
         setSyncProvider(RTC.get);   // the function to get the time from the RTC
     }
-    std::string ToString() {
-        char stringbuffer[255];
-        sprintf(stringbuffer, "%02i:%02i:%02i", hour(), minute(), second());
-        return stringbuffer;
+    
+    void pad(SafeString& s, int n)
+    {
+        if (n < 10) {
+            s.print(F("0"));
+        }
+        s.print(n);
     }
-    std::string ToStringExt() {
-        char stringbuffer[255];
-        char degree = '\xDF';
-        sprintf(stringbuffer, "%02i:%02i:%02i %02i C", hour(), minute(), second(), RTC.temperature());
-        stringbuffer[11] = degree;
-        return stringbuffer;
+/*
+    SafeString& ToString()
+    {
+        cSFA(sf_line, buffer);
+        sf_line.clear();
+        pad(sf_line, hour());
+        sf_line.print(F(":"));
+        pad(sf_line, minute());
+        sf_line.print(F(":"));
+        pad(sf_line, second());
+        return sf_line;
     }
+*/ 
+
+    String ToString()
+    {
+        cSF(sf, 41);
+        pad(sf, hour());
+        sf.print(F(":"));
+        pad(sf, minute());
+        sf.print(F(":"));
+        pad(sf, second());
+        return sf.c_str();
+    }
+
+    String ToStringExt()
+    {
+        cSFA(sf, 41);
+        sf = ToString().c_str();
+        sf.print(RTC.temperature());
+        sf.print(F(" C\xDF"));
+        return sf.c_str();
+    }
+
+    void ToStringExt(Stream& out)
+    {
+        out.println(ToStringExt().c_str());
+    }
+
+    void printlnExt(Print& out)
+    {
+        out.println(ToStringExt().c_str());
+    }
+
 };
+

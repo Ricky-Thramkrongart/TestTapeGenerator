@@ -1,5 +1,9 @@
 #pragma once
 
+#include <ArduinoSTL.h>
+#include <bitset>
+#include "Beep.h"
+
 template <class T>
 class ButtonPanel
 {

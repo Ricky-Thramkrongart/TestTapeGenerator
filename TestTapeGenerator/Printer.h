@@ -1,7 +1,11 @@
 #pragma once
 
-#include "adaqrcode.h"
+#include <ArduinoSTL.h>
+#include <ArxSmartPtr.h>
 #include <Adafruit_Thermal.h>
+#include "Dialog.h"
+#include "RTCHelper.h"
+#include "adaqrcode.h"
 #include "SoftwareSerial.h"
 #include "TapeInfo.h"
 #include "TestTapeGenerator.h"
@@ -18,17 +22,20 @@ public:
     Adafruit_Thermal printer;
     std::shared_ptr<TapeInfo> tapeInfo;
     void Print(void) {
+        RTC_Helper rtchelper;
         printer.justify('C');
         printer.println(TESTTAPEGENERATOR_SW_VERSION);
         printer.println(TAPELIST_VERSION);
         printer.justify('L');
-        printer.println((RTC_Helper().ToStringExt().c_str()));
+        rtchelper.printlnExt(printer);
         printer.setSize('S');
-        printer.println(tapeInfo->ToString()[0].c_str());
-        printer.println(tapeInfo->ToString()[1].c_str());
+        ///////tapeInfo.printlnExt(printer);
+
+        //printer.println(tapeInfo->ToString()[0].c_str());
+        //printer.println(tapeInfo->ToString()[1].c_str());
         for (std::vector<RecordStep*>::iterator ptr = tapeInfo->RecordSteps.begin(); ptr != tapeInfo->RecordSteps.end(); ptr++)
         {
-            if ((*ptr)->Comment.size()) {
+            if ((*ptr)->Comment) {
                 printer.println((*ptr)->ToStringExt().c_str());
             }
         }
@@ -50,6 +57,7 @@ public:
         printer.begin();        // Init printer (same regardless of serial type)
     }
     void FullUpdate() {
+/*
         lcdhelper.line[0] = "Printing";
         lcdhelper.line[1] = tapeInfo->ToString()[0];
         lcdhelper.line[2] = tapeInfo->ToString()[1];
@@ -59,5 +67,6 @@ public:
             lcdhelper.line[0] = "Finished Printing";
             finished = true;
         }
+*/
     }
 };

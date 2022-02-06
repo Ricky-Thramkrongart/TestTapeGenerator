@@ -13,9 +13,10 @@ public:
     {
     }
     void FullUpdate() {
-        lcdhelper.line[0] = "Reference Level";
-        lcdhelper.line[1] = tapeInfo->ToString()[0];
-        lcdhelper.line[2] = "Start recording";
+        lcdhelper.Line(0, F("Reference Level"));
+        //lcdhelper.line[1] = tapeInfo->ToString()[0];
+        lcdhelper.Line(1, F("TBD"));
+        lcdhelper.Line(2, F("Start recording"));
     }
     void Update() {
     }
@@ -55,9 +56,10 @@ public:
         char str_target[6];
         dtostrf(Target, 4, 1, str_target);
         sprintf(stringbuffer, "Target: % s dB  Actuel (L:R):        ", str_target);
-        lcdhelper.line[0] = "Reference Level";
-        lcdhelper.line[1] = tapeInfo->ToString()[0];
-        lcdhelper.line[2] = stringbuffer;
+        lcdhelper.Line(0, F("Reference Level"));
+        //        lcdhelper.line[1] = tapeInfo->ToString()[0];
+        lcdhelper.Line(1, "TBD");
+        lcdhelper.Line(2, stringbuffer);
     }
 };
 
@@ -72,9 +74,10 @@ public:
     void FullUpdate() {
         char stringbuffer[255];
         sprintf(stringbuffer, "Adjustment: %3i %% Complete", i);
-        lcdhelper.line[0] = "Reference Level";
-        lcdhelper.line[1] = tapeInfo->ToString()[0];
-        lcdhelper.line[2] = stringbuffer;
+        lcdhelper.Line(0, F("Reference Level"));
+        //lcdhelper.line[1] = tapeInfo->ToString()[0];
+        lcdhelper.Line(1, "TBD");
+        lcdhelper.Line(2, stringbuffer);
         i += 10;
         if (i > 100) {
             finished = true;
@@ -96,9 +99,10 @@ public:
     void FullUpdate() {
         char stringbuffer[255];
         sprintf(stringbuffer, "%s (%i/%i)", (*ptr)->ToString().c_str(), (ptr - tapeInfo->RecordSteps.begin()) + 1, (int)tapeInfo->RecordSteps.size());
-        lcdhelper.line[0] = "Record Level";
-        lcdhelper.line[1] = tapeInfo->ToString()[0];
-        lcdhelper.line[2] = stringbuffer;
+        lcdhelper.Line(0,F("Record Level"));
+        //lcdhelper.line[1] = tapeInfo->ToString()[0];
+        lcdhelper.Line(1, "TBD");
+        lcdhelper.Line(2, stringbuffer);
         signalGenerator.setFreq((*ptr)->Frequency, (*ptr)->Level);
         ptr++;
         if (ptr == tapeInfo->RecordSteps.end()) {
@@ -118,6 +122,7 @@ public:
     {
     }
     void FullUpdate() {
+/*
         char stringbuffer[255];
         sprintf(stringbuffer, "%s (%i/%i)", (*ptr)->ToString().c_str(), (ptr - tapeInfo->RecordSteps.begin()) + 1, (int)tapeInfo->RecordSteps.size());
         std::vector<std::string> VUMeter(GetVUMeterStrings(randomDouble(-3, 3), randomDouble(-3, 3)));
@@ -130,6 +135,7 @@ public:
         if (ptr == tapeInfo->RecordSteps.end()) {
             finished = true;
         }
+*/
     }
 };
 
@@ -140,8 +146,8 @@ public:
     void FullUpdate() {
         std::shared_ptr<TapeInfo> tapeInfo(TapeInfo::Get(Current));
         std::vector<std::string> strs = tapeInfo->ToString();
-        lcdhelper.line[0] = strs[0];
-        lcdhelper.line[1] = strs[1];
+        lcdhelper.Line(0, strs[0].c_str());
+        lcdhelper.Line(1, strs[1].c_str());
     }
 };
 

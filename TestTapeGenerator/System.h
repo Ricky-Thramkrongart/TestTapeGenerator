@@ -3,8 +3,13 @@
 class System
 {
 private:
+    //Disables copy constructor
     System(const System&) = delete;
+    System(System&) = delete;
+    //Disables assignment operator
     System& operator=(const System&) = delete;
+    System& operator=(System&) = delete;
+
 protected:
     static Relay muteRelay;
     static Relay calibrationRelay;

@@ -1,6 +1,11 @@
 #pragma once
 
+#include <ArduinoSTL.h>
+#include <bitset>
+#include <SafeString.h>
+#include "Timer.h"
 #include "LCDHelper.h"
+#include "RTCHelper.h"
 #include "Button.h"
 
 class DialogOk
@@ -15,8 +20,7 @@ public:
     {
         if (!Updated) {
             FullUpdate();
-            lcdhelper.line[0].resize(32, ' ');
-            lcdhelper.line[0] += rtchelper.ToString();
+            lcdhelper.Line(0, 32, rtchelper.ToString().c_str());
             lcdhelper.Show();
             Updated = true;
         }
@@ -36,7 +40,7 @@ public:
     LCD_Helper lcdhelper;
     virtual void FullUpdate() = 0;
     virtual void Update() = 0;
-    virtual DialogOk(void) : lcdhelper(false), buttonPanel(this), TimerClock(this), Updated(false)
+    DialogOk(void) : lcdhelper(false), buttonPanel(this), TimerClock(this), Updated(false)
     {
         buttonPanel.OnUpdate = &DialogOk::OnUpdate;
         buttonPanel.OnLoop = &DialogOk::OnLoop;
@@ -60,7 +64,7 @@ public:
     enum Buttons { BN_UP, BN_DOWN, BN_RIGHT, BN_LEFT, BN_PAGEUP, BN_PAGEDOWN, BN_ESCAPE, BN_OK };
     virtual void FullUpdate() = 0;
     uint16_t _delay;
-    virtual Dialog(uint16_t delay_) : _delay(delay_), finished(false)
+    Dialog(uint16_t delay_) : _delay(delay_), finished(false)
     {
     }
 

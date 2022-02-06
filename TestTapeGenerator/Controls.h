@@ -49,13 +49,6 @@ void GetCaret(double min_val, double max_val, double value, char& caret, int& in
 
 }
 
-void Beep(long ms = 30)
-{
-    digitalWrite(11, HIGH); // set buzzer on
-    delay(ms);
-    digitalWrite(11, LOW); // set buzzer OFF
-}
-
 std::vector<std::string> GetVUMeterStrings(double left, double right)
 {
     std::vector<std::string> strs(3);
@@ -91,7 +84,7 @@ public:
     {
         digitalWrite(8, HIGH);
         lcdhelper.lcd.setCursor(32, 0);
-        lcdhelper.lcd.print(rtchelper.ToString().c_str());
+        lcdhelper.lcd.print(rtchelper.ToString());
     }
     virtual void OnTimerLCD(Timer<BasePanel>* timer)
     {
@@ -128,8 +121,7 @@ public:
     }
     virtual void OnUpdate(ButtonPanel<BasePanel>* buttonPanel) {
         FullUpdate();
-        lcdhelper.line[0].resize(32, ' ');
-        lcdhelper.line[0] += rtchelper.ToString();
+        lcdhelper.Line(0, 32, rtchelper.ToString());
         lcdhelper.Show();
     }
     virtual void OnLoop(ButtonPanel<BasePanel>* buttonPanel)

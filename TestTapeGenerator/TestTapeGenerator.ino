@@ -1,18 +1,15 @@
+#include "Menu.h"
+#include "Printer.h"
+#include "Controls.h"
+#include "Dialog.h"
+#include "RTCHelper.h"
 #include <ArduinoSTL.h>
 #include <bitset>
 #include <ArxSmartPtr.h>
-
-#include "TestTapeGenerator.h"
-#include "TapeInfo.h"
-#include "LCDHelper.h"
-#include "Controls.h"
-#include "Dialog.h"
-#include "Menu.h"
-#include "Printer.h"
-#include "SignalGenerator.h"
 #include <EEPROM.h>
 #include <DS3232RTC.h>      // https://github.com/JChristensen/DS3232RTC
 #include <Regexp.h>         // https://github.com/nickgammon/Regexp/
+#include <MemoryFree.h>
 #include "Splash.h"
 #include "SelfTest.h"
 #include "NewTestTape.h"
@@ -30,7 +27,7 @@ public:
         char buffer[255];
         sprintf(buffer, "Potention Meter Output: %i", Current);
         signalGenerator.ManualOutPut(Current);
-        lcdhelper.line[0] = buffer;
+        lcdhelper.Line(0, buffer);
     }
 };
 
@@ -39,37 +36,35 @@ class MainMenu : public Menu
 public:
     MainMenu() : Menu(8) {}
     void FullUpdate() {
-        std::string str;
+        const __FlashStringHelper* str = 0;
         switch (Current) {
         case 0:
-            str = "Create Test Tape";
+            str = F("Create Test Tape");
             break;
         case 1:
-            str = "Set Time";
+            str = F("Set Time");
             break;
         case 2:
-            str = "Start Signal Generator";
+            str = F("Start Signal Generator");
             break;
         case 3:
-            str = "Start dBMeter";
+            str = F("Start dBMeter");
             break;
         case 4:
-            str = "Output Hardware Calibration";
+            str = F("Output Hardware Calibration");
             break;
         case 5:
-            str = "Output Poly Fit";
+            str = F("Output Poly Fit");
             break;
         case 6:
-            str = "Input Hardware Calibration";
+            str = F("Input Hardware Calibration");
             break;
         case 7:
-            str = "dBMeter RV Scan";
+            str = F("dBMeter RV Scan");
             break;
         }
-        char buffer[255];
-        sprintf(buffer, "Current: %i", Current);
-        lcdhelper.line[0] = "== Main Menu ==================";
-        lcdhelper.line[1] = str;
+        lcdhelper.Line(0, F("== Main Menu =================="));
+        lcdhelper.Line(1, str);
     }
 };
 
@@ -77,15 +72,13 @@ void SetDateTime()
 {
     LCD_Helper lcdhelper;
     RTC_Helper rtchelper;
-    lcdhelper.line[0] = "Reading Date Time from Serial Port";
-    lcdhelper.line[1] = "Format: [yyyy/mm/dd HH.MM.SS] 115200 Baud";
+    lcdhelper.Line(0, F("Reading Date Time from Serial Port"));
+    lcdhelper.Line(1, F("Format: [yyyy/mm/dd HH.MM.SS] 115200 Baud"));
     lcdhelper.Show();
     Serial.setTimeout(500);
     while (Serial.available() > 0) Serial.read();
     Serial.flush();
-    Serial.println(lcdhelper.line[0].c_str());
-    Serial.println(lcdhelper.line[1].c_str());
-
+    lcdhelper.Show(Serial);
     do {
         if (Serial.available() >= 19) {
             MatchState ms;
@@ -114,9 +107,9 @@ void SetDateTime()
                 t = makeTime(tm);
                 RTC.set(t);        // use the time_t value to ensure correct weekday is set
                 setSyncProvider(RTC.get);   // the function to get the time from the RTC
-                lcdhelper.line[2] = "Recieved Date Time.";
+                lcdhelper.Line(2, F("Recieved Date Time."));
                 lcdhelper.Show();
-                Serial.println(lcdhelper.line[2].c_str());
+                lcdhelper.Show(Serial);
                 delay(2000);
                 return;
             }
@@ -136,26 +129,21 @@ void dBMeterScan(void)
     dbMeter.Scan();
 }
 
-void InputHardwareCalibration(void)
-{
-    dBMeter dbMeter;
-    dbMeter.RVSweep();
-}
-
 void StartSignalGenerator()
 {
+
     LCD_Helper lcdhelper;
-    lcdhelper.line[0] = "Signal Generator";
-    lcdhelper.line[1] = "Format: [float float] 115200 Baud";
+    lcdhelper.Line(0, F("Signal Generator"));
+    lcdhelper.Line(1, F("Format: [float float] 115200 Baud"));
 
     lcdhelper.Show();
+
     Serial.setTimeout(500);
     while (Serial.available() > 0) Serial.read();
     Serial.flush();
-    Serial.println(lcdhelper.line[0].c_str());
-    Serial.println(lcdhelper.line[1].c_str());
+    lcdhelper.Show(Serial);
     SignalGenerator signalGenerator;
-    System::UnMute();
+    System::UnmutedCalibrationMode();
     dBMeter dbMeter;
 
     do {
@@ -178,77 +166,47 @@ void StartSignalGenerator()
                 m.dB = dB;
                 double dBLeft, dBRight;
                 dbMeter.GetdB(m, dBLeft, dBRight);
-                char sz_dBLeft[255];
-                char sz_dBRight[255];
-                dtostrf(dBLeft, 4, 2, sz_dBLeft);
-                dtostrf(dBRight, 4, 2, sz_dBRight);
-
-                char stringbuffer[256];
-                char sz_freq[8];
-                dtostrf(freq, 4, 2, sz_freq);
-                char sz_db[8];
-                dtostrf(dB, 4, 2, sz_db);
-                sprintf(stringbuffer, "Measured dB(L/R): %s/%s", sz_dBLeft, sz_dBRight);
-                lcdhelper.line[3] = stringbuffer;
-                sprintf(stringbuffer, "Frequency: %s dB: %s", sz_freq, sz_db);
-                lcdhelper.line[2] = stringbuffer;
+                lcdhelper.Line(2, SignalGenerator::String(freq, dB));
+                lcdhelper.Line(3, m.String());
                 lcdhelper.Show();
-                Serial.println(lcdhelper.line[2].c_str());
-                Serial.println(lcdhelper.line[3].c_str());
+                lcdhelper.Show(Serial);
             }
             while (Serial.available() > 0) Serial.read();
         }
         delay(1000);
-    } while (true);
 
-    lcdhelper.line[0] = "Setting Signal Generator (1000, 5.0)";
-    lcdhelper.Show();
-    delay(60000);
+    } while (true);
 }
 
 void StartdBMeter()
 {
     LCD_Helper lcdhelper;
-    lcdhelper.line[0] = "dBMeter";
+    lcdhelper.Line(0, F("dBMeter"));
     lcdhelper.Show();
-    Serial.println(lcdhelper.line[0].c_str());
+    lcdhelper.Show(Serial);
     System::Mute();
-
     dBMeter dbMeter;
-
     do {
         dBMeter::Measurement m;
         double dBLeft, dBRight;
         dbMeter.GetdB(m, dBLeft, dBRight);
-        char sz_dBLeft[255];
-        char sz_dBRight[255];
-        dtostrf(dBLeft, 4, 2, sz_dBLeft);
-        dtostrf(dBRight, 4, 2, sz_dBRight);
-
-        char stringbuffer[256];
-        sprintf(stringbuffer, "Measured dB(L/R): %s/%s", sz_dBLeft, sz_dBRight);
-        lcdhelper.line[3] = stringbuffer;
+        lcdhelper.Line(3, m.String());
         lcdhelper.Show();
-        Serial.println(lcdhelper.line[3].c_str());
+        lcdhelper.Show(Serial);
         delay(1000);
     } while (true);
-
-    lcdhelper.line[0] = "Setting Signal Generator (1000, 5.0)";
-    lcdhelper.Show();
-    delay(60000);
 }
 
 void SetOutPutFit()
 {
     LCD_Helper lcdhelper;
-    lcdhelper.line[0] = "Reading OutPut fit a6..a0 from Serial Port";
-    lcdhelper.line[1] = "Format: [sci.not.] 115200 Baud";
+    lcdhelper.Line(0, F("Reading OutPut fit a6..a0"));
+    lcdhelper.Line(1, F("Format: [sci.not.] 115200 Baud"));
     lcdhelper.Show();
     Serial.setTimeout(500);
     while (Serial.available() > 0) Serial.read();
     Serial.flush();
-    Serial.println(lcdhelper.line[0].c_str());
-    Serial.println(lcdhelper.line[1].c_str());
+    lcdhelper.Show(Serial);
     SignalGenerator signalGenerator;
     int i = FIT_ORDER;
     std::vector<float64_t> fit64(FIT64_SIZE);
@@ -267,12 +225,14 @@ void SetOutPutFit()
                 int index = 0;
                 ms.GetCapture(cap, index++);
                 fit64[i] = fp64_atof(str.c_str());
-                char stringbuffer[256];
-                //dtostre(fit[i], sz_a, 20, NULL);
-                sprintf(stringbuffer, "Recieved a%i: %s", i--, fp64_to_string(fit64[i], 30, 2));
-                lcdhelper.line[2] = stringbuffer;
+                cSF(sf_Line, 100);
+                sf_Line = F("Recieved a");
+                sf_Line.print(i--);
+                sf_Line.print(": ");
+                sf_Line.print(fp64_to_string(fit64[i], 30, 2));
+                lcdhelper.Line(2, sf_Line);
                 lcdhelper.Show();
-                Serial.println(lcdhelper.line[2].c_str());
+                lcdhelper.Show(Serial);
                 if (i == -1) {
                     break;
                 }
@@ -289,14 +249,19 @@ void SetOutPutFit()
     signalGenerator.ReadFit64FromEEPROM();
 
     for (double d = 16.0; d > -0.1; d -= 0.1) {
-        char stringbuffer[255];
-        char sz_d[8];
-        dtostrf(d, 4, 1, sz_d);
-        sprintf(stringbuffer, "%s %i", sz_d, signalGenerator.OutPutFit64(d));
-        Serial.println(stringbuffer);
+        cSF(sf_line, 41);
+        sf_line.print(d, 4, 1);
+        sf_line.print(F(" "));
+        sf_line.print(signalGenerator.OutPutFit64(d));
+        Serial.println(sf_line.c_str());
         delay(50);
     }
+}
 
+void InputHardwareCalibration(void)
+{
+    dBMeter dbMeter;
+    dbMeter.RVSweep();
 }
 
 void setup()
@@ -348,7 +313,6 @@ void setup()
             };
         }
     } while (1);
-
 }
 
 void loop() {

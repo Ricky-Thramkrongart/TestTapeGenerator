@@ -26,6 +26,7 @@ public:
         Measurement() {}
         Measurement(const double dB_, const uint8_t RV_) : dB(dB_), RV(RV_) {
         }
+
         std::string ToString(void) {
             char stringbuffer[255];
             char sz_dB[8];
@@ -43,6 +44,21 @@ public:
             sprintf(stringbuffer, "%i,%s,%i,%i", RV, sz_dB, RawLeft, RawRight);
             return stringbuffer;
         }
+        String String(void) {
+            cSF(sf_line, 41);
+            sf_line.print(F("dBMeter: "));
+            sf_line.print(dBLeft, 2, 5);
+            sf_line.print(F("dB "));
+            sf_line.print(dBRight, 2, 5);
+            sf_line.print(F("dB "));
+            return sf_line.c_str();
+        }
+
+
+
+
+
+
         double dB;
         uint8_t RV;
         uint16_t RawLeft;
@@ -306,7 +322,7 @@ public:
     void RVSweep()
     {
         LCD_Helper lcdhelper;
-        lcdhelper.line[0] = "dBMeter RVSweep";
+        lcdhelper.Line(0, F("dBMeter RVSweep"));
         lcdhelper.Show();
         SignalGenerator signalGenerator;
         System::UnmutedCalibrationMode();;
@@ -319,7 +335,6 @@ public:
                 GetRawInputInternal(m);
                 lcdhelper.lcd.setCursor(0, 0);
                 lcdhelper.lcd.print(m.ToString().c_str());
-                Beep();
                 if (!m.HasNull() && !m.IsSaturated())
                     Serial.println(m.ToStringData().c_str());
             }
@@ -330,7 +345,7 @@ public:
     void Scan()
     {
         LCD_Helper lcdhelper;
-        lcdhelper.line[0] = "dBMeter Scan";
+        lcdhelper.Line(0, F("dBMeter Scan"));
         lcdhelper.Show();
         SignalGenerator signalGenerator;
         System::UnmutedCalibrationMode();;

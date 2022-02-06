@@ -168,6 +168,17 @@ public:
             spiSend(f_low  | freq);
             spiSend(f_high | freq);
         }
+        static String String(double f, double dB)
+        {
+            cSF(sf_line, 41);
+            sf_line.print(F("Generator: "));
+            sf_line.print(f, 0, 5);
+            sf_line.print(F("Hz "));
+            sf_line.print(dB, 2, 5);
+            sf_line.print(F("dB"));
+            return sf_line.c_str();
+        }
+
 };
 
 #endif // SIGNALGENERATOR_H
