@@ -30,6 +30,7 @@ public:
     std::shared_ptr<TapeInfo> tapeInfo;
     AdjustingReferenceLevelMonitor(TapeInfo::Tapes Tape) : tapeInfo(TapeInfo::Get(Tape))
     {
+        System::UnMute();
     }
     void Update()
     {
