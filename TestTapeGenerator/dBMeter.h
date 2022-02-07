@@ -150,7 +150,7 @@ public:
 
         //Determine Device
         if (fit64RV45_l.empty() || fit64RV45_r.empty()) {
-            Device1();
+            Device2();
             //bool I2C_eepromHasFitArray = ReadFit64FromI2C_eeprom();
             //if (false && !I2C_eepromHasFitArray) {
             //    Device2();
@@ -268,7 +268,7 @@ public:
             }
             if (m.dBRight > 28) {
                 m.RawRightGain = true;
-                m.RawRight = n.RawLeft;
+                m.RawRight = n.RawRight;
                 m.dBRight = PolyVal(fit64RV45_r, m.RawRight) + 12.0;
             }
             inputpregainRelay.Disable();
