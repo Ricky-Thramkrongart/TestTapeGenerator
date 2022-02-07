@@ -4,14 +4,13 @@ from math import sqrt
 from matplotlib import pyplot as plt
 import serial
 
-
 def write_array(hfile, data, rv_, c):
     RV = str(int(rv_))
     s = open(hfile, mode='wb')
     s.write(str('            fit64RV' + RV + c + ' = std::vector <float64_t>(' + str(len(data)) + ');\r\n').encode())
     i = len(data) - 1
     for d in data:
-        s.write(str('            fit64RV' + RV + c + '[' + str(i) + '] = fp64_atof("' + str(d) + '");\r\n').encode())
+        s.write(str('            fit64RV' + RV + c + '[' + str(i) + '] = fp64_atof(String(F("' + str(d) + '")).c_str());\r\n').encode())
         i -= 1
     s.close()
 
