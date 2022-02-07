@@ -35,7 +35,7 @@ public:
 class MainMenu : public Menu
 {
 public:
-    MainMenu() : Menu(8) {}
+    MainMenu() : Menu(7) {}
     void FullUpdate() {
         const __FlashStringHelper* str = 0;
         switch (Current) {
@@ -55,12 +55,9 @@ public:
             str = F("Output Hardware Calibration");
             break;
         case 5:
-            str = F("Output Poly Fit");
-            break;
-        case 6:
             str = F("Input Hardware Calibration");
             break;
-        case 7:
+        case 6:
             str = F("dBMeter RV Scan");
             break;
         }
@@ -198,67 +195,6 @@ void StartdBMeter()
     } while (true);
 }
 
-void SetOutPutFit()
-{
-    LCD_Helper lcdhelper;
-    lcdhelper.Line(0, F("Reading OutPut fit a6..a0"));
-    lcdhelper.Line(1, F("Format: [sci.not.] 115200 Baud"));
-    lcdhelper.Show();
-    Serial.setTimeout(500);
-    while (Serial.available() > 0) Serial.read();
-    Serial.flush();
-    lcdhelper.Show(Serial);
-    SignalGenerator signalGenerator;
-    int i = FIT_ORDER;
-    std::vector<float64_t> fit64(FIT64_SIZE);
-
-    do {
-
-        if (Serial.available()) {
-            String str(Serial.readString());
-            MatchState ms;
-
-            ms.Target(str.c_str());
-            char result = ms.Match("([+%-]?%d+%.?%d*[eE+%-]*%d?%d?)");
-            char cap[256];
-            if (result == REGEXP_MATCHED && ms.level == 1)
-            {
-                int index = 0;
-                ms.GetCapture(cap, index++);
-                fit64[i] = fp64_atof(str.c_str());
-                cSF(sf_Line, 100);
-                sf_Line = F("Recieved a");
-                sf_Line.print(i--);
-                sf_Line.print(F(": "));
-                sf_Line.print(fp64_to_string(fit64[i], 30, 2));
-                lcdhelper.Line(2, sf_Line);
-                lcdhelper.Show();
-                lcdhelper.Show(Serial);
-                if (i == -1) {
-                    break;
-                }
-            }
-
-            while (Serial.available() > 0) Serial.read();
-            delay(100);
-        }
-        delay(1000);
-    } while (true);
-
-    signalGenerator.fit64 = fit64;
-    signalGenerator.WriteFit64ToEEPROM();
-    signalGenerator.ReadFit64FromEEPROM();
-
-    for (double d = 16.0; d > -0.1; d -= 0.1) {
-        cSF(sf_line, 41);
-        sf_line.print(d, 4, 1);
-        sf_line.print(F(" "));
-        sf_line.print(signalGenerator.OutPutFit64(d));
-        Serial.println(sf_line.c_str());
-        delay(50);
-    }
-}
-
 void InputHardwareCalibration(void)
 {
     dBMeter dbMeter;
@@ -302,12 +238,9 @@ void setup()
                 OutputHardwareCalibration();
                 break;
             case 5:
-                SetOutPutFit();
-                break;
-            case 6:
                 InputHardwareCalibration();
                 break;
-            case 7:
+            case 6:
                 dBMeterScan();
                 break;
 
