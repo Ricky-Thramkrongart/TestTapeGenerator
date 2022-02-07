@@ -17,9 +17,11 @@ void selftest()
         Wire.begin();
         Wire.beginTransmission(devices[i]);
         if (Wire.endTransmission() != 0) {
+            cSF(sf_line, 41);
             char stringbuffer[255];
-            sprintf(stringbuffer, "Hardware Not Found at %02X", devices[i]);
-            lcdHelper.Line(0, stringbuffer);
+            sf_line.print(F("Hardware Not Found at 0x"));
+            sf_line.print(devices[i], HEX);
+            lcdHelper.Line(0, sf_line);
             lcdHelper.Show();
             exit(EXIT_FAILURE);
         }

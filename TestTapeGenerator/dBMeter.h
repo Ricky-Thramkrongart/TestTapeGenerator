@@ -28,15 +28,18 @@ public:
         }
 
         std::string ToString(void) {
-            char stringbuffer[255];
-            char sz_dB[8];
-            dtostrf(dB, 4, 2, sz_dB);
-
             int bitsLeft = ceil(log(RawLeft) / log(2));
             int bitsRight = ceil(log(RawRight) / log(2));
-            sprintf(stringbuffer, "RV:%i Raw:%s Left:%i Right:%i Bits (L/R): %i/%i ", RV, sz_dB, RawLeft, RawRight, bitsLeft, bitsRight);
-            return stringbuffer;
+            cSF(sf_line, 41);
+            sf_line.print(F("RV:")); sf_line.print(RV);
+            sf_line.print(F(" Raw:")); sf_line.print(dB, 4, 2);
+            sf_line.print(F(" Left:")); sf_line.print(RawLeft);
+            sf_line.print(F(" Right:")); sf_line.print(RawRight);
+            sf_line.print(F(" Bits (L/R): ")); sf_line.print(bitsLeft);
+            sf_line.print(F("/")); sf_line.print(bitsRight);
+            return sf_line.c_str();
         }
+       
         std::string ToStringData() {
             cSF(sf_line, 41);
             sf_line.print(RV);
@@ -87,12 +90,12 @@ private:
         uint8_t datasize = fit64.size() * sizeof(float64_t);
         i2C_eeprom.writeBlock(addr_, (uint8_t*)fit64.begin(), datasize);
         addr_ += datasize;
-        Serial.print("fit64 written. addr: ");
+        Serial.print(F("fit64 written. addr: "));
         Serial.println(addr_);
     }
     bool ReadFit64FromI2C_eeprom(uint16_t& addr_, std::vector<float64_t>& fit64) {
         uint8_t arraysize = i2C_eeprom.readByte(addr_);
-        Serial.print("Read Arraysize: ");
+        Serial.print(F("Read Arraysize: "));
         Serial.println(arraysize);
         if (arraysize == 0 || arraysize == 0xFF || arraysize > 20) {
             return false;
@@ -102,7 +105,7 @@ private:
         uint8_t datasize = fit64.size() * sizeof(float64_t);
         i2C_eeprom.readBlock(addr_, (uint8_t*)fit64.begin(), datasize);
         addr_ += datasize;
-        Serial.print("fit64 read. addr: ");
+        Serial.print(F("fit64 read. addr: "));
         Serial.println(addr_);
         return true;
     }

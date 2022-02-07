@@ -15,39 +15,32 @@ public:
     RecordStep(int Frequency_, int Time_, int Level_, const __FlashStringHelper* Comment_ = 0) : Frequency(Frequency_), Time(Time_), Level(Level_), Comment(Comment_)
     {
     }
-    
-        std::string ToString()
-        {
-            cSF(sf_line, 100);
-            sf_line.print(Frequency, 5);
-            sf_line.print(F("Hz "));
-            sf_line.print(Level, 5);
-            sf_line.print(F("dB "));
-            sf_line.print(Time, 5);
-            sf_line.print(F("s"));
-            return sf_line.c_str();
-        }
-    /*
-        std::string ToStringExt()
-        {
-            char stringbuffer[255];
-            sprintf(stringbuffer, "%5i Hz %4i dB %4i Sec %s", Frequency, Level, Time, Comment);
-            return stringbuffer;
-        }
-    */
-    
-        void println(Stream& out)
-        {
-            out.println(ToString().c_str());
-            //sprintf(stringbuffer, "%5i Hz %4i dB %4i Sec", Frequency, Level, Time);
-        }
-        std::string ToStringExt()
-        {
-            char stringbuffer[255];
-            sprintf(stringbuffer, "%5i Hz %4i dB %4i Sec %s", Frequency, Level, Time, Comment);
-            return stringbuffer;
-        }
-   
+
+    std::string ToString()
+    {
+        cSF(sf_line, 100);
+        sf_line.print(Frequency, 5);
+        sf_line.print(F("Hz "));
+        sf_line.print(Level, 5);
+        sf_line.print(F("dB "));
+        sf_line.print(Time, 5);
+        sf_line.print(F("s"));
+        return sf_line.c_str();
+    }
+
+    std::string ToStringExt()
+    {
+        cSF(sf_line, 100);
+        sf_line = ToString().c_str();
+        sf_line.print(F(" "));
+        sf_line.print(Comment);
+        return sf_line.c_str();
+    }
+
+    void println(Stream& out)
+    {
+        out.println(ToString().c_str());
+    }
 };
 
 class TapeInfo
@@ -81,21 +74,25 @@ public:
             delete* ptr;
         }
     }
-    
-        std::vector<std::string> ToString()
-        {
-            std::vector<std::string> Result(2);
-                    char stringbuffer[256];
-            Result[0] = String(Description).c_str();
-            char format = 'R';
-            if (Format == TapeFormat::Cassette) {
-                format = 'C';
-            }
-            sprintf(stringbuffer, "Track:%i Tracks:%u %u[Min] %u[nW/m] %c", Tracks, RecordSteps.size(), (Length % 60) ? Length / 60 + 1 : Length / 60, Flux, format);
-            Result[1] = stringbuffer;
-            return Result;
+
+    std::vector<std::string> ToString()
+    {
+        cSF(sf_line, 41);
+        std::vector<std::string> Result(2);
+        char format = 'R';
+        if (Format == TapeFormat::Cassette) {
+            format = 'C';
         }
-    
+        sf_line.print(F("Track:")); sf_line.print(Tracks);
+        sf_line.print(F(" Tracks:"));  sf_line.print(RecordSteps.size()); sf_line.print(F(" "));
+        sf_line.print((Length % 60) ? Length / 60 + 1 : Length / 60); sf_line.print(F("[Min] ")); 
+        sf_line.print(Flux); sf_line.print(F("[nW/m] ")); 
+        sf_line.print(format);
+        Result[0] = String(Description).c_str();
+        Result[1] = sf_line.c_str();
+        return Result;
+    }
+
 
     enum Tapes {
         FIRST_TAPE,

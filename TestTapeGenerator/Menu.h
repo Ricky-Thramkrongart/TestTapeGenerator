@@ -50,11 +50,15 @@ public:
         if (Current != Display) {
             BasePanel::OnUpdate(buttonPanel);
             Display = Current;
-            char stringbuffer[255];
-            sprintf(stringbuffer, "(%i/%i)", Current + 1, End);
+            cSF(sf_Line, 41);
+            sf_Line.print(F("("));
+            sf_Line.print(Current + 1);
+            sf_Line.print(F("/"));
+            sf_Line.print(End);
+            sf_Line.print(F(")"));
             digitalWrite(8, LOW);
             lcdhelper.lcd.setCursor(33, 1);
-            lcdhelper.lcd.print(stringbuffer);
+            lcdhelper.lcd.print(sf_Line);
         }
     }
 

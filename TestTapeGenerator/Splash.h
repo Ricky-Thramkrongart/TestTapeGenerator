@@ -8,12 +8,14 @@
 void splashscreen()
 {
     LCD_Helper lcdhelper;
-    char stringbuffer[255];
-    sprintf(stringbuffer, "  %s", TESTTAPEGENERATOR_SW_VERSION);
+    cSF(sf_line, 41);
+    sf_line.print(F("  "));
+    sf_line.print(TESTTAPEGENERATOR_SW_VERSION);
     lcdhelper.Line(0, F("Test Tape Generator"));
-    lcdhelper.Line(1, stringbuffer);
-    sprintf(stringbuffer, "%s", TAPELIST_VERSION);
-    lcdhelper.Line(2, stringbuffer);
+    lcdhelper.Line(1, sf_line);
+    sf_line.clear();
+    sf_line.print(TAPELIST_VERSION);
+    lcdhelper.Line(2, sf_line);
     lcdhelper.Show(Serial);
     lcdhelper.Show(2000);
 }

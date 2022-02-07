@@ -24,10 +24,11 @@ protected:
 public:
     PotentioMeterOutputSelection() : Menu(256) {}
     void FullUpdate() {
-        char buffer[255];
-        sprintf(buffer, "Potention Meter Output: %i", Current);
+        cSF(sf_line, 41);
+        sf_line.print(F("Potention Meter Output: "));
+        sf_line.print(Current);
         signalGenerator.ManualOutPut(Current);
-        lcdhelper.Line(0, buffer);
+        lcdhelper.Line(0, sf_line);
     }
 };
 
@@ -228,7 +229,7 @@ void SetOutPutFit()
                 cSF(sf_Line, 100);
                 sf_Line = F("Recieved a");
                 sf_Line.print(i--);
-                sf_Line.print(": ");
+                sf_Line.print(F(": "));
                 sf_Line.print(fp64_to_string(fit64[i], 30, 2));
                 lcdhelper.Line(2, sf_Line);
                 lcdhelper.Show();

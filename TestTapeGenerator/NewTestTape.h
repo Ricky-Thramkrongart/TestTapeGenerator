@@ -14,8 +14,7 @@ public:
     }
     void FullUpdate() {
         lcdhelper.Line(0, F("Reference Level"));
-        //lcdhelper.line[1] = tapeInfo->ToString()[0];
-        lcdhelper.Line(1, F("TBD"));
+        lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
         lcdhelper.Line(2, F("Start recording"));
     }
     void Update() {
@@ -41,25 +40,24 @@ public:
         m.dB = Target;
         dbMeter.GetdB(m, RightLevel, LeftLevel);
         std::string statuscontrol = StatusControl(0.5, LeftLevel - Target, RightLevel - Target);
-        char stringbuffer[255];
-        char str_target[6];
-        dtostrf(Target, 4, 1, str_target);
-        sprintf(stringbuffer, "Target: %s dB  Actuel (L:R): ", str_target);
+        cSF(sf_line, 41);
+        sf_line.print(F("Target: "));
+        sf_line.print(Target, 4 ,1);
+        sf_line.print(F(" dB  Actuel (L:R): "));
         digitalWrite(8, LOW);
-        lcdhelper.lcd.setCursor(strlen(stringbuffer), 0);
+        lcdhelper.lcd.setCursor(sf_line.length(), 0);
         lcdhelper.lcd.print(statuscontrol.c_str());
     }
 
     void FullUpdate() {
         double Target = tapeInfo->Target;
-        char stringbuffer[255];
-        char str_target[6];
-        dtostrf(Target, 4, 1, str_target);
-        sprintf(stringbuffer, "Target: % s dB  Actuel (L:R):        ", str_target);
+        cSF(sf_line, 41);
+        sf_line.print(F("Target: "));
+        sf_line.print(Target, 4, 1);
+        sf_line.print(F(" dB  Actuel (L:R):        "));
         lcdhelper.Line(0, F("Reference Level"));
-        //        lcdhelper.line[1] = tapeInfo->ToString()[0];
-        lcdhelper.Line(1, "TBD");
-        lcdhelper.Line(2, stringbuffer);
+        lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
+        lcdhelper.Line(2, sf_line);
     }
 };
 
@@ -72,12 +70,13 @@ public:
     {
     }
     void FullUpdate() {
-        char stringbuffer[255];
-        sprintf(stringbuffer, "Adjustment: %3i %% Complete", i);
+        cSF(sf_line, 41);
+        sf_line.print(F("Adjustment: "));
+        sf_line.print(i, 3);
+        sf_line.print(" % Complete");
         lcdhelper.Line(0, F("Reference Level"));
-        //lcdhelper.line[1] = tapeInfo->ToString()[0];
-        lcdhelper.Line(1, "TBD");
-        lcdhelper.Line(2, stringbuffer);
+        lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
+        lcdhelper.Line(2, sf_line);
         i += 10;
         if (i > 100) {
             finished = true;
@@ -97,12 +96,16 @@ public:
     {
     }
     void FullUpdate() {
-        char stringbuffer[255];
-        sprintf(stringbuffer, "%s (%i/%i)", (*ptr)->ToString().c_str(), (ptr - tapeInfo->RecordSteps.begin()) + 1, (int)tapeInfo->RecordSteps.size());
+        cSF(sf_line, 41);
+        sf_line.print((*ptr)->ToString().c_str());
+        sf_line.print(F(" ("));
+        sf_line.print((ptr - tapeInfo->RecordSteps.begin()) + 1);
+        sf_line.print(F("/"));
+        sf_line.print((int)tapeInfo->RecordSteps.size());
+        sf_line.print(F(")"));
         lcdhelper.Line(0,F("Record Level"));
-        //lcdhelper.line[1] = tapeInfo->ToString()[0];
-        lcdhelper.Line(1, "TBD");
-        lcdhelper.Line(2, stringbuffer);
+        lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
+        lcdhelper.Line(2, sf_line);
         signalGenerator.setFreq((*ptr)->Frequency, (*ptr)->Level);
         ptr++;
         if (ptr == tapeInfo->RecordSteps.end()) {
@@ -122,20 +125,24 @@ public:
     {
     }
     void FullUpdate() {
-/*
-        char stringbuffer[255];
-        sprintf(stringbuffer, "%s (%i/%i)", (*ptr)->ToString().c_str(), (ptr - tapeInfo->RecordSteps.begin()) + 1, (int)tapeInfo->RecordSteps.size());
+
+        cSF(sf_line, 41);
+        sf_line.print((*ptr)->ToString().c_str());
+        sf_line.print(F(" ("));
+        sf_line.print((ptr - tapeInfo->RecordSteps.begin()) + 1);
+        sf_line.print(F("/"));
+        sf_line.print((int)tapeInfo->RecordSteps.size());
+        sf_line.print(F(")"));
         std::vector<std::string> VUMeter(GetVUMeterStrings(randomDouble(-3, 3), randomDouble(-3, 3)));
-        lcdhelper.line[0] = stringbuffer;
-        lcdhelper.line[1] = VUMeter[0].c_str();
-        lcdhelper.line[2] = VUMeter[1].c_str();
-        lcdhelper.line[3] = VUMeter[2].c_str();
+        lcdhelper.Line(0, sf_line.c_str());
+        lcdhelper.Line(1, VUMeter[0].c_str());
+        lcdhelper.Line(2, VUMeter[1].c_str());
+        lcdhelper.Line(3, VUMeter[2].c_str());
         signalGenerator.setFreq((*ptr)->Frequency, (*ptr)->Level);
         ptr++;
         if (ptr == tapeInfo->RecordSteps.end()) {
             finished = true;
         }
-*/
     }
 };
 
