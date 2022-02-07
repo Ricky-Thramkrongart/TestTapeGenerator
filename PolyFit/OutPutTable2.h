@@ -1,0 +1,11 @@
+            fit64 = std::vector <float64_t>(10);
+            fit64[9] = fp64_atof(String(F("1.7800453819819787e-11")).c_str());
+            fit64[8] = fp64_atof(String(F("8.656268716548466e-09")).c_str());
+            fit64[7] = fp64_atof(String(F("9.985712631417102e-07")).c_str());
+            fit64[6] = fp64_atof(String(F("5.2157895124829465e-05")).c_str());
+            fit64[5] = fp64_atof(String(F("0.0014167550103016079")).c_str());
+            fit64[4] = fp64_atof(String(F("0.019175211596256944")).c_str());
+            fit64[3] = fp64_atof(String(F("0.08524400351736518")).c_str());
+            fit64[2] = fp64_atof(String(F("-0.1094720810469209")).c_str());
+            fit64[1] = fp64_atof(String(F("15.713410685133057")).c_str());
+            fit64[0] = fp64_atof(String(F("255.02567422590707")).c_str());
