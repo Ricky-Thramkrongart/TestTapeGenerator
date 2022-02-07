@@ -161,7 +161,7 @@ public:
             //    Measurement m(dB, 45);
             //    double dBLeft, dBRight;
             //    GetdB(m, dBLeft, dBRight);
-            //    if (dBLeft - dB > 1 || dBRight - dB > 1) {
+            //    if (fabs(dBLeft - dB) > 1 || fabs(dBRight - dB) > 1) {
             //        Device1();
             //    }
             //    WriteFit64ToI2C_eeprom();
@@ -174,76 +174,75 @@ public:
 
     void Device1(void) {
         fit64RV45_l = std::vector <float64_t>(15);
-        fit64RV45_l[14] = fp64_atof(String(F("1.677923585110501e-36")).c_str());
-        fit64RV45_l[13] = fp64_atof(String(F("-1.2560653304131632e-32")).c_str());
-        fit64RV45_l[12] = fp64_atof(String(F("4.227894224574707e-29")).c_str());
-        fit64RV45_l[11] = fp64_atof(String(F("-8.45064378915242e-26")).c_str());
-        fit64RV45_l[10] = fp64_atof(String(F("1.115804991376365e-22")).c_str());
-        fit64RV45_l[9] = fp64_atof(String(F("-1.0244379036302585e-19")).c_str());
-        fit64RV45_l[8] = fp64_atof(String(F("6.705683940884093e-17")).c_str());
-        fit64RV45_l[7] = fp64_atof(String(F("-3.158402453382945e-14")).c_str());
-        fit64RV45_l[6] = fp64_atof(String(F("1.0682418823283996e-11")).c_str());
-        fit64RV45_l[5] = fp64_atof(String(F("-2.566411400535807e-09")).c_str());
-        fit64RV45_l[4] = fp64_atof(String(F("4.3066302928320864e-07")).c_str());
-        fit64RV45_l[3] = fp64_atof(String(F("-4.9748269797742075e-05")).c_str());
-        fit64RV45_l[2] = fp64_atof(String(F("0.004030972379686488")).c_str());
-        fit64RV45_l[1] = fp64_atof(String(F("-0.28074280452148")).c_str());
-        fit64RV45_l[0] = fp64_atof(String(F("29.355779672332574")).c_str());
+        fit64RV45_l[14] = fp64_atof(String(F("-1.677923585110501e-36")).c_str());
+        fit64RV45_l[13] = fp64_atof(String(F("1.2560653304131632e-32")).c_str());
+        fit64RV45_l[12] = fp64_atof(String(F("-4.227894224574707e-29")).c_str());
+        fit64RV45_l[11] = fp64_atof(String(F("8.45064378915242e-26")).c_str());
+        fit64RV45_l[10] = fp64_atof(String(F("-1.115804991376365e-22")).c_str());
+        fit64RV45_l[9] = fp64_atof(String(F("1.0244379036302585e-19")).c_str());
+        fit64RV45_l[8] = fp64_atof(String(F("-6.705683940884093e-17")).c_str());
+        fit64RV45_l[7] = fp64_atof(String(F("3.158402453382945e-14")).c_str());
+        fit64RV45_l[6] = fp64_atof(String(F("-1.0682418823283996e-11")).c_str());
+        fit64RV45_l[5] = fp64_atof(String(F("2.566411400535807e-09")).c_str());
+        fit64RV45_l[4] = fp64_atof(String(F("-4.3066302928320864e-07")).c_str());
+        fit64RV45_l[3] = fp64_atof(String(F("4.9748269797742075e-05")).c_str());
+        fit64RV45_l[2] = fp64_atof(String(F("-0.004030972379686488")).c_str());
+        fit64RV45_l[1] = fp64_atof(String(F("0.28074280452148")).c_str());
+        fit64RV45_l[0] = fp64_atof(String(F("-29.355779672332574")).c_str());
 
         fit64RV45_r = std::vector <float64_t>(15);
-        fit64RV45_r[14] = fp64_atof(String(F("2.1287535929115348e-36")).c_str());
-        fit64RV45_r[13] = fp64_atof(String(F("-1.5748997961393054e-32")).c_str());
-        fit64RV45_r[12] = fp64_atof(String(F("5.235180407213225e-29")).c_str());
-        fit64RV45_r[11] = fp64_atof(String(F("-1.0326522313620901e-25")).c_str());
-        fit64RV45_r[10] = fp64_atof(String(F("1.3446707593535264e-22")).c_str());
-        fit64RV45_r[9] = fp64_atof(String(F("-1.2167590034249164e-19")).c_str());
-        fit64RV45_r[8] = fp64_atof(String(F("7.84515584960287e-17")).c_str());
-        fit64RV45_r[7] = fp64_atof(String(F("-3.6376381048261166e-14")).c_str());
-        fit64RV45_r[6] = fp64_atof(String(F("1.2103995770781873e-11")).c_str());
-        fit64RV45_r[5] = fp64_atof(String(F("-2.8579468570036992e-09")).c_str());
-        fit64RV45_r[4] = fp64_atof(String(F("4.704431961655748e-07")).c_str());
-        fit64RV45_r[3] = fp64_atof(String(F("-5.3107745275726005e-05")).c_str());
-        fit64RV45_r[2] = fp64_atof(String(F("0.004178304781667345")).c_str());
-        fit64RV45_r[1] = fp64_atof(String(F("-0.28128607980332293")).c_str());
-        fit64RV45_r[0] = fp64_atof(String(F("29.084007135068532")).c_str());
+        fit64RV45_r[14] = fp64_atof(String(F("-2.1287535929115348e-36")).c_str());
+        fit64RV45_r[13] = fp64_atof(String(F("1.5748997961393054e-32")).c_str());
+        fit64RV45_r[12] = fp64_atof(String(F("-5.235180407213225e-29")).c_str());
+        fit64RV45_r[11] = fp64_atof(String(F("1.0326522313620901e-25")).c_str());
+        fit64RV45_r[10] = fp64_atof(String(F("-1.3446707593535264e-22")).c_str());
+        fit64RV45_r[9] = fp64_atof(String(F("1.2167590034249164e-19")).c_str());
+        fit64RV45_r[8] = fp64_atof(String(F("-7.84515584960287e-17")).c_str());
+        fit64RV45_r[7] = fp64_atof(String(F("3.6376381048261166e-14")).c_str());
+        fit64RV45_r[6] = fp64_atof(String(F("-1.2103995770781873e-11")).c_str());
+        fit64RV45_r[5] = fp64_atof(String(F("2.8579468570036992e-09")).c_str());
+        fit64RV45_r[4] = fp64_atof(String(F("-4.704431961655748e-07")).c_str());
+        fit64RV45_r[3] = fp64_atof(String(F("5.3107745275726005e-05")).c_str());
+        fit64RV45_r[2] = fp64_atof(String(F("-0.004178304781667345")).c_str());
+        fit64RV45_r[1] = fp64_atof(String(F("0.28128607980332293")).c_str());
+        fit64RV45_r[0] = fp64_atof(String(F("-29.084007135068532")).c_str());
     }
 
 
     void Device2(void) {
         fit64RV45_l = std::vector <float64_t>(15);
-        fit64RV45_l[14] = fp64_atof(String(F("1.3012260559125937e-35")).c_str());
-        fit64RV45_l[13] = fp64_atof(String(F("-9.494262059115952e-32")).c_str());
-        fit64RV45_l[12] = fp64_atof(String(F("3.1268682744213197e-28")).c_str());
-        fit64RV45_l[11] = fp64_atof(String(F("-6.146799573438062e-25")).c_str());
-        fit64RV45_l[10] = fp64_atof(String(F("8.037299976392854e-22")).c_str());
-        fit64RV45_l[9] = fp64_atof(String(F("-7.374707899901929e-19")).c_str());
-        fit64RV45_l[8] = fp64_atof(String(F("4.88300808491803e-16")).c_str());
-        fit64RV45_l[7] = fp64_atof(String(F("-2.3633748281711946e-13")).c_str());
-        fit64RV45_l[6] = fp64_atof(String(F("8.379425770217733e-11")).c_str());
-        fit64RV45_l[5] = fp64_atof(String(F("-2.1609842284031454e-08")).c_str());
-        fit64RV45_l[4] = fp64_atof(String(F("3.986407205204476e-06")).c_str());
-        fit64RV45_l[3] = fp64_atof(String(F("-0.000511188364967593")).c_str());
-        fit64RV45_l[2] = fp64_atof(String(F("0.04357093118373209")).c_str());
-        fit64RV45_l[1] = fp64_atof(String(F("-2.329489728986675")).c_str());
-        fit64RV45_l[0] = fp64_atof(String(F("82.46352504265981")).c_str());
+        fit64RV45_l[14] = fp64_atof(String(F("-1.3012260559125937e-35")).c_str());
+        fit64RV45_l[13] = fp64_atof(String(F("9.494262059115952e-32")).c_str());
+        fit64RV45_l[12] = fp64_atof(String(F("-3.1268682744213197e-28")).c_str());
+        fit64RV45_l[11] = fp64_atof(String(F("6.146799573438062e-25")).c_str());
+        fit64RV45_l[10] = fp64_atof(String(F("-8.037299976392854e-22")).c_str());
+        fit64RV45_l[9] = fp64_atof(String(F("7.374707899901929e-19")).c_str());
+        fit64RV45_l[8] = fp64_atof(String(F("-4.88300808491803e-16")).c_str());
+        fit64RV45_l[7] = fp64_atof(String(F("2.3633748281711946e-13")).c_str());
+        fit64RV45_l[6] = fp64_atof(String(F("-8.379425770217733e-11")).c_str());
+        fit64RV45_l[5] = fp64_atof(String(F("2.1609842284031454e-08")).c_str());
+        fit64RV45_l[4] = fp64_atof(String(F("-3.986407205204476e-06")).c_str());
+        fit64RV45_l[3] = fp64_atof(String(F("0.000511188364967593")).c_str());
+        fit64RV45_l[2] = fp64_atof(String(F("-0.04357093118373209")).c_str());
+        fit64RV45_l[1] = fp64_atof(String(F("2.329489728986675")).c_str());
+        fit64RV45_l[0] = fp64_atof(String(F("-82.46352504265981")).c_str());
 
         fit64RV45_r = std::vector <float64_t>(15);
-        fit64RV45_r = std::vector <float64_t>(15);
-        fit64RV45_r[14] = fp64_atof(String(F("1.4436231649486664e-35")).c_str());
-        fit64RV45_r[13] = fp64_atof(String(F("-1.0489683655067018e-31")).c_str());
-        fit64RV45_r[12] = fp64_atof(String(F("3.4395003093908697e-28")).c_str());
-        fit64RV45_r[11] = fp64_atof(String(F("-6.729451414975763e-25")).c_str());
-        fit64RV45_r[10] = fp64_atof(String(F("8.754188106097561e-22")).c_str());
-        fit64RV45_r[9] = fp64_atof(String(F("-7.987655610880187e-19")).c_str());
-        fit64RV45_r[8] = fp64_atof(String(F("5.256314114862736e-16")).c_str());
-        fit64RV45_r[7] = fp64_atof(String(F("-2.5266654527916786e-13")).c_str());
-        fit64RV45_r[6] = fp64_atof(String(F("8.89000755255239e-11")).c_str());
-        fit64RV45_r[5] = fp64_atof(String(F("-2.2731008508940537e-08")).c_str());
-        fit64RV45_r[4] = fp64_atof(String(F("4.15342530472971e-06")).c_str());
-        fit64RV45_r[3] = fp64_atof(String(F("-0.000527040998067761")).c_str());
-        fit64RV45_r[2] = fp64_atof(String(F("0.04441480169308953")).c_str());
-        fit64RV45_r[1] = fp64_atof(String(F("-2.3465342934877804")).c_str());
-        fit64RV45_r[0] = fp64_atof(String(F("82.24086926718981")).c_str());
+        fit64RV45_r[14] = fp64_atof(String(F("-1.4436231649486664e-35")).c_str());
+        fit64RV45_r[13] = fp64_atof(String(F("1.0489683655067018e-31")).c_str());
+        fit64RV45_r[12] = fp64_atof(String(F("-3.4395003093908697e-28")).c_str());
+        fit64RV45_r[11] = fp64_atof(String(F("6.729451414975763e-25")).c_str());
+        fit64RV45_r[10] = fp64_atof(String(F("-8.754188106097561e-22")).c_str());
+        fit64RV45_r[9] = fp64_atof(String(F("7.987655610880187e-19")).c_str());
+        fit64RV45_r[8] = fp64_atof(String(F("-5.256314114862736e-16")).c_str());
+        fit64RV45_r[7] = fp64_atof(String(F("2.5266654527916786e-13")).c_str());
+        fit64RV45_r[6] = fp64_atof(String(F("-8.89000755255239e-11")).c_str());
+        fit64RV45_r[5] = fp64_atof(String(F("2.2731008508940537e-08")).c_str());
+        fit64RV45_r[4] = fp64_atof(String(F("-4.15342530472971e-06")).c_str());
+        fit64RV45_r[3] = fp64_atof(String(F("0.000527040998067761")).c_str());
+        fit64RV45_r[2] = fp64_atof(String(F("-0.04441480169308953")).c_str());
+        fit64RV45_r[1] = fp64_atof(String(F("2.3465342934877804")).c_str());
+        fit64RV45_r[0] = fp64_atof(String(F("-82.24086926718981")).c_str());
     }
 
     typedef void (dBMeter::* GetRawInputType)(Measurement&);
@@ -257,19 +256,19 @@ public:
         (this->*GetRawInput)(m);
         m.dBLeft = PolyVal(fit64RV45_l, m.RawLeft);
         m.dBRight = PolyVal(fit64RV45_r, m.RawRight);
-        if (m.dBLeft > 28 || m.dBRight > 28) {
+        if (m.dBLeft < -28 || m.dBRight < -28) {
             inputpregainRelay.Enable();
             Measurement n(m);
             (this->*GetRawInput)(n);
-            if (m.dBLeft > 28) {
+            if (m.dBLeft < -28) {
                 m.RawLeftGain = true;
                 m.RawLeft = n.RawLeft;
-                m.dBLeft = PolyVal(fit64RV45_l, m.RawLeft) + 12.0;
+                m.dBLeft = PolyVal(fit64RV45_l, m.RawLeft) - 12.0;
             }
-            if (m.dBRight > 28) {
+            if (m.dBRight < -28) {
                 m.RawRightGain = true;
                 m.RawRight = n.RawRight;
-                m.dBRight = PolyVal(fit64RV45_r, m.RawRight) + 12.0;
+                m.dBRight = PolyVal(fit64RV45_r, m.RawRight) - 12.0;
             }
             inputpregainRelay.Disable();
         }
@@ -358,7 +357,7 @@ public:
         //std::vector<int> rv{45, 146, 255};
         std::vector<int> rv{ 45 };
         for (std::vector<int>::iterator r = rv.begin(); r != rv.end(); r++) {
-            for (float d = 0.0; d < 32.1; d += 0.05) {
+            for (float d = 0.0; d > -32.1; d -= 0.05) {
                 signalGenerator.setFreq(1000.0, d);
                 Measurement m(d, *r);
                 GetRawInputInternal(m);
@@ -379,7 +378,7 @@ public:
         SignalGenerator signalGenerator;
         System::UnmutedCalibrationMode();;
         int i = 44;
-        for (float d = 0.0; d < 32.1; d += .1) {
+        for (float d = 0.0; d > -32.1; d -= .1) {
             signalGenerator.setFreq(1000.0, d);
             Measurement next(d, i);
             GetRawInputInternal(next);
