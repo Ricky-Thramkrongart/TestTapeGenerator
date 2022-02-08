@@ -25,12 +25,15 @@ public:
 class AdjustingReferenceLevelMonitor : public DialogOk
 {
 protected:
+    SignalGenerator signalGenerator;
     dBMeter dbMeter;
 public:
     std::shared_ptr<TapeInfo> tapeInfo;
     AdjustingReferenceLevelMonitor(TapeInfo::Tapes Tape) : tapeInfo(TapeInfo::Get(Tape))
     {
-        System::UnMute();
+        double d = tapeInfo->Target -6;
+        signalGenerator.setFreq(1000.0, d);
+        System::UnMute();       
     }
     void Update()
     {
@@ -40,7 +43,8 @@ public:
         dBMeter::Measurement m;
         m.dB = Target;
         dbMeter.GetdB(m, RightLevel, LeftLevel);
-        std::string statuscontrol = StatusControl(0.5, LeftLevel - Target, RightLevel - Target);
+        
+        std::string statuscontrol = StatusControl(1.5, LeftLevel - Target, RightLevel - Target);
         cSF(sf_line, 41);
         sf_line.print(F("Target: "));
         sf_line.print(Target, 1 ,4);
@@ -55,7 +59,7 @@ public:
         cSF(sf_line, 41);
         sf_line.print(F("Target: "));
         sf_line.print(Target, 1, 4);
-        sf_line.print(F("dBm  Actuel (L:R):        "));
+        sf_line.print(F(" dBm  Actuel (L:R):        "));
         lcdhelper.Line(0, F("Reference Level"));
         lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
         lcdhelper.Line(2, sf_line);

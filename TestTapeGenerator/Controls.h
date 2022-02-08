@@ -5,25 +5,25 @@
 #include "Timer.h"
 #include "Button.h"
 
-std::string StatusControl(double trashhold, uint16_t LeftLevel, uint16_t RightLevel)
+std::string StatusControl(double treshhold, double LeftLevelDiff, double RightLevelDiff)
 {
     char stringbuffer[] = "=:=";
-    if (LeftLevel < -trashhold)
+    if (LeftLevelDiff < -treshhold)
     {
-        stringbuffer[0] = '<';
+        stringbuffer[0] = '-';
     }
-    if (LeftLevel > trashhold)
+    if (LeftLevelDiff > treshhold)
     {
-        stringbuffer[0] = '>';
+        stringbuffer[0] = '+';
     }
 
-    if (RightLevel < -trashhold)
+    if (RightLevelDiff < -treshhold)
     {
-        stringbuffer[2] = '<';
+        stringbuffer[2] = '-';
     }
-    if (RightLevel > trashhold)
+    if (RightLevelDiff > treshhold)
     {
-        stringbuffer[2] = '>';
+        stringbuffer[2] = '+';
     }
 
     return stringbuffer;
