@@ -16,8 +16,8 @@ double g(SignalGenerator& signalGenerator, dBMeter& dbMeter, double x0, const do
 {
     double f1;
     do {
+        delta += 0.1;
         f1 = f(signalGenerator, dbMeter, x0 + delta, Target);
-        delta += 0.2;
     } while (f1 - f0 < 0.2);
     return (f1 - f0) / delta;
 }
@@ -35,7 +35,7 @@ bool FindDb(SignalGenerator& signalGenerator, dBMeter& dbMeter, double Target)
 
     Serial.print("Target: "); Serial.println(Target);
 
-    double delta = 0.1;
+    double delta = 0.0;
 
     do
     {
