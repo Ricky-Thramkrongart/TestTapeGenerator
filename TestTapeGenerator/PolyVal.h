@@ -12,8 +12,8 @@ double PolyVal(const std::vector <float64_t>& fit64, uint16_t v)
         y = fp64_add(y, fp64_mul(fit64[i], fp64_pow(x, fp64_sd(i))));
     }
 
-    y = fp64_fmin(y, fp64_sd(29.2));
-    y = fp64_fmax(y, fp64_sd(0));
+    y = fp64_fmax(y, fp64_sd(-29.2));
+    y = fp64_fmin(y, fp64_sd(0));
 
     return atof(fp64_to_string(y, 15, 2));
 }

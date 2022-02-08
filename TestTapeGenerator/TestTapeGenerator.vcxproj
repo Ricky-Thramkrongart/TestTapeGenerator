@@ -118,6 +118,7 @@
     <ClInclude Include="NewTestTape.h">
       <FileType>CppCode</FileType>
     </ClInclude>
+    <ClInclude Include="PolyVal.h" />
     <ClInclude Include="Printer.h">
       <FileType>CppCode</FileType>
     </ClInclude>

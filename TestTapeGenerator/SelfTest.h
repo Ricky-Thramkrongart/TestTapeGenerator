@@ -38,10 +38,18 @@ void selftest()
     System::UnmutedCalibrationMode();
     dBMeter dbMeter;
 
+    //for (double d = -16.0; d < 0.1; d += 0.1) {
+    //    cSF(sf_line, 41);
+    //    sf_line.print(F("dBM: ")); sf_line.print(d); sf_line.print(F(" "));
+    //    sf_line.print(F("OutPutFit64: ")); sf_line.print(signalGenerator.OutPutFit64(d));
+    //    Serial.println(sf_line.c_str());
+    //    delay(50);
+    //}
+
     //std::vector<double> freqTest{ 300, 1000, 10000, 20000.0, 25000.0 };
     std::vector<double> freqTest{ 25000.0 };
-    //std::vector<double> dbTest{ 0.0, 5.0, 10.0, 25.0, 30.0 };
-    std::vector<double> dbTest{ 30.0 };
+    //std::vector<double> dbTest{ 0.0, -5.0, -10.0, -25.0, -30.0 };
+    std::vector<double> dbTest{ -30.0 };
     for (std::vector<double>::iterator f = freqTest.begin(); f != freqTest.end(); f++) {
         for (std::vector<double>::iterator d = dbTest.begin(); d != dbTest.end(); d++) {
             signalGenerator.setFreq(*f, *d);

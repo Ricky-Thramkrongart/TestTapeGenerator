@@ -6,10 +6,13 @@ import serial
 
 def write_array(hfile, data):
     s = open(hfile, mode='wb')
-    s.write(str('            fit64 = std::vector <float64_t>(' + str(len(data)) + ');\r\n').encode())
     i = len(data) - 1
     for d in data:
-        s.write(str('            fit64[' + str(i) + '] = fp64_atof(String(F("' + str(d) + '")).c_str());\r\n').encode())
+        s.write(str('            "' + str(d)).encode())
+        if (i > 0):
+            s.write(str('",\r\n').encode())
+        else:
+            s.write(str('"').encode())
         i -= 1
     s.close()
 

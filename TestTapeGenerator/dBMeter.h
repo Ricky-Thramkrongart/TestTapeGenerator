@@ -32,7 +32,7 @@ public:
             int bitsRight = ceil(log(RawRight) / log(2));
             cSF(sf_line, 41);
             sf_line.print(F("RV:")); sf_line.print(RV);
-            sf_line.print(F(" Raw:")); sf_line.print(dB, 4, 2);
+            sf_line.print(F(" Raw:")); sf_line.print(dB, 2, 4);
             sf_line.print(F(" Left:")); sf_line.print(RawLeft);
             sf_line.print(F(" Right:")); sf_line.print(RawRight);
             sf_line.print(F(" Bits (L/R): ")); sf_line.print(bitsLeft);
@@ -44,7 +44,7 @@ public:
             cSF(sf_line, 41);
             sf_line.print(RV);
             sf_line.print(F(","));
-            sf_line.print(dB, 4, 2);
+            sf_line.print(dB, 1, 4);
             sf_line.print(F(","));
             sf_line.print(RawLeft);
             sf_line.print(F(","));
@@ -55,10 +55,10 @@ public:
         String String(void) {
             cSF(sf_line, 41);
             sf_line.print(F("dBMeter: "));
-            sf_line.print(dBLeft, 2, 5);
-            sf_line.print(F("dB "));
-            sf_line.print(dBRight, 2, 5);
-            sf_line.print(F("dB "));
+            sf_line.print(dBLeft, 1, 5);
+            sf_line.print(F("dBM "));
+            sf_line.print(dBRight, 1, 5);
+            sf_line.print(F("dBM "));
             return sf_line.c_str();
         }
         double dB;
@@ -150,7 +150,7 @@ public:
 
         //Determine Device
         if (fit64RV45_l.empty() || fit64RV45_r.empty()) {
-            Device2();
+            Device1();
             //bool I2C_eepromHasFitArray = ReadFit64FromI2C_eeprom();
             //if (false && !I2C_eepromHasFitArray) {
             //    Device2();

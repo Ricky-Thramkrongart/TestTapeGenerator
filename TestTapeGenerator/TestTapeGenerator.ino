@@ -81,7 +81,7 @@ void SetDateTime()
         if (Serial.available() >= 19) {
             MatchState ms;
             String str(Serial.readString());
-            ms.Target(str.c_str());
+            ms.Target(const_cast<char*>(str.c_str()));
             char result = ms.Match("(%d%d%d%d)/(%d%d)/(%d%d) (%d%d)\.(%d%d)\.(%d%d)");
             char cap[256];
             if (result == REGEXP_MATCHED)
@@ -148,7 +148,7 @@ void StartSignalGenerator()
         if (Serial.available()) {
             MatchState ms;
             String str(Serial.readString());
-            ms.Target(str.c_str());
+            ms.Target(const_cast<char*>(str.c_str()));
             char result = ms.Match("([-+]?[0-9]*\.?[0-9]+) ([-+]?[0-9]*\.?[0-9]+)");
             char cap[256];
 
@@ -212,7 +212,7 @@ void setup()
     String str(Serial.readString());
     str.trim();
     if (str.length()) {
-        MatchState ms(str.c_str());
+        MatchState ms(const_cast<char*>(str.c_str()));
         if (REGEXP_MATCHED == ms.Match("RVSweep"))
             InputHardwareCalibration();
     }
