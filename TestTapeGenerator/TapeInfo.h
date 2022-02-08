@@ -22,7 +22,7 @@ public:
         sf_line.print(Frequency, 5);
         sf_line.print(F("Hz "));
         sf_line.print(Level, 5);
-        sf_line.print(F("dBM "));
+        sf_line.print(F("dBm "));
         sf_line.print(Time, 5);
         sf_line.print(F("s"));
         return sf_line.c_str();

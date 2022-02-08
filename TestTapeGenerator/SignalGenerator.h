@@ -99,23 +99,13 @@ public:
     void Device2()
     {
         const char* fit64_flashTable[] PROGMEM = {
-            //"2.600890117485789397e-05",
-            //"-1.382974224325811971e-03",
-            //"2.582426183357029378e-02",
-            //"-1.628642044710132131e-01",
-            //"5.232081299714196748e-02",
-            //"-1.763286858580261196e+01",
-            //"2.552888852916538838e+02"
-            "1.7800453819819787e-11",
-            "8.656268716548466e-09",
-            "9.985712631417102e-07",
-            "5.2157895124829465e-05",
-            "0.0014167550103016079",
-            "0.019175211596256944",
-            "0.08524400351736518",
-            "-0.1094720810469209",
-            "15.713410685133057",
-            "255.02567422590707"
+            "2.6008901174857894e-05",
+            "0.001382974224325812",
+            "0.025824261833570294",
+            "0.1628642044710132",
+            "0.05232081299714197",
+            "17.632868585802612",
+            "255.28888529165388"
         };
         constexpr auto fit64_size = sizeof(fit64_flashTable) / sizeof(const char*);
         fit64 = std::vector <float64_t>(fit64_size);
@@ -188,7 +178,7 @@ public:
         }
         output = OutPutFit64(dBdiff);
         //cSF(sf_line, 41);
-        //sf_line.print(F("dBM: ")); sf_line.print(dB, 1, 5); sf_line.print(F(" dBDiff: ")); sf_line.print(dBdiff, 1, 5); sf_line.print(" Output: "); sf_line.print(output);
+        //sf_line.print(F("dBm: ")); sf_line.print(dB, 1, 5); sf_line.print(F(" dBDiff: ")); sf_line.print(dBdiff, 1, 5); sf_line.print(" Output: "); sf_line.print(output);
         //Serial.println(sf_line);
 
         const uint8_t leftChannelOut(0);
@@ -234,7 +224,7 @@ public:
         sf_line.print(f, 0, 5);
         sf_line.print(F("Hz "));
         sf_line.print(dB, 1, 5);
-        sf_line.print(F("dBM"));
+        sf_line.print(F("dBm"));
         return sf_line.c_str();
     }
 

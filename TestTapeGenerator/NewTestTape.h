@@ -44,7 +44,7 @@ public:
         cSF(sf_line, 41);
         sf_line.print(F("Target: "));
         sf_line.print(Target, 1 ,4);
-        sf_line.print(F(" dBM  Actuel (L:R): "));
+        sf_line.print(F(" dBm  Actuel (L:R): "));
         digitalWrite(8, LOW);
         lcdhelper.lcd.setCursor(sf_line.length(), 0);
         lcdhelper.lcd.print(statuscontrol.c_str());
@@ -55,7 +55,7 @@ public:
         cSF(sf_line, 41);
         sf_line.print(F("Target: "));
         sf_line.print(Target, 1, 4);
-        sf_line.print(F("dBM  Actuel (L:R):        "));
+        sf_line.print(F("dBm  Actuel (L:R):        "));
         lcdhelper.Line(0, F("Reference Level"));
         lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
         lcdhelper.Line(2, sf_line);

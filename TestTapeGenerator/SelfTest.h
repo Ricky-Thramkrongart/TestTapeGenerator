@@ -40,7 +40,7 @@ void selftest()
 
     //for (double d = -16.0; d < 0.1; d += 0.1) {
     //    cSF(sf_line, 41);
-    //    sf_line.print(F("dBM: ")); sf_line.print(d); sf_line.print(F(" "));
+    //    sf_line.print(F("dBm: ")); sf_line.print(d); sf_line.print(F(" "));
     //    sf_line.print(F("OutPutFit64: ")); sf_line.print(signalGenerator.OutPutFit64(d));
     //    Serial.println(sf_line.c_str());
     //    delay(50);

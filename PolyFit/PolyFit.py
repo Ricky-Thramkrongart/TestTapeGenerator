@@ -38,6 +38,8 @@ def fit(basename):
         deltaerror = sqrt(numpy.dot(delta, delta)) / delta.size
         error_change = (current_deltaerror - deltaerror) / current_deltaerror
         current_deltaerror = deltaerror
+        print(str(deltaerror) + " " + str(error_change))
+
 
         if (error_change < 0.01):
             numpy.savetxt(fitfile, data, delimiter=",")

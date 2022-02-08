@@ -56,9 +56,9 @@ public:
             cSF(sf_line, 41);
             sf_line.print(F("dBMeter: "));
             sf_line.print(dBLeft, 1, 5);
-            sf_line.print(F("dBM "));
+            sf_line.print(F("dBm "));
             sf_line.print(dBRight, 1, 5);
-            sf_line.print(F("dBM "));
+            sf_line.print(F("dBm "));
             return sf_line.c_str();
         }
         double dB;
@@ -150,7 +150,7 @@ public:
 
         //Determine Device
         if (fit64RV45_l.empty() || fit64RV45_r.empty()) {
-            Device1();
+            Device2();
             //bool I2C_eepromHasFitArray = ReadFit64FromI2C_eeprom();
             //if (false && !I2C_eepromHasFitArray) {
             //    Device2();
