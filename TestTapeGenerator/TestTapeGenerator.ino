@@ -13,6 +13,7 @@
 #include "Splash.h"
 #include "SelfTest.h"
 #include "NewTestTape.h"
+#include "FindDb.h"
 
 using namespace std;
 
@@ -204,8 +205,13 @@ void InputHardwareCalibration(void)
 void setup()
 {
     Serial.begin(115200);
+
     splashscreen();
     selftest();
+
+    SignalGenerator signalGenerator;
+    dBMeter dbMeter;
+    FindDb(signalGenerator, dbMeter, -9.5);
 
     Serial.setTimeout(500);
     Serial.println("Prompt>");

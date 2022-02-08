@@ -119,7 +119,7 @@ public:
         System::UnMute();
 
         //ReadFit64FromEEPROM();
-        Device1();
+        Device2();
 
         potentio.begin();        // start Didital potmeter
 

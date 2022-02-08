@@ -63,5 +63,8 @@
     <ClInclude Include="PolyVal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FindDb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

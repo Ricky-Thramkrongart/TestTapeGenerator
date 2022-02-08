@@ -7,10 +7,6 @@
 void selftest()
 {
     LCD_Helper lcdHelper;
-    lcdHelper.Line(0, String(F("Free Memory: ")) + String(freeMemory()));
-    lcdHelper.Show(Serial);
-    lcdHelper.Show(1000);
-
     byte devices[] = { 0x25 /*Disp*/, 0x2C/*DATT*/, 0x50/*EEPROM*/, 0x68/*RTC*/ };
     for (int i = 0; i != sizeof(devices) / sizeof(byte); i++)
     {
