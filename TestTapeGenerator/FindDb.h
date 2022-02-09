@@ -5,10 +5,9 @@ double f(SignalGenerator& signalGenerator, dBMeter& dbMeter, const double x0, do
 {
     signalGenerator.setFreq(1000, x0);
     dBMeter::Measurement m;
-    double dummy;
-    dbMeter.GetdB(m, dummy, dummy);
-    Serial.println(SignalGenerator::String(1000, x0));
-    Serial.println(m.String().c_str());
+    dbMeter.GetdB(m);
+    Serial.println(SignalGenerator::String(1000, x0, 2));
+    Serial.println(m.String(2).c_str());
     return m.dBLeft - Target;
 }
 
@@ -22,7 +21,7 @@ double g(SignalGenerator& signalGenerator, dBMeter& dbMeter, double x0, const do
     return (f1 - f0) / delta;
 }
 
-bool FindDb(SignalGenerator& signalGenerator, dBMeter& dbMeter, double Target)
+double FindDb(SignalGenerator& signalGenerator, dBMeter& dbMeter, double Target)
 {
     cSF(sf_line, 41);
     System::UnmutedCalibrationMode();
@@ -40,6 +39,9 @@ bool FindDb(SignalGenerator& signalGenerator, dBMeter& dbMeter, double Target)
     do
     {
         f0 = f(signalGenerator, dbMeter, x0, Target);
+        if (fabs(f0) <= e) {
+            return x0;
+        }
         g0 = g(signalGenerator, dbMeter, x0, Target, f0, delta);
 
         if (g0 == 0.0)
@@ -57,11 +59,5 @@ bool FindDb(SignalGenerator& signalGenerator, dBMeter& dbMeter, double Target)
             Serial.println("Not Convergent.");
             exit(0);
         }
-
-        f1 = f(signalGenerator, dbMeter, x1, Target);
-    } while (fabs(f1) > e);
-    signalGenerator.setFreq(1000, x1);
-    double dummy;
-    dBMeter::Measurement m;
-    dbMeter.GetdB(m, dummy, dummy);
+    } while (true);
 }

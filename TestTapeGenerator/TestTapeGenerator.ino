@@ -13,6 +13,8 @@
 #include "Splash.h"
 #include "SelfTest.h"
 #include "NewTestTape.h"
+
+
 #include "FindDb.h"
 
 using namespace std;
@@ -163,8 +165,7 @@ void StartSignalGenerator()
                 signalGenerator.setFreq(freq, dB);
                 dBMeter::Measurement m;
                 m.dB = dB;
-                double dBLeft, dBRight;
-                dbMeter.GetdB(m, dBLeft, dBRight);
+                dbMeter.GetdB(m);
                 lcdhelper.Line(2, SignalGenerator::String(freq, dB));
                 lcdhelper.Line(3, m.String());
                 lcdhelper.Show();
@@ -187,8 +188,7 @@ void StartdBMeter()
     dBMeter dbMeter;
     do {
         dBMeter::Measurement m;
-        double dBLeft, dBRight;
-        dbMeter.GetdB(m, dBLeft, dBRight);
+        dbMeter.GetdB(m);
         lcdhelper.Line(3, m.String());
         lcdhelper.Show();
         lcdhelper.Show(Serial);
@@ -205,13 +205,8 @@ void InputHardwareCalibration(void)
 void setup()
 {
     Serial.begin(115200);
-
     splashscreen();
     selftest();
-
-    SignalGenerator signalGenerator;
-    dBMeter dbMeter;
-    FindDb(signalGenerator, dbMeter, -9.5);
 
     Serial.setTimeout(500);
     Serial.println("Prompt>");

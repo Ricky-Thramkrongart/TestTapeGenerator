@@ -72,13 +72,6 @@ public:
     void Device1()
     {
         const char* fit64_flashTable[] PROGMEM = {
-            //"1.020466224049053809e-05",
-            //"6.344531099424989985e-04",
-            //"1.274961406865410436e-02",
-            //"5.875279263118116796e-02",
-            //"-3.520279674414997784e-01",
-            //"1.660582415370900833e+01",
-            //"2.548871206504122995e+02"
             "-6.162314822380227e-08",
             "-4.378308439972472e-06",
             "-0.00011688793870179859",
@@ -119,7 +112,7 @@ public:
         System::UnMute();
 
         //ReadFit64FromEEPROM();
-        Device2();
+        Device1();
 
         potentio.begin();        // start Didital potmeter
 
@@ -217,13 +210,13 @@ public:
         spiSend(f_low | freq);
         spiSend(f_high | freq);
     }
-    static String String(double f, double dB)
+    static String String(double f, double dB, uint8_t decs = 1)
     {
         cSF(sf_line, 41);
         sf_line.print(F("Generator: "));
         sf_line.print(f, 0, 5);
         sf_line.print(F("Hz "));
-        sf_line.print(dB, 1, 5);
+        sf_line.print(dB, decs, 5);
         sf_line.print(F("dBm"));
         return sf_line.c_str();
     }

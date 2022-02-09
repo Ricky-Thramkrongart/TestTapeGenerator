@@ -3,6 +3,7 @@
 
 #include <Wire.h>
 #include "dBMeter.h"
+#include "findDb.h"
 
 void selftest()
 {
@@ -51,8 +52,7 @@ void selftest()
             signalGenerator.setFreq(*f, *d);
             dBMeter::Measurement m;
             m.dB = *d;
-            double dBLeft, dBRight;
-            dbMeter.GetdB(m, dBLeft, dBRight);
+            dbMeter.GetdB(m);
             lcdHelper.Line(0, String(F("Free Memory: ")) + String(freeMemory()));
             lcdHelper.Line(2, SignalGenerator::String(*f, *d));
             lcdHelper.Line(3, m.String());
@@ -61,6 +61,14 @@ void selftest()
 
         }
     }
+    double dbOut = -9.5;
+    double dbIn = FindDb(signalGenerator, dbMeter, dbOut);
+    dBMeter::Measurement m;
+    m.dB = dbOut;
+    dbMeter.GetdB(m);
+    lcdHelper.Line(2, SignalGenerator::String(1000, dbOut, 2));
+    lcdHelper.Line(3, m.String(2));
+    lcdHelper.Show();
     delay(2000);
 }
 

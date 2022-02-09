@@ -42,9 +42,9 @@ public:
         double RightLevel;
         dBMeter::Measurement m;
         m.dB = Target;
-        dbMeter.GetdB(m, RightLevel, LeftLevel);
+        dbMeter.GetdB(m);
         
-        std::string statuscontrol = StatusControl(1.5, LeftLevel - Target, RightLevel - Target);
+        std::string statuscontrol = StatusControl(1.5, m.dBLeft - Target, m.dBRight - Target);
         cSF(sf_line, 41);
         sf_line.print(F("Target: "));
         sf_line.print(Target, 1 ,4);

@@ -40,11 +40,11 @@ public:
             return sf_line.c_str();
         }
        
-        std::string ToStringData() {
+        std::string ToStringData(uint8_t decs = 1) {
             cSF(sf_line, 41);
             sf_line.print(RV);
             sf_line.print(F(","));
-            sf_line.print(dB, 1, 4);
+            sf_line.print(dB, decs, 4);
             sf_line.print(F(","));
             sf_line.print(RawLeft);
             sf_line.print(F(","));
@@ -52,12 +52,14 @@ public:
             return sf_line.c_str();
         }
 
-        String String(void) {
+        String String(uint8_t decs = 1) {
+
+
             cSF(sf_line, 41);
             sf_line.print(F("dBMeter: "));
-            sf_line.print(dBLeft, 1, 5);
+            sf_line.print(dBLeft, decs, 5);
             sf_line.print(F("dBm "));
-            sf_line.print(dBRight, 1, 5);
+            sf_line.print(dBRight, decs, 5);
             sf_line.print(F("dBm "));
             return sf_line.c_str();
         }
@@ -150,7 +152,7 @@ public:
 
         //Determine Device
         if (fit64RV45_l.empty() || fit64RV45_r.empty()) {
-            Device2();
+            Device1();
             //bool I2C_eepromHasFitArray = ReadFit64FromI2C_eeprom();
             //if (false && !I2C_eepromHasFitArray) {
             //    Device2();
@@ -159,9 +161,8 @@ public:
             //    double dB = 0.0;
             //    signalGenerator.setFreq(1000, dB);
             //    Measurement m(dB, 45);
-            //    double dBLeft, dBRight;
-            //    GetdB(m, dBLeft, dBRight);
-            //    if (fabs(dBLeft - dB) > 1 || fabs(dBRight - dB) > 1) {
+            //    GetdB(m);
+            //    if (fabs(m.dBLeft - dB) > 1 || fabs(m.dBRight - dB) > 1) {
             //        Device1();
             //    }
             //    WriteFit64ToI2C_eeprom();
@@ -246,7 +247,7 @@ public:
     }
 
     typedef void (dBMeter::* GetRawInputType)(Measurement&);
-    double GetdB(Measurement& m, double& dBLeft, double& dBRight)
+    double GetdB(Measurement& m)
     {
         m.RV = 45;
         inputpregainRelay.Disable();
@@ -272,8 +273,6 @@ public:
             }
             inputpregainRelay.Disable();
         }
-        dBLeft = m.dBLeft;
-        dBRight = m.dBRight;
     }
 
     void GetRawInputInternal(Measurement& m)
