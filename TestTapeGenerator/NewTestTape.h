@@ -1,5 +1,8 @@
 #pragma once
 
+#include "FindDb.h"
+#include "Beep.h"
+
 double randomDouble(double minf, double maxf)
 {
     return minf + random(1UL << 31) * (maxf - minf) / (1UL << 31);  // use 1ULL<<63 for max double values)
@@ -27,6 +30,7 @@ class AdjustingReferenceLevelMonitor : public DialogOk
 protected:
     SignalGenerator signalGenerator;
     dBMeter dbMeter;
+    int manual_calibration_ok_count;
 public:
     std::shared_ptr<TapeInfo> tapeInfo;
     AdjustingReferenceLevelMonitor(TapeInfo::Tapes Tape) : tapeInfo(TapeInfo::Get(Tape))
@@ -45,6 +49,15 @@ public:
         dbMeter.GetdB(m);
         
         std::string statuscontrol = StatusControl(1.5, m.dBLeft - Target, m.dBRight - Target);
+        if (fabs(m.dBLeft - Target) < 1.5 && fabs(m.dBRight - Target) < 1.5) {
+            manual_calibration_ok_count++;
+            Beep();
+        }
+        else {
+            manual_calibration_ok_count = 0;
+        }
+
+
         cSF(sf_line, 41);
         sf_line.print(F("Target: "));
         sf_line.print(Target, 1 ,4);
@@ -52,6 +65,19 @@ public:
         digitalWrite(8, LOW);
         lcdhelper.lcd.setCursor(sf_line.length(), 0);
         lcdhelper.lcd.print(statuscontrol.c_str());
+
+        if (manual_calibration_ok_count >= 3) {
+            System::UnMute();
+            double dbOut = FindDb(signalGenerator, dbMeter, Target);
+            signalGenerator.setFreq(1000, dbOut);
+            dbMeter.GetdB(m);
+            lcdhelper.Line(2, SignalGenerator::String(1000, dbOut, 2));
+            lcdhelper.Line(3, m.String(2));
+            lcdhelper.Show(Serial);
+        }
+
+
+
     }
 
     void FullUpdate() {
