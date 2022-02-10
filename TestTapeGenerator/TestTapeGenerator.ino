@@ -206,8 +206,8 @@ void InputHardwareCalibration(void)
 void setup()
 {
     Serial.begin(115200);
-    System::Device2();
     splashscreen();
+    System::Device1();
     selftest();
 
     Serial.setTimeout(500);
