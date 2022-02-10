@@ -57,7 +57,6 @@ public:
             manual_calibration_ok_count = 0;
         }
 
-
         cSF(sf_line, 41);
         sf_line.print(F("Target: "));
         sf_line.print(Target, 1, 4);
@@ -75,9 +74,6 @@ public:
             lcdhelper.Line(3, m.String(2));
             lcdhelper.Show(Serial);
         }
-
-
-
     }
 
     void FullUpdate() {

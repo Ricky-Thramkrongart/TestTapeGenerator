@@ -207,7 +207,7 @@ void setup()
 {
     Serial.begin(115200);
     splashscreen();
-    System::Device1();
+    System::Device2();
     selftest();
 
     Serial.setTimeout(500);
