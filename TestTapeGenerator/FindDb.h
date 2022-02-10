@@ -3,7 +3,7 @@
 #include "dBMeter.h"
 double f(SignalGenerator& signalGenerator, dBMeter& dbMeter, const double x0, double const Target)
 {
-    signalGenerator.setFreq(1000, x0);
+    signalGenerator.setFreq(1000, x0, x0);
     dBMeter::Measurement m;
     dbMeter.GetdB(m);
     Serial.println(SignalGenerator::String(1000, x0, 2));

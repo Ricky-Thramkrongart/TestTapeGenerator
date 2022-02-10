@@ -206,7 +206,7 @@ public:
         std::vector<int> rv{ 45 };
         for (std::vector<int>::iterator r = rv.begin(); r != rv.end(); r++) {
             for (float d = 0.0; d > -32.1; d -= 0.05) {
-                signalGenerator.setFreq(1000.0, d);
+                signalGenerator.setFreq(1000, d, d);
                 Measurement m(d, *r);
                 GetRawInputInternal(m);
                 lcdhelper.lcd.setCursor(0, 0);
@@ -227,7 +227,7 @@ public:
         System::UnmutedCalibrationMode();;
         int i = 44;
         for (float d = 0.0; d > -32.1; d -= .1) {
-            signalGenerator.setFreq(1000.0, d);
+            signalGenerator.setFreq(1000, d, d);
             Measurement next(d, i);
             GetRawInputInternal(next);
             Measurement prev(next);

@@ -83,10 +83,11 @@ public:
         digitalWrite(_fsyncPin, HIGH);
     }
 
-    void setdB(double dB)
+    void setdB(double dB, const uint8_t ChannelOut)
     {
         double dBdiff;
         uint8_t output;
+
         if (dB > -5) {
             digitalWrite(7, LOW);  // -5 db att OFF
             digitalWrite(10, LOW);  // -10 db att OFF
@@ -112,15 +113,12 @@ public:
         //sf_line.print(F("dBm: ")); sf_line.print(dB, 1, 5); sf_line.print(F(" dBDiff: ")); sf_line.print(dBdiff, 1, 5); sf_line.print(" Output: "); sf_line.print(output);
         //Serial.println(sf_line);
 
-        const uint8_t leftChannelOut(0);
-        const uint8_t rightChannelOut(1);
-        potentio.writeRDAC(leftChannelOut, output);  //Right
-        potentio.writeRDAC(rightChannelOut, output);  //Left
+        potentio.writeRDAC(ChannelOut, output);  //Right
     }
 
     void ManualOutPut(uint8_t output)
     {
-        setFreq(1000, 0); //ATTNUATOR OFF
+        setFreq(1000, 0.0, 0.0); //ATTNUATOR OFF
 
         System::UnMute();
 
@@ -130,9 +128,10 @@ public:
         potentio.writeRDAC(rightChannelOut, output);  //Left
     }
 
-    void setFreq(double f, double dB)
+    void setFreq(uint32_t f, double dBLeft, double dBRight)
     {
-        setdB(dB);
+        setdB(dBLeft, 0);
+        setdB(dBRight, 1);
 
         const uint16_t b28 = (1UL << 13);
         const uint16_t freq = (1UL << 14);
@@ -148,15 +147,15 @@ public:
         spiSend(f_low | freq);
         spiSend(f_high | freq);
     }
-    static String String(double f, double dB, uint8_t decs = 1)
+
+    static String String(uint32_t f, double dB, uint8_t decs = 1)
     {
         cSF(sf_line, 41);
         sf_line.print(F("Generator: "));
-        sf_line.print(f, 0, 5);
+        sf_line.print(f);
         sf_line.print(F("Hz "));
         sf_line.print(dB, decs, 5);
         sf_line.print(F("dBm"));
         return sf_line.c_str();
     }
-
 };

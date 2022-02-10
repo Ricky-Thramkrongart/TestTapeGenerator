@@ -36,7 +36,7 @@ public:
     AdjustingReferenceLevelMonitor(TapeInfo::Tapes Tape) : tapeInfo(TapeInfo::Get(Tape))
     {
         double d = tapeInfo->Target - 6;
-        signalGenerator.setFreq(1000.0, d);
+        signalGenerator.setFreq(1000, d, d);
         System::UnMute();
     }
     void Update()
@@ -68,7 +68,7 @@ public:
         if (manual_calibration_ok_count >= 3) {
             System::UnMute();
             double dbOut = FindDb(signalGenerator, dbMeter, Target);
-            signalGenerator.setFreq(1000, dbOut);
+            signalGenerator.setFreq(1000, dbOut, dbOut);
             dbMeter.GetdB(m);
             lcdhelper.Line(2, SignalGenerator::String(1000, dbOut, 2));
             lcdhelper.Line(3, m.String(2));
@@ -133,7 +133,7 @@ public:
         lcdhelper.Line(0, F("Record Level"));
         lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
         lcdhelper.Line(2, sf_line);
-        signalGenerator.setFreq((*ptr)->Frequency, (*ptr)->Level);
+        signalGenerator.setFreq((*ptr)->Frequency, (*ptr)->Level, (*ptr)->Level);
         ptr++;
         if (ptr == tapeInfo->RecordSteps.end()) {
             finished = true;
@@ -165,7 +165,7 @@ public:
         lcdhelper.Line(1, VUMeter[0].c_str());
         lcdhelper.Line(2, VUMeter[1].c_str());
         lcdhelper.Line(3, VUMeter[2].c_str());
-        signalGenerator.setFreq((*ptr)->Frequency, (*ptr)->Level);
+        signalGenerator.setFreq((*ptr)->Frequency, (*ptr)->Level, (*ptr)->Level);
         ptr++;
         if (ptr == tapeInfo->RecordSteps.end()) {
             finished = true;

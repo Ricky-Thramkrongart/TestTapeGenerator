@@ -135,7 +135,7 @@ void StartSignalGenerator()
 {
   LCD_Helper lcdhelper;
     lcdhelper.Line(0, F("Signal Generator"));
-    lcdhelper.Line(1, F("Format: [float float] 115200 Baud"));
+    lcdhelper.Line(1, F("Format: [float float float] 115200 Baud"));
 
     lcdhelper.Show();
 
@@ -152,21 +152,23 @@ void StartSignalGenerator()
             MatchState ms;
             String str(Serial.readString());
             ms.Target(const_cast<char*>(str.c_str()));
-            char result = ms.Match("([-+]?[0-9]*\.?[0-9]+) ([-+]?[0-9]*\.?[0-9]+)");
+            char result = ms.Match("([-+]?[0-9]*\.?[0-9]+) ([-+]?[0-9]*\.?[0-9]+) ([-+]?[0-9]*\.?[0-9]+)");
             char cap[256];
 
             if (result == REGEXP_MATCHED)
             {
                 int index = 0;
                 ms.GetCapture(cap, index++);
-                double freq = atof(cap);
+                int freq = atoi(cap);
                 ms.GetCapture(cap, index++);
-                double dB = atof(cap);
-                signalGenerator.setFreq(freq, dB);
+                double dBLeft = atof(cap);
+                ms.GetCapture(cap, index++);
+                double dBRight = atof(cap);
+                signalGenerator.setFreq(freq, dBLeft, dBRight);
                 dBMeter::Measurement m;
-                m.dB = dB;
+                m.dB = dBLeft;
                 dbMeter.GetdB(m);
-                lcdhelper.Line(2, SignalGenerator::String(freq, dB));
+                lcdhelper.Line(2, SignalGenerator::String(freq, dBLeft));
                 lcdhelper.Line(3, m.String());
                 lcdhelper.Show();
                 lcdhelper.Show(Serial);
@@ -207,7 +209,7 @@ void setup()
 {
     Serial.begin(115200);
     splashscreen();
-    System::Device2();
+    System::Device1();
     selftest();
 
     Serial.setTimeout(500);
