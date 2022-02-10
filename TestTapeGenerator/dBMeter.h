@@ -54,8 +54,6 @@ public:
         }
 
         String String(uint8_t decs = 1) {
-
-
             cSF(sf_line, 41);
             sf_line.print(F("dBMeter: "));
             sf_line.print(dBLeft, decs, 5);
@@ -251,4 +249,3 @@ public:
     }
 };
 Relay dBMeter::inputpregainRelay(Relay(30));
-

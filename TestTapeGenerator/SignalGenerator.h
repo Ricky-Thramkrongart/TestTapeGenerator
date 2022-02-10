@@ -1,5 +1,4 @@
-#ifndef SIGNALGENERATOR_H
-#define SIGNALGENERATOR_H
+#pragma once
 
 #include <AD5254_asukiaaa.h>
 #include <fp64lib.h>
@@ -161,6 +160,3 @@ public:
     }
 
 };
-
-
-#endif // SIGNALGENERATOR_H
