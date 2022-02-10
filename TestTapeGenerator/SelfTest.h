@@ -1,5 +1,4 @@
-#ifndef SELFTEST_H
-#define SELFTEST_H
+#pragma once
 
 #include <Wire.h>
 #include "dBMeter.h"
@@ -71,5 +70,3 @@ void selftest()
     lcdHelper.Show();
     delay(2000);
 }
-
-#endif // SELFTEST_H
