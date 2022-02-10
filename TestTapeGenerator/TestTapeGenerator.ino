@@ -1,3 +1,4 @@
+#include "System.h"
 #include "Menu.h"
 #include "Printer.h"
 #include "Controls.h"
@@ -132,7 +133,6 @@ void dBMeterScan(void)
 
 void StartSignalGenerator()
 {
-
     LCD_Helper lcdhelper;
     lcdhelper.Line(0, F("Signal Generator"));
     lcdhelper.Line(1, F("Format: [float float] 115200 Baud"));
@@ -205,6 +205,7 @@ void InputHardwareCalibration(void)
 void setup()
 {
     Serial.begin(115200);
+    System::Device1();
     splashscreen();
     selftest();
 

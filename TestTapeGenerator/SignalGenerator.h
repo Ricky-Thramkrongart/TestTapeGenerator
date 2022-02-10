@@ -3,11 +3,9 @@
 
 #include <AD5254_asukiaaa.h>
 #include <fp64lib.h>
-#include <EEPROM.h>
 #include <ArduinoSTL.h>
 #include <algorithm>
 #include <iterator>
-#include <I2C_eeprom.h>
 #include "Relay.h"
 #include "System.h"
 #include "PolyVal.h"
@@ -26,40 +24,14 @@ protected:
     AD5254_asukiaaa potentio;
 
 public:
-    static std::vector<float64_t> fit64;
-    void WriteFit64ToEEPROM(void)
-    {
-        int addrOffset = 0;
-        byte size_ = fit64.size();
-        EEPROM.put(addrOffset, size_);
-        addrOffset += sizeof(size_);
-        for (int i = 0; i != size_; i++)
-        {
-            EEPROM.put(addrOffset, fit64[i]);
-            addrOffset += sizeof(float64_t);
-        }
-    }
-    void ReadFit64FromEEPROM(void)
-    {
-        int addrOffset = 0;
-        byte size_;
-        EEPROM.get(addrOffset, size_);
-        addrOffset += sizeof(size_);
-        fit64.resize(size_);
-        for (int i = 0; i != size_; i++)
-        {
-            EEPROM.get(addrOffset, fit64[i]);
-            addrOffset += sizeof(float64_t);
-        }
-    }
 
     uint16_t OutPutFit64(double dB)
     {
         float64_t dB64 = fp64_sd(dB);
-        float64_t rv = fp64_add(fit64[0], fp64_mul(fit64[1], dB64));
-        for (int i = fit64.size() - 1; i != 1; i--)
+        float64_t rv = fp64_add(System::fit64[0], fp64_mul(System::fit64[1], dB64));
+        for (int i = System::fit64.size() - 1; i != 1; i--)
         {
-            rv = fp64_add(rv, fp64_mul(fit64[i], fp64_pow(dB64, fp64_sd(i))));
+            rv = fp64_add(rv, fp64_mul(System::fit64[i], fp64_pow(dB64, fp64_sd(i))));
         }
 
         //rv = fp64_round(rv);
@@ -68,51 +40,18 @@ public:
         return atoi(fp64_to_string(rv, 15, 2));
     }
 
-
-    void Device1()
-    {
-        const char* fit64_flashTable[] PROGMEM = {
-            "-6.162314822380227e-08",
-            "-4.378308439972472e-06",
-            "-0.00011688793870179859",
-            "-0.0013040839584018702",
-            "-0.003870823753524697",
-            "-0.020528115676117634",
-            "-0.5461083074144886",
-            "16.406533912931025",
-            "254.83884893125213"
-        };
-        constexpr auto fit64_size = sizeof(fit64_flashTable) / sizeof(const char*);
-        fit64 = std::vector <float64_t>(fit64_size);
-        for (int i = 0; i != fit64.size(); i++) {
-            fit64[fit64_size - i - 1] = fp64_atof(const_cast<char*>(fit64_flashTable[i]));
-        }
-    }
-
-    void Device2()
-    {
-        const char* fit64_flashTable[] PROGMEM = {
-            "2.6008901174857894e-05",
-            "0.001382974224325812",
-            "0.025824261833570294",
-            "0.1628642044710132",
-            "0.05232081299714197",
-            "17.632868585802612",
-            "255.28888529165388"
-        };
-        constexpr auto fit64_size = sizeof(fit64_flashTable) / sizeof(const char*);
-        fit64 = std::vector <float64_t>(fit64_size);
-        for (int i = 0; i != fit64.size(); i++) {
-            fit64[fit64_size - i - 1] = fp64_atof(const_cast<char*>(fit64_flashTable[i]));
-        }
-    }
-
     SignalGenerator() : potentio(AD5254_ASUKIAAA_ADDR_A0_GND_A1_GND)
     {
         System::UnMute();
 
+
+        if (System::fit64.empty()) {
+            Serial.print("System::fit64.empty()");
+            delay(1000);
+            exit(EXIT_FAILURE);
+        }
+
         //ReadFit64FromEEPROM();
-        Device1();
 
         potentio.begin();        // start Didital potmeter
 
@@ -223,6 +162,5 @@ public:
 
 };
 
-std::vector<float64_t> SignalGenerator::fit64;
 
 #endif // SIGNALGENERATOR_H

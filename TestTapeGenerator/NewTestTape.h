@@ -35,9 +35,9 @@ public:
     std::shared_ptr<TapeInfo> tapeInfo;
     AdjustingReferenceLevelMonitor(TapeInfo::Tapes Tape) : tapeInfo(TapeInfo::Get(Tape))
     {
-        double d = tapeInfo->Target -6;
+        double d = tapeInfo->Target - 6;
         signalGenerator.setFreq(1000.0, d);
-        System::UnMute();       
+        System::UnMute();
     }
     void Update()
     {
@@ -47,7 +47,7 @@ public:
         dBMeter::Measurement m;
         m.dB = Target;
         dbMeter.GetdB(m);
-        
+
         std::string statuscontrol = StatusControl(1.5, m.dBLeft - Target, m.dBRight - Target);
         if (fabs(m.dBLeft - Target) < 1.5 && fabs(m.dBRight - Target) < 1.5) {
             manual_calibration_ok_count++;
@@ -60,7 +60,7 @@ public:
 
         cSF(sf_line, 41);
         sf_line.print(F("Target: "));
-        sf_line.print(Target, 1 ,4);
+        sf_line.print(Target, 1, 4);
         sf_line.print(F(" dBm  Actuel (L:R): "));
         digitalWrite(8, LOW);
         lcdhelper.lcd.setCursor(sf_line.length(), 0);
@@ -134,7 +134,7 @@ public:
         sf_line.print(F("/"));
         sf_line.print((int)tapeInfo->RecordSteps.size());
         sf_line.print(F(")"));
-        lcdhelper.Line(0,F("Record Level"));
+        lcdhelper.Line(0, F("Record Level"));
         lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
         lcdhelper.Line(2, sf_line);
         signalGenerator.setFreq((*ptr)->Frequency, (*ptr)->Level);
