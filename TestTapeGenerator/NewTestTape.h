@@ -74,6 +74,8 @@ public:
             lcdhelper.Line(2, SignalGenerator::String(Targetfreq, dbOut, 2));
             lcdhelper.Line(3, m.String(2));
             lcdhelper.Show(Serial);
+            System::ReferenceLevel = dbOut;
+            buttonPanel.returncode = ButtonPanel<DialogOk>::IDOK;
         }
     }
 

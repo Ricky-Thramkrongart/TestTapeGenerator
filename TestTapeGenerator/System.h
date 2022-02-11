@@ -55,6 +55,8 @@ protected:
     static Relay muteRelay;
     static Relay calibrationRelay;
 public:
+    static std::pair<double, double> ReferenceLevel;
+
     static void UnMute()
     {
         muteRelay.Disable();
@@ -293,7 +295,7 @@ public:
     static std::vector<float64_t> fit64RV45_r;
     static std::vector<float64_t> fit64;
 };
-
+std::pair<double, double> System::ReferenceLevel{0.0,0.0};
 Relay System::muteRelay(Relay(28, true));
 Relay System::calibrationRelay(Relay(26));
 

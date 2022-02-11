@@ -11,7 +11,11 @@ protected:
     enum Buttons { BN_UP, BN_DOWN, BN_RIGHT, BN_LEFT, BN_PAGEUP, BN_PAGEDOWN, BN_ESCAPE, BN_OK };
     T* t;
 public:
-    bool Execute()
+    enum ReturnCode { IDNONE=0, IDOK=1, IDCANCEL = 2, IDABORT =3, IDRETRY=4};
+    ReturnCode returncode;
+
+
+    ReturnCode Execute()
     {
         auto pinl = PINL;
         int keycount = 0;
@@ -41,7 +45,7 @@ public:
                     }
                 }
                 delay(50);
-            } while (keycount == 0 || ((keycount > 1) && (keycount < 4)));
+            } while (returncode == IDNONE && (keycount == 0 || ((keycount > 1) && (keycount < 4))));
             std::bitset<8> b{ pinl };
             if (b.test(BN_UP)) {
                 if (OnButtonUp) {
@@ -84,16 +88,16 @@ public:
                     (t->*OnButtonEscape)(this);
                 }
                 Beep(25);
-                return false;
+                return IDCANCEL;
             }
             else if (b.test(BN_OK)) {
                 if (OnButtonOk) {
                     (t->*OnButtonOk)(this);
                 }
                 Beep(25);
-                return true;
+                return IDOK;
             }
-        } while (true);
+        } while (returncode == IDNONE);
     }
 
     ButtonPanel(T* t_) : t(t_),
@@ -107,7 +111,9 @@ public:
         OnButtonEscape(0),
         OnButtonOk(0),
         OnUpdate(0),
-        OnLoop(0)
+        OnLoop(0),
+        returncode(IDNONE)
+
     {
         DDRL = B00000000; // all inputs PORT-L D42 til D49
     }

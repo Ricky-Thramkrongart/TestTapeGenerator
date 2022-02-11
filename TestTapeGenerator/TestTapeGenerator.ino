@@ -210,7 +210,7 @@ void setup()
     Serial.begin(115200);
     splashscreen();
     System::Device1();
-    selftest();
+    //selftest();
 
     Serial.setTimeout(500);
     Serial.println("Prompt>");
