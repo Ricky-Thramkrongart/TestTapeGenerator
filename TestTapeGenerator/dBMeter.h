@@ -25,7 +25,7 @@ public:
             return false;
         }
         Measurement() {}
-        Measurement(const double dB_, const uint8_t RV_) : dB(dB_), RV(RV_) {
+        Measurement(const std::pair<double, double>& dB_, const uint8_t RV_=45) : dB(dB_), RV(RV_) {
         }
 
         std::string ToString(void) {
@@ -33,7 +33,7 @@ public:
             int bitsRight = ceil(log(RawRight) / log(2));
             cSF(sf_line, 41);
             sf_line.print(F("RV:")); sf_line.print(RV);
-            sf_line.print(F(" Raw:")); sf_line.print(dB, 2, 4);
+            sf_line.print(F(" Raw:")); sf_line.print(dB.first, 2, 4); sf_line.print(" "); sf_line.print(dB.second, 2, 4);
             sf_line.print(F(" Left:")); sf_line.print(RawLeft);
             sf_line.print(F(" Right:")); sf_line.print(RawRight);
             sf_line.print(F(" Bits (L/R): ")); sf_line.print(bitsLeft);
@@ -41,11 +41,13 @@ public:
             return sf_line.c_str();
         }
 
-        std::string ToStringData(uint8_t decs = 1) {
+        std::string ToStringData(const uint8_t decs = 1) {
             cSF(sf_line, 41);
             sf_line.print(RV);
             sf_line.print(F(","));
-            sf_line.print(dB, decs, 4);
+            sf_line.print(dB.first, decs, 4);
+            sf_line.print(F(","));
+            sf_line.print(dB.second, decs, 4);
             sf_line.print(F(","));
             sf_line.print(RawLeft);
             sf_line.print(F(","));
@@ -53,16 +55,16 @@ public:
             return sf_line.c_str();
         }
 
-        String String(uint8_t decs = 1) {
+        String String(const uint8_t decs = 1) {
             cSF(sf_line, 41);
-            sf_line.print(F("dBMeter: "));
+            sf_line.print(F("dBMeter:           "));
             sf_line.print(dBLeft, decs, 5);
             sf_line.print(F("dBm "));
             sf_line.print(dBRight, decs, 5);
             sf_line.print(F("dBm "));
             return sf_line.c_str();
         }
-        double dB;
+        std::pair<double, double> dB;
         uint8_t RV;
         uint16_t RawLeft;
         uint16_t RawRight;
@@ -206,8 +208,8 @@ public:
         std::vector<int> rv{ 45 };
         for (std::vector<int>::iterator r = rv.begin(); r != rv.end(); r++) {
             for (float d = 0.0; d > -32.1; d -= 0.05) {
-                signalGenerator.setFreq(1000, d, d);
-                Measurement m(d, *r);
+                signalGenerator.setFreq(1000, { d, d });
+                Measurement m({ d,d }, *r);
                 GetRawInputInternal(m);
                 lcdhelper.lcd.setCursor(0, 0);
                 lcdhelper.lcd.print(m.ToString().c_str());
@@ -227,8 +229,8 @@ public:
         System::UnmutedCalibrationMode();;
         int i = 44;
         for (float d = 0.0; d > -32.1; d -= .1) {
-            signalGenerator.setFreq(1000, d, d);
-            Measurement next(d, i);
+            signalGenerator.setFreq(1000, { d, d });
+            Measurement next({ d,d }, i);
             GetRawInputInternal(next);
             Measurement prev(next);
             while (next.RV != 255 && !next.IsSaturated()) {

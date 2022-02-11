@@ -11,7 +11,7 @@ public:
         setSyncProvider(RTC.get);   // the function to get the time from the RTC
     }
     
-    void pad(SafeString& s, int n)
+    void pad(SafeString& s, const int n)
     {
         if (n < 10) {
             s.print(F("0"));

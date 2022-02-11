@@ -33,10 +33,12 @@ protected:
     int manual_calibration_ok_count;
 public:
     std::shared_ptr<TapeInfo> tapeInfo;
-    AdjustingReferenceLevelMonitor(TapeInfo::Tapes Tape) : tapeInfo(TapeInfo::Get(Tape))
+    const uint32_t Targetfreq;
+
+    AdjustingReferenceLevelMonitor(TapeInfo::Tapes Tape) : tapeInfo(TapeInfo::Get(Tape)), Targetfreq(1000)
     {
         double d = tapeInfo->Target - 6;
-        signalGenerator.setFreq(1000, d, d);
+        signalGenerator.setFreq(Targetfreq, { d, d });
         System::UnMute();
     }
     void Update()
@@ -44,8 +46,7 @@ public:
         double Target = tapeInfo->Target;
         double LeftLevel;
         double RightLevel;
-        dBMeter::Measurement m;
-        m.dB = Target;
+        dBMeter::Measurement m({ Target ,Target });
         dbMeter.GetdB(m);
 
         std::string statuscontrol = StatusControl(1.5, m.dBLeft - Target, m.dBRight - Target);
@@ -67,10 +68,10 @@ public:
 
         if (manual_calibration_ok_count >= 3) {
             System::UnMute();
-            double dbOut = FindDb(signalGenerator, dbMeter, Target);
-            signalGenerator.setFreq(1000, dbOut, dbOut);
+            std::pair<double, double>dbOut = FindDb(signalGenerator, dbMeter, Targetfreq, { Target, Target });
+            signalGenerator.setFreq(Targetfreq, dbOut);
             dbMeter.GetdB(m);
-            lcdhelper.Line(2, SignalGenerator::String(1000, dbOut, 2));
+            lcdhelper.Line(2, SignalGenerator::String(Targetfreq, dbOut, 2));
             lcdhelper.Line(3, m.String(2));
             lcdhelper.Show(Serial);
         }
@@ -133,7 +134,7 @@ public:
         lcdhelper.Line(0, F("Record Level"));
         lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
         lcdhelper.Line(2, sf_line);
-        signalGenerator.setFreq((*ptr)->Frequency, (*ptr)->Level, (*ptr)->Level);
+        signalGenerator.setFreq((*ptr)->Frequency, { (*ptr)->Level, (*ptr)->Level });
         ptr++;
         if (ptr == tapeInfo->RecordSteps.end()) {
             finished = true;
@@ -165,7 +166,7 @@ public:
         lcdhelper.Line(1, VUMeter[0].c_str());
         lcdhelper.Line(2, VUMeter[1].c_str());
         lcdhelper.Line(3, VUMeter[2].c_str());
-        signalGenerator.setFreq((*ptr)->Frequency, (*ptr)->Level, (*ptr)->Level);
+        signalGenerator.setFreq((*ptr)->Frequency, { (*ptr)->Level, (*ptr)->Level });
         ptr++;
         if (ptr == tapeInfo->RecordSteps.end()) {
             finished = true;

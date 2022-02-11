@@ -24,7 +24,7 @@ protected:
 
 public:
 
-    uint16_t OutPutFit64(double dB)
+    uint16_t OutPutFit64(const double dB)
     {
         float64_t dB64 = fp64_sd(dB);
         float64_t rv = fp64_add(System::fit64[0], fp64_mul(System::fit64[1], dB64));
@@ -83,42 +83,47 @@ public:
         digitalWrite(_fsyncPin, HIGH);
     }
 
-    void setdB(double dB, const uint8_t ChannelOut)
+    void setdB(const std::pair<double, double>& dB)
     {
-        double dBdiff;
-        uint8_t output;
 
-        if (dB > -5) {
+        double dBdiff;
+        const double dBMax(std::max(dB.first, dB.second));
+        if (dBMax > -5) {
             digitalWrite(7, LOW);  // -5 db att OFF
             digitalWrite(10, LOW);  // -10 db att OFF
-            dBdiff = dB;
+            dBdiff = 0;
         }
-        else if (dB <= -5 && dB > -10) {
+        else if (dBMax <= -5 && dBMax > -10) {
             digitalWrite(7, HIGH);  // -5 db att ON
             digitalWrite(10, LOW);  // -10 db att OFF
-            dBdiff = dB + 5;  // beregn rest att fra digi-pot
+            dBdiff = 5;  // beregn rest att fra digi-pot
         }
-        else if (dB <= -10 && dB > -15) {
+        else if (dBMax <= -10 && dBMax > -15) {
             digitalWrite(7, LOW);   // -5 db att OFF
             digitalWrite(10, HIGH); // -10 db att ON
-            dBdiff = dB + 10; // beregn rest att fra digi-pot
+            dBdiff = 10; // beregn rest att fra digi-pot
         }
-        else if (dB <= -15) {
+        else if (dBMax <= -15) {
             digitalWrite(7, HIGH);  // -5 db att ON
             digitalWrite(10, HIGH); // -10 db att ON
-            dBdiff = dB + 15; // beregn rest att fra digi-pot
+            dBdiff = 15; // beregn rest att fra digi-pot
         }
-        output = OutPutFit64(dBdiff);
-        //cSF(sf_line, 41);
-        //sf_line.print(F("dBm: ")); sf_line.print(dB, 1, 5); sf_line.print(F(" dBDiff: ")); sf_line.print(dBdiff, 1, 5); sf_line.print(" Output: "); sf_line.print(output);
+
+        std::pair<uint8_t, uint8_t>output{ OutPutFit64(dB.first + dBdiff) ,OutPutFit64(dB.second + dBdiff) };
+
+        //cSF(sf_line, 128);
+        //sf_line.print("dBLeft: "); sf_line.print(dBLeft, 1, 5); sf_line.print("dBRight: "); sf_line.print(dBRight, 1, 5); sf_line.print(" dBDiff: "); sf_line.print(dBdiff, 1, 5); sf_line.print(" outputLeft: "); sf_line.print(outputLeft); sf_line.print(" outputRight: "); sf_line.print(outputRight);
         //Serial.println(sf_line);
 
-        potentio.writeRDAC(ChannelOut, output);  //Right
+        const uint8_t leftChannelOut(1);
+        const uint8_t rightChannelOut(0);
+        potentio.writeRDAC(leftChannelOut, output.first);
+        potentio.writeRDAC(rightChannelOut, output.second);
     }
 
-    void ManualOutPut(uint8_t output)
+    void ManualOutPut(const uint8_t output)
     {
-        setFreq(1000, 0.0, 0.0); //ATTNUATOR OFF
+        setFreq(1000, { 0.0, 0.0 }); //ATTNUATOR OFF
 
         System::UnMute();
 
@@ -128,10 +133,9 @@ public:
         potentio.writeRDAC(rightChannelOut, output);  //Left
     }
 
-    void setFreq(uint32_t f, double dBLeft, double dBRight)
+    void setFreq(const uint32_t f, const std::pair<double, double>& dB)
     {
-        setdB(dBLeft, 0);
-        setdB(dBRight, 1);
+        setdB(dB);
 
         const uint16_t b28 = (1UL << 13);
         const uint16_t freq = (1UL << 14);
@@ -148,13 +152,17 @@ public:
         spiSend(f_high | freq);
     }
 
-    static String String(uint32_t f, double dB, uint8_t decs = 1)
+    static String String(const uint32_t f, const std::pair<double, double>& dB, const uint8_t decs = 1)
     {
         cSF(sf_line, 41);
+
+        char buffer[21];
         sf_line.print(F("Generator: "));
-        sf_line.print(f);
+        sf_line.print(uintToStr(f, 5, buffer)); //Unsafe
         sf_line.print(F("Hz "));
-        sf_line.print(dB, decs, 5);
+        sf_line.print(dB.first, decs, 5);
+        sf_line.print(F("dBm "));
+        sf_line.print(dB.second, decs, 5);
         sf_line.print(F("dBm"));
         return sf_line.c_str();
     }

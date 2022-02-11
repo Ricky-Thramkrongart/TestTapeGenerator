@@ -42,32 +42,31 @@ void selftest()
     //    delay(50);
     //}
 
-    //std::vector<uint32_t> freqTest{ 300, 1000, 10000, 20000, 25000 };
-    std::vector<uint32_t> freqTest{ 25000 };
-    //std::vector<double> dbTest{ {0.0,0.0}, {-5.0,-5.3}, {-9.5, -10.0}, {-25.0, -25.0}, {-30.0,-30.0} };
-    std::vector<std::pair<double, double>> dbTest{ { -30.0, -20.0}, { -20.0, -30.0} };
+    std::vector<uint32_t> freqTest{ 1000, 25000 };
+    std::vector<std::pair<double, double>> dbTest{ { -4.9, -5.1},  { -5.1, -4.9}, { -5.5, -5.5}, { -30.0, -20.0}, { -20.0, -30.0} };
 
     for (std::vector<uint32_t>::iterator f = freqTest.begin(); f != freqTest.end(); f++) {
         for (std::vector<std::pair<double, double>>::iterator d = dbTest.begin(); d != dbTest.end(); d++) {
-            signalGenerator.setFreq(*f, d->first, d->second);
-            dBMeter::Measurement m;
-            m.dB = d->first;
+            signalGenerator.setFreq(*f, *d);
+            dBMeter::Measurement m(*d);
             dbMeter.GetdB(m);
             lcdHelper.Line(0, String(F("Free Memory: ")) + String(freeMemory()));
-            lcdHelper.Line(2, SignalGenerator::String(*f, d->first));
+            lcdHelper.Line(2, SignalGenerator::String(*f, *d));
             lcdHelper.Line(3, m.String());
             lcdHelper.Show();
             lcdHelper.Show(Serial);
 
+
         }
+        std::pair<double, double>dbOut{ -9.4, -10.6 };
+        std::pair<double, double> dbIn = FindDb(signalGenerator, dbMeter, *f, dbOut);
+        signalGenerator.setFreq(*f, dbIn);
+        dBMeter::Measurement m(dbIn);
+        dbMeter.GetdB(m);
+        lcdHelper.Line(2, SignalGenerator::String(*f, dbIn, 2));
+        lcdHelper.Line(3, m.String(2));
+        lcdHelper.Show();
     }
-    double dbOut = -9.5;
-    double dbIn = FindDb(signalGenerator, dbMeter, dbOut);
-    dBMeter::Measurement m;
-    m.dB = dbOut;
-    dbMeter.GetdB(m);
-    lcdHelper.Line(2, SignalGenerator::String(1000, dbOut, 2));
-    lcdHelper.Line(3, m.String(2));
-    lcdHelper.Show();
+  
     delay(2000);
 }

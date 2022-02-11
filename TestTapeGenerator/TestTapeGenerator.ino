@@ -72,57 +72,57 @@ public:
 
 void SetDateTime()
 {
-    LCD_Helper lcdhelper;
-    RTC_Helper rtchelper;
-    lcdhelper.Line(0, F("Reading Date Time from Serial Port"));
-    lcdhelper.Line(1, F("Format: [yyyy/mm/dd HH.MM.SS] 115200 Baud"));
-    lcdhelper.Show();
-    Serial.setTimeout(500);
-    while (Serial.available() > 0) Serial.read();
-    Serial.flush();
-    lcdhelper.Show(Serial);
-    do {
-        if (Serial.available() >= 19) {
-            MatchState ms;
-            String str(Serial.readString());
-            ms.Target(const_cast<char*>(str.c_str()));
-            char result = ms.Match("(%d%d%d%d)/(%d%d)/(%d%d) (%d%d)\.(%d%d)\.(%d%d)");
-            char cap[256];
-            if (result == REGEXP_MATCHED)
-            {
-                time_t t;
-                tmElements_t tm;
-                int index = 0;
-                ms.GetCapture(cap, index++);
-                uint16_t y = atoi(cap);
-                tm.Year = CalendarYrToTm(atoi(cap));
-                ms.GetCapture(cap, index++);
-                tm.Month = atoi(cap);
-                ms.GetCapture(cap, index++);
-                tm.Day = atoi(cap);
-                ms.GetCapture(cap, index++);
-                tm.Hour = atoi(cap);
-                ms.GetCapture(cap, index++);
-                tm.Minute = atoi(cap);
-                ms.GetCapture(cap, index++);
-                tm.Second = atoi(cap);
-                t = makeTime(tm);
-                RTC.set(t);        // use the time_t value to ensure correct weekday is set
-                setSyncProvider(RTC.get);   // the function to get the time from the RTC
-                lcdhelper.Line(2, F("Recieved Date Time."));
-                lcdhelper.Show();
-                lcdhelper.Show(Serial);
-                delay(2000);
-                return;
-            }
-            while (Serial.available() > 0) Serial.read();
-        }
-    } while (true);
+//    LCD_Helper lcdhelper;
+//    RTC_Helper rtchelper;
+//    lcdhelper.Line(0, F("Reading Date Time from Serial Port"));
+//    lcdhelper.Line(1, F("Format: [yyyy/mm/dd HH.MM.SS] 115200 Baud"));
+//    lcdhelper.Show();
+//    Serial.setTimeout(500);
+//    while (Serial.available() > 0) Serial.read();
+//    Serial.flush();
+//    lcdhelper.Show(Serial);
+//    do {
+//        if (Serial.available() >= 19) {
+//            MatchState ms;
+//            String str(Serial.readString());
+//            ms.Target(const_cast<char*>(str.c_str()));
+//            char result = ms.Match("(%d%d%d%d)/(%d%d)/(%d%d) (%d%d)\.(%d%d)\.(%d%d)");
+//            char cap[256];
+//            if (result == REGEXP_MATCHED)
+//            {
+//                time_t t;
+//                tmElements_t tm;
+//                int index = 0;
+//                ms.GetCapture(cap, index++);
+//                uint16_t y = atoi(cap);
+//                tm.Year = CalendarYrToTm(atoi(cap));
+//                ms.GetCapture(cap, index++);
+//                tm.Month = atoi(cap);
+//                ms.GetCapture(cap, index++);
+//                tm.Day = atoi(cap);
+//                ms.GetCapture(cap, index++);
+//                tm.Hour = atoi(cap);
+//                ms.GetCapture(cap, index++);
+//                tm.Minute = atoi(cap);
+//                ms.GetCapture(cap, index++);
+//                tm.Second = atoi(cap);
+//                t = makeTime(tm);
+//                RTC.set(t);        // use the time_t value to ensure correct weekday is set
+//                setSyncProvider(RTC.get);   // the function to get the time from the RTC
+//                lcdhelper.Line(2, F("Recieved Date Time."));
+//                lcdhelper.Show();
+//                lcdhelper.Show(Serial);
+//                delay(2000);
+//                return;
+//            }
+//            while (Serial.available() > 0) Serial.read();
+//        }
+//    } while (true);
 }
 
 void OutputHardwareCalibration(void)
 {
-    PotentioMeterOutputSelection().Execute();
+    //PotentioMeterOutputSelection().Execute();
 }
 
 void dBMeterScan(void)
@@ -164,11 +164,11 @@ void StartSignalGenerator()
                 double dBLeft = atof(cap);
                 ms.GetCapture(cap, index++);
                 double dBRight = atof(cap);
-                signalGenerator.setFreq(freq, dBLeft, dBRight);
-                dBMeter::Measurement m;
-                m.dB = dBLeft;
+                std::pair<double, double> dB{ dBLeft , dBRight };
+                signalGenerator.setFreq(freq, dB);
+                dBMeter::Measurement m(dB);
                 dbMeter.GetdB(m);
-                lcdhelper.Line(2, SignalGenerator::String(freq, dBLeft));
+                lcdhelper.Line(2, SignalGenerator::String(freq, dB));
                 lcdhelper.Line(3, m.String());
                 lcdhelper.Show();
                 lcdhelper.Show(Serial);
@@ -201,8 +201,8 @@ void StartdBMeter()
 
 void InputHardwareCalibration(void)
 {
-    dBMeter dbMeter;
-    dbMeter.RVSweep();
+    //dBMeter dbMeter;
+    //dbMeter.RVSweep();
 }
 
 void setup()

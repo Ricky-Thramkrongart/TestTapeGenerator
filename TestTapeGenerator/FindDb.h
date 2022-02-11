@@ -1,56 +1,61 @@
 #pragma once
 
 #include "dBMeter.h"
-double f(SignalGenerator& signalGenerator, dBMeter& dbMeter, const double x0, double const Target)
+std::pair<double, double> f(SignalGenerator& signalGenerator, dBMeter& dbMeter, const std::pair<double, double> x0, const uint32_t Targetfreq, const std::pair<double, double>TargetdB)
 {
-    signalGenerator.setFreq(1000, x0, x0);
+    signalGenerator.setFreq(Targetfreq, x0);
     dBMeter::Measurement m;
     dbMeter.GetdB(m);
-    Serial.println(SignalGenerator::String(1000, x0, 2));
+    Serial.println(SignalGenerator::String(Targetfreq, x0, 2));
     Serial.println(m.String(2).c_str());
-    return m.dBLeft - Target;
+    return { m.dBLeft - TargetdB.first, m.dBRight - TargetdB.second };
 }
 
-double g(SignalGenerator& signalGenerator, dBMeter& dbMeter, double x0, const double Target, const double f0, double& delta)
+std::pair<double, double> g(SignalGenerator& signalGenerator, dBMeter& dbMeter, const std::pair<double, double> x0,  const uint32_t Targetfreq, const std::pair<double, double>TargetdB, const std::pair<double, double>f0, double& delta)
 {
-    double f1;
+    std::pair<double, double> f1;
     do {
         delta += 0.1;
-        f1 = f(signalGenerator, dbMeter, x0 + delta, Target);
-    } while (f1 - f0 < 0.2);
-    return (f1 - f0) / delta;
+        std::pair<double, double> x_delta{ x0.first + delta,x0.second + delta };
+        f1 = f(signalGenerator, dbMeter, x_delta, Targetfreq, TargetdB);
+
+    } while (f1.first - f0.first < 0.2 || f1.second - f0.second < 0.2);
+
+    return { (f1.first - f0.first) / delta, (f1.second - f0.second) / delta };
 }
 
-double FindDb(SignalGenerator& signalGenerator, dBMeter& dbMeter, double Target)
+
+std::pair<double, double> FindDb(SignalGenerator& signalGenerator, dBMeter& dbMeter, const uint32_t Targetfreq, std::pair<double,double> TargetdB)
 {
     cSF(sf_line, 41);
     System::UnmutedCalibrationMode();
 
-    double x0, x1, f0, f1, g0, e;
+    std::pair<double, double> x0, x1, f0, f1, g0;
+    double e = 0.05;
     int step = 1, N = 100;
 
     e = 0.05;
-    x0 = Target;
+    x0 = TargetdB;
 
-    Serial.print("Target: "); Serial.println(Target);
+    Serial.print("Target: "); Serial.print(Targetfreq); Serial.print(" "); Serial.print(TargetdB.first); Serial.print(" "); Serial.println(TargetdB.second);
 
     double delta = 0.0;
-
     do
     {
-        f0 = f(signalGenerator, dbMeter, x0, Target);
-        if (fabs(f0) <= e) {
+        f0 = f(signalGenerator, dbMeter, x0, Targetfreq, TargetdB);
+        if (fabs(f0.first) <= e && fabs(f0.second) <= e) {
             return x0;
         }
-        g0 = g(signalGenerator, dbMeter, x0, Target, f0, delta);
+        g0 = g(signalGenerator, dbMeter, x0, Targetfreq, TargetdB, f0, delta);
 
-        if (g0 == 0.0)
+        if (g0.first == 0.0 || g0.second == 0.0)
         {
             Serial.println("Mathematical Error.");
             exit(0);
         }
 
-        x1 = x0 - f0 / g0;
+        x1.first = x0.first - f0.first / g0.first;
+        x1.second = x0.second - f0.second / g0.second;
         x0 = x1;
         step = step + 1;
 
