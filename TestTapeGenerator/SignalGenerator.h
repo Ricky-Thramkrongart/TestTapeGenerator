@@ -112,7 +112,7 @@ public:
         std::pair<uint8_t, uint8_t>output{ OutPutFit64(dB.first + dBdiff) ,OutPutFit64(dB.second + dBdiff) };
 
         //cSF(sf_line, 128);
-        //sf_line.print("dBLeft: "); sf_line.print(dBLeft, 1, 5); sf_line.print("dBRight: "); sf_line.print(dBRight, 1, 5); sf_line.print(" dBDiff: "); sf_line.print(dBdiff, 1, 5); sf_line.print(" outputLeft: "); sf_line.print(outputLeft); sf_line.print(" outputRight: "); sf_line.print(outputRight);
+        //sf_line.print(F("dBLeft: ")); sf_line.print(dB.first, 1, 5); sf_line.print(F("dBRight: ")); sf_line.print(dB.second, 1, 5); sf_line.print(F(" dBDiff: ")); sf_line.print(dBdiff, 1, 5); sf_line.print(F(" outputLeft: ")); sf_line.print(output.first); sf_line.print(F(" outputRight: ")); sf_line.print(output.second);
         //Serial.println(sf_line);
 
         const uint8_t leftChannelOut(1);
