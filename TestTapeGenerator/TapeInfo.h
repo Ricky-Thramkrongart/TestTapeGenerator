@@ -11,6 +11,7 @@ public:
     uint32_t Frequency;
     uint8_t Time;
     int8_t Level;
+    std::pair<double, double> RecordLevel;
     const __FlashStringHelper* Comment;
     RecordStep(uint32_t Frequency_, uint8_t Time_, int8_t Level_, const __FlashStringHelper* Comment_ = 0) : Frequency(Frequency_), Time(Time_), Level(Level_), Comment(Comment_)
     {
@@ -19,11 +20,11 @@ public:
     std::string ToString()
     {
         cSF(sf_line, 100);
-        sf_line.print(Frequency, 5);
+        sf_line.print(Frequency);
         sf_line.print(F("Hz "));
-        sf_line.print(Level, 5);
+        sf_line.print(Level);
         sf_line.print(F("dBm "));
-        sf_line.print(Time, 5);
+        sf_line.print(Time);
         sf_line.print(F("s"));
         return sf_line.c_str();
     }
@@ -53,6 +54,7 @@ public:
     uint16_t Flux;
     TapeFormat Format;
     int8_t Target;
+    std::pair<double, double> ReferenceLevel;
     std::vector<RecordStep*> RecordSteps;
 
     TapeInfo(
@@ -61,7 +63,7 @@ public:
         uint16_t Flux_,
         TapeFormat Format_,
         int8_t Target_,
-        std::vector<RecordStep*> RecordSteps_) : Description(Description_), Tracks(Tracks_), Flux(Flux_), Format(Format_), Target(Target_), RecordSteps(RecordSteps_)
+        std::vector<RecordStep*> RecordSteps_) : Description(Description_), Tracks(Tracks_), Flux(Flux_), Format(Format_), Target(Target_), RecordSteps(RecordSteps_), ReferenceLevel{ 0.0,0.0 }
     {
         Length = 0;
         for (std::vector<RecordStep*>::iterator ptr = RecordSteps.begin(); ptr < RecordSteps.end(); ptr++) {

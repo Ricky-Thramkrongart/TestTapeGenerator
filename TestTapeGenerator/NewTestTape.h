@@ -44,10 +44,9 @@ public:
     void Update()
     {
         double Target = tapeInfo->Target;
-        double LeftLevel;
-        double RightLevel;
         dBMeter::Measurement m({ Target ,Target });
         dbMeter.GetdB(m);
+        Serial.println(m.String(2));
 
         std::string statuscontrol = StatusControl(1.5, m.dBLeft - Target, m.dBRight - Target);
         if (fabs(m.dBLeft - Target) < 1.5 && fabs(m.dBRight - Target) < 1.5) {
@@ -65,16 +64,11 @@ public:
         digitalWrite(8, LOW);
         lcdhelper.lcd.setCursor(sf_line.length(), 0);
         lcdhelper.lcd.print(statuscontrol.c_str());
+        lcdhelper.lcd.setCursor(0,1);
+        lcdhelper.lcd.print(m.String(2));
 
         if (manual_calibration_ok_count >= 3) {
-            System::UnMute();
-            std::pair<double, double>dbOut = FindDb(signalGenerator, dbMeter, Targetfreq, { Target, Target });
-            signalGenerator.setFreq(Targetfreq, dbOut);
-            dbMeter.GetdB(m);
-            lcdhelper.Line(2, SignalGenerator::String(Targetfreq, dbOut, 2));
-            lcdhelper.Line(3, m.String(2));
-            lcdhelper.Show(Serial);
-            System::ReferenceLevel = dbOut;
+            Beep();
             buttonPanel.returncode = ButtonPanel<DialogOk>::IDOK;
         }
     }
@@ -85,7 +79,7 @@ public:
         sf_line.print(F("Target: "));
         sf_line.print(Target, 1, 4);
         sf_line.print(F(" dBm  Actuel (L:R):        "));
-        lcdhelper.Line(0, F("Reference Level"));
+        lcdhelper.Line(0, F("Reference Level (1/2)"));
         lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
         lcdhelper.Line(2, sf_line);
     }
@@ -93,39 +87,51 @@ public:
 
 class AdjustingReferenceLevelProgress : public Dialog
 {
+protected:
+    SignalGenerator signalGenerator;
+    dBMeter dbMeter;
 public:
     std::shared_ptr<TapeInfo> tapeInfo;
     uint16_t i;
     AdjustingReferenceLevelProgress(TapeInfo::Tapes Tape) : Dialog(1000), tapeInfo(TapeInfo::Get(Tape)), i(0)
     {
+        System::UnMute();
     }
     void FullUpdate() {
-        cSF(sf_line, 41);
-        sf_line.print(F("Adjustment: "));
-        sf_line.print(i, 3);
-        sf_line.print(" % Complete");
-        lcdhelper.Line(0, F("Reference Level"));
+        const uint32_t Targetfreq(1000);
+        double Target = tapeInfo->Target;
+        dBMeter::Measurement m({ Target ,Target });
+        std::pair<double, double>dbOut = FindDb(signalGenerator, dbMeter, Targetfreq, { Target, Target });
+        signalGenerator.setFreq(Targetfreq, dbOut);
+        dbMeter.GetdB(m);
+        lcdhelper.Line(0, F("Reference Level (2/2)"));
         lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
-        lcdhelper.Line(2, sf_line);
-        i += 10;
-        if (i > 100) {
-            finished = true;
-        }
+        lcdhelper.Line(2, SignalGenerator::String(Targetfreq, dbOut, 2));
+        lcdhelper.Line(3, m.String(2));
+        tapeInfo->ReferenceLevel = dbOut;
+        lcdhelper.Show(Serial);
+        Beep();
+        lcdhelper.Show(2000);
+        finished = true;
     }
 };
-
 
 class AdjustingRecordLevelProgress : public Dialog
 {
 protected:
     SignalGenerator signalGenerator;
+    dBMeter dbMeter;
 public:
     std::shared_ptr<TapeInfo> tapeInfo;
     std::vector<RecordStep*>::iterator ptr;
     AdjustingRecordLevelProgress(TapeInfo::Tapes Tape) : Dialog(1000), tapeInfo(TapeInfo::Get(Tape)), ptr(tapeInfo->RecordSteps.begin())
     {
+        System::UnMute();
     }
     void FullUpdate() {
+        lcdhelper.Line(0, F("Record Level"));
+        lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
+
         cSF(sf_line, 41);
         sf_line.print((*ptr)->ToString().c_str());
         sf_line.print(F(" ("));
@@ -133,10 +139,11 @@ public:
         sf_line.print(F("/"));
         sf_line.print((int)tapeInfo->RecordSteps.size());
         sf_line.print(F(")"));
-        lcdhelper.Line(0, F("Record Level"));
-        lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
         lcdhelper.Line(2, sf_line);
-        signalGenerator.setFreq((*ptr)->Frequency, { (*ptr)->Level, (*ptr)->Level });
+        Serial.println(sf_line);
+        (*ptr)->RecordLevel = FindDb(signalGenerator, dbMeter, (*ptr)->Frequency, { (*ptr)->Level, (*ptr)->Level });
+        lcdhelper.Line(3, dBMeter::Measurement((*ptr)->RecordLevel).String(2));
+        Beep();
         ptr++;
         if (ptr == tapeInfo->RecordSteps.end()) {
             finished = true;
@@ -210,10 +217,10 @@ void NewTestTape()
     if (!AdjustingRecordLevelProgress(tape).Execute()) {
         return;
     }
-    if (!RecordTestTape(tape).Execute()) {
-        return;
-    }
-    if (!PrintProgress(tape).Execute()) {
-        return;
-    }
+ //   if (!RecordTestTape(tape).Execute()) {
+ //       return;
+ //   }
+//    if (!PrintProgress(tape).Execute()) {
+//        return;
+//    }
 }
