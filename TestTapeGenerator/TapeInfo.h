@@ -67,6 +67,8 @@ public:
         int8_t Target_,
         std::vector<RecordStep*> RecordSteps_) : Description(Description_), Tracks(Tracks_), Flux(Flux_), Format(Format_), Target(Target_), RecordSteps(RecordSteps_), ReferenceLevel{ 0.0,0.0 }
     {
+        Target = std::max(Target, (int8_t)DBOUT_MAX_SERVICE);
+        Target = std::min(Target, (int8_t)DBOUT_MIN_SERVICE);
         Length = 0;
         for (std::vector<RecordStep*>::iterator ptr = RecordSteps.begin(); ptr < RecordSteps.end(); ptr++) {
             Length += (*ptr)->Time;
