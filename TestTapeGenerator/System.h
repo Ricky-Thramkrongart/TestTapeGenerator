@@ -8,6 +8,32 @@
 #include "Relay.h"
 
 
+constexpr double DB_MAX = 0.0;
+constexpr double DB_MIN = -31.0;
+
+constexpr double DBIN_MAX = 0.0;
+constexpr double DBIN_MIN = -31.0;
+
+constexpr double DBOUT_MAX = 0.0;
+constexpr double DBOUT_MIN = -31.0;
+
+constexpr double DBOUT_MAX_EXT = 0.0;
+constexpr double DBOUT_MIN_EXT = -31.0;
+
+bool Is_dB_OutOfRange(const double dB)
+{
+    if (dB > DB_MAX || dB < DB_MIN)
+        return true;
+    return false;
+}
+
+bool Is_dB_OutOfRange(const std::pair<double, double>& dB)
+{
+    if (Is_dB_OutOfRange(dB.first) || Is_dB_OutOfRange(dB.second))
+        return true;
+    return false;
+}
+
 char* uintToStr(unsigned long x, unsigned d, char* b)
 {
     char* p;

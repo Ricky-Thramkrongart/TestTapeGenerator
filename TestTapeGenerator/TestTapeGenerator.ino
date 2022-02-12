@@ -133,7 +133,7 @@ void dBMeterScan(void)
 
 void StartSignalGenerator()
 {
-  LCD_Helper lcdhelper;
+    LCD_Helper lcdhelper;
     lcdhelper.Line(0, F("Signal Generator"));
     lcdhelper.Line(1, F("Format: [float float float] 115200 Baud"));
 
@@ -201,16 +201,34 @@ void StartdBMeter()
 
 void InputHardwareCalibration(void)
 {
-    //dBMeter dbMeter;
-    //dbMeter.RVSweep();
+    dBMeter dbMeter;
+    dbMeter.RVSweep();
 }
 
 void setup()
 {
     Serial.begin(115200);
     splashscreen();
-    System::Device1();
-    //selftest();
+    {
+        System::Device1();
+        Serial.println("Device1");
+        //SignalGenerator signalGenerator;
+        //dBMeter dbMeter;
+        //System::UnmutedCalibrationMode();
+        //std::pair <double, double> dB = { 0.0, 0.0 };
+        //signalGenerator.setFreq(1000, dB);
+        //dBMeter::Measurement m(dB, 45);
+        //dbMeter.GetdB(m);
+        //Serial.println(SignalGenerator::String(1000, dB, 2));
+        //Serial.println(m.String(2));
+        //delay(1000);
+
+        //if (fabs(m.dBOut.first - dB.first) > 1 || fabs(m.dBOut.second - dB.second) > 1) {
+        //    Serial.println("Device1");
+        //    System::Device1();
+        //}
+    }
+    selftest();
 
     Serial.setTimeout(500);
     Serial.println("Prompt>");

@@ -160,9 +160,9 @@ public:
         sf_line.print(F("Generator: "));
         sf_line.print(uintToStr(f, 5, buffer)); //Unsafe
         sf_line.print(F("Hz "));
-        sf_line.print(dB.first, decs, 5);
+        sf_line.print(dB.first, decs, 4 + decs);
         sf_line.print(F("dBm "));
-        sf_line.print(dB.second, decs, 5);
+        sf_line.print(dB.second, decs, 4 + decs);
         sf_line.print(F("dBm"));
         return sf_line.c_str();
     }

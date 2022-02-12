@@ -15,27 +15,27 @@ public:
     struct Measurement {
         bool IsSaturated(void) {
             const uint16_t Saturation = 1023;
-            if (RawLeft == Saturation || RawRight >= Saturation)
+            if (Raw.first == Saturation || Raw.second >= Saturation)
                 return true;
             return false;
         }
         bool HasNull(void) {
-            if (RawLeft == 0 || RawRight == 0)
+            if (Raw.first == 0 || Raw.second == 0)
                 return true;
             return false;
         }
         Measurement() {}
-        Measurement(const std::pair<double, double>& dB_, const uint8_t RV_=45) : dB(dB_), RV(RV_) {
+        Measurement(const std::pair<double, double>& dB_, const uint8_t RV_ = 45) : dBOut(dB_), RV(RV_) {
         }
 
         std::string ToString(void) {
-            int bitsLeft = ceil(log(RawLeft) / log(2));
-            int bitsRight = ceil(log(RawRight) / log(2));
+            int bitsLeft = ceil(log(Raw.first) / log(2));
+            int bitsRight = ceil(log(Raw.second) / log(2));
             cSF(sf_line, 41);
             sf_line.print(F("RV:")); sf_line.print(RV);
-            sf_line.print(F(" Raw:")); sf_line.print(dB.first, 2, 4); sf_line.print(" "); sf_line.print(dB.second, 2, 4);
-            sf_line.print(F(" Left:")); sf_line.print(RawLeft);
-            sf_line.print(F(" Right:")); sf_line.print(RawRight);
+            sf_line.print(F(" Raw:")); sf_line.print(dBOut.first, 2, 4); sf_line.print(" "); sf_line.print(dBOut.second, 2, 4);
+            sf_line.print(F(" Left:")); sf_line.print(Raw.first);
+            sf_line.print(F(" Right:")); sf_line.print(Raw.second);
             sf_line.print(F(" Bits (L/R): ")); sf_line.print(bitsLeft);
             sf_line.print(F("/")); sf_line.print(bitsRight);
             return sf_line.c_str();
@@ -45,33 +45,41 @@ public:
             cSF(sf_line, 41);
             sf_line.print(RV);
             sf_line.print(F(","));
-            sf_line.print(dB.first, decs, 4);
+            if (Is_dB_OutOfRange(dBOut.first))
+                sf_line.print(F("ovf"));
+            else
+                sf_line.print(dBOut.first, decs, 4 + decs);
             sf_line.print(F(","));
-            sf_line.print(dB.second, decs, 4);
+            if (Is_dB_OutOfRange(dBOut.second))
+                sf_line.print(F("ovf"));
+            else
+                sf_line.print(dBOut.first, decs, 4 + decs);
             sf_line.print(F(","));
-            sf_line.print(RawLeft);
+            sf_line.print(Raw.first);
             sf_line.print(F(","));
-            sf_line.print(RawRight);
+            sf_line.print(Raw.second);
             return sf_line.c_str();
         }
 
         String String(const uint8_t decs = 1) {
             cSF(sf_line, 41);
             sf_line.print(F("dBMeter:           "));
-            sf_line.print(dBLeft, decs, 5);
+            if (Is_dB_OutOfRange(dBIn.first))
+                sf_line.print(F("ovf"));
+            else
+                sf_line.print(dBIn.first, decs, 4 + decs);
             sf_line.print(F("dBm "));
-            sf_line.print(dBRight, decs, 5);
+            if (Is_dB_OutOfRange(dBIn.second))
+                sf_line.print(F("ovf"));
+            else
+                sf_line.print(dBIn.second, decs, 4 + decs);
             sf_line.print(F("dBm "));
             return sf_line.c_str();
         }
-        std::pair<double, double> dB;
+        std::pair<double, double> dBOut;
+        std::pair<double, double> dBIn;
+        std::pair<double, double> Raw;
         uint8_t RV;
-        uint16_t RawLeft;
-        uint16_t RawRight;
-        bool RawLeftGain;
-        bool RawRightGain;
-        double dBLeft;
-        double dBRight;
     };
 
     // for chip info see https://www.analog.com/en/products/ad9833.html
@@ -103,24 +111,20 @@ public:
         m.RV = 45;
         inputpregainRelay.Disable();
         GetRawInputType GetRawInput = System::GetCalibration() ? &GetRawInputInternal : &GetRawInputExternal;
-        m.RawLeftGain = false;
-        m.RawRightGain = false;
         (this->*GetRawInput)(m);
-        m.dBLeft = PolyVal(System::fit64RV45_l, m.RawLeft);
-        m.dBRight = PolyVal(System::fit64RV45_r, m.RawRight);
-        if (m.dBLeft < -28 || m.dBRight < -28) {
+        m.dBIn.first = PolyVal(System::fit64RV45_l, m.Raw.first);
+        m.dBIn.second = PolyVal(System::fit64RV45_r, m.Raw.second);
+        if (m.dBIn.first < -28 || m.dBIn.second < -28) {
             inputpregainRelay.Enable();
             Measurement n(m);
             (this->*GetRawInput)(n);
-            if (m.dBLeft < -28) {
-                m.RawLeftGain = true;
-                m.RawLeft = n.RawLeft;
-                m.dBLeft = PolyVal(System::fit64RV45_l, m.RawLeft) - 12.0;
+            if (m.dBIn.first < -28) {
+                m.Raw.first = n.Raw.first;
+                m.dBIn.first = PolyVal(System::fit64RV45_l, m.Raw.first) - 12.0;
             }
-            if (m.dBRight < -28) {
-                m.RawRightGain = true;
-                m.RawRight = n.RawRight;
-                m.dBRight = PolyVal(System::fit64RV45_r, m.RawRight) - 12.0;
+            if (m.dBIn.second < -28) {
+                m.Raw.second = n.Raw.second;
+                m.dBIn.second = PolyVal(System::fit64RV45_r, m.Raw.second) - 12.0;
             }
             inputpregainRelay.Disable();
         }
@@ -142,15 +146,15 @@ public:
         do {
             const int CH1(A0);
             const int CH2(A1);
-            m.RawLeft = analogRead(CH1);
-            m.RawRight = analogRead(CH2);
+            m.Raw.first = analogRead(CH1);
+            m.Raw.second = analogRead(CH2);
             buffer.push(m);
             delay(50);
 
             if (buffer.isFull()) {
                 using index_t = decltype(buffer)::index_t;
                 for (index_t i = 0; i < buffer.size(); i++) {
-                    if (buffer[0].RawLeft != buffer[i].RawLeft || buffer[0].RawRight != buffer[i].RawRight) {
+                    if (buffer[0].Raw.first != buffer[i].Raw.first || buffer[0].Raw.second != buffer[i].Raw.second) {
                         measure_again = true;
                         break;
                     }
@@ -178,8 +182,8 @@ public:
         do {
             const int CH1(A0);
             const int CH2(A1);
-            m.RawLeft = analogRead(CH1);
-            m.RawRight = analogRead(CH2);
+            m.Raw.first = analogRead(CH1);
+            m.Raw.second = analogRead(CH2);
             buffer.push(m);
             delay(50);
         } while (!buffer.isFull());
@@ -188,13 +192,13 @@ public:
         float64_t dBLeftSum = fp64_sd(0.0);
         float64_t dBRightSum = fp64_sd(0.0);
         for (index_t i = 0; i < buffer.size(); i++) {
-            dBLeftSum = fp64_add(dBLeftSum, fp64_sd(buffer[i].RawLeft));
-            dBRightSum = fp64_add(dBRightSum, fp64_sd(buffer[i].RawRight));
+            dBLeftSum = fp64_add(dBLeftSum, fp64_sd(buffer[i].Raw.first));
+            dBRightSum = fp64_add(dBRightSum, fp64_sd(buffer[i].Raw.second));
         }
         float64_t dBLeftMean = fp64_div(dBLeftSum, fp64_sd(buffer.size()));
         float64_t dBRightMean = fp64_div(dBRightSum, fp64_sd(buffer.size()));
-        m.RawLeft = atoi(fp64_to_string(dBLeftMean, 15, 2));
-        m.RawRight = atoi(fp64_to_string(dBRightMean, 15, 2));
+        m.Raw.first = atoi(fp64_to_string(dBLeftMean, 15, 2));
+        m.Raw.second = atoi(fp64_to_string(dBRightMean, 15, 2));
     }
 
     void RVSweep()
