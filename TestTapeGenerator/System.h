@@ -8,21 +8,23 @@
 #include "Relay.h"
 
 
-constexpr double DB_MAX = 0.0;
-constexpr double DB_MIN = -31.0;
+constexpr auto DBIN_MAX = 0;
+constexpr auto DBIN_MIN = -40;
+constexpr auto DBIN_HEADROOM = 5;
+constexpr auto DBIN_MAX_SERVICE = DBIN_MAX - DBIN_HEADROOM;
+constexpr auto DBIN_MIN_SERVICE = DBIN_MIN + DBIN_HEADROOM;
 
-constexpr double DBIN_MAX = 0.0;
-constexpr double DBIN_MIN = -31.0;
+constexpr auto DBOUT_MAX = 0;
+constexpr auto DBOUT_MIN = -31;
+constexpr auto DBOUT_HEADROOM = 5;
+constexpr auto DBOUT_MAX_SERVICE = DBOUT_MAX - DBOUT_HEADROOM;
+constexpr auto DBOUT_MIN_SERVICE = DBOUT_MIN + DBOUT_HEADROOM;
 
-constexpr double DBOUT_MAX = 0.0;
-constexpr double DBOUT_MIN = -31.0;
 
-constexpr double DBOUT_MAX_EXT = 0.0;
-constexpr double DBOUT_MIN_EXT = -31.0;
 
 bool Is_dB_OutOfRange(const double dB)
 {
-    if (dB > DB_MAX || dB < DB_MIN)
+    if (dB > DBOUT_MAX || dB < DBOUT_MIN)
         return true;
     return false;
 }

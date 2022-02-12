@@ -15,6 +15,8 @@ public:
     const __FlashStringHelper* Comment;
     RecordStep(uint32_t Frequency_, uint8_t Time_, int8_t Level_, const __FlashStringHelper* Comment_ = 0) : Frequency(Frequency_), Time(Time_), Level(Level_), Comment(Comment_)
     {
+        Level = std::max(Level, (int8_t)DBOUT_MAX_SERVICE);
+        Level = std::min(Level, (int8_t)DBOUT_MIN_SERVICE);
     }
 
     std::string ToString()
