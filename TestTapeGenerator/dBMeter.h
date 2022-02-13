@@ -33,11 +33,9 @@ public:
             int bitsRight = ceil(log(Raw.second) / log(2));
             cSF(sf_line, 41);
             sf_line.print(F("RV:")); sf_line.print(RV);
-            sf_line.print(F(" Raw:")); sf_line.print(dBOut.first, 2, 4); sf_line.print(" "); sf_line.print(dBOut.second, 2, 4);
-            sf_line.print(F(" Left:")); sf_line.print(Raw.first);
-            sf_line.print(F(" Right:")); sf_line.print(Raw.second);
-            sf_line.print(F(" Bits (L/R): ")); sf_line.print(bitsLeft);
-            sf_line.print(F("/")); sf_line.print(bitsRight);
+            sf_line.print(F(" Out:")); sf_line.print(dBOut.first, 2, 4); sf_line.print(F(" ")); sf_line.print(dBOut.second, 2, 4);
+            sf_line.print(F(" Raw:")); sf_line.print(Raw.first, 0, 4); sf_line.print(F(" ")); sf_line.print(Raw.second, 0, 4);
+            sf_line.print(F(" B:")); sf_line.print(bitsLeft); sf_line.print(F("/")); sf_line.print(bitsRight);
             return sf_line.c_str();
         }
 
@@ -88,9 +86,9 @@ public:
     AD5254_asukiaaa potentio;
 
 private:
-
+    bool SwapChannels;
 public:
-    dBMeter() :potentio(AD5254_ASUKIAAA_ADDR_A0_GND_A1_GND)
+    dBMeter() :potentio(AD5254_ASUKIAAA_ADDR_A0_GND_A1_GND), SwapChannels(false)
     {
         potentio.begin();
         inputpregainRelay.Disable();
@@ -207,7 +205,7 @@ public:
         lcdhelper.Line(0, F("dBMeter RVSweep"));
         lcdhelper.Show();
         SignalGenerator signalGenerator;
-        System::UnmutedCalibrationMode();;
+        System::UnmutedCalibrationMode();
         //std::vector<int> rv{45, 146, 255};
         std::vector<int> rv{ 45 };
         for (std::vector<int>::iterator r = rv.begin(); r != rv.end(); r++) {
@@ -222,6 +220,7 @@ public:
             }
         }
         Serial.println("Finished");
+        System::PopRelayStack();
     }
 
     void Scan()
@@ -252,6 +251,20 @@ public:
             Serial.println(unSaturated.ToString().c_str());
         }
         Serial.println("Finished");
+        System::PopRelayStack();
+    }
+
+    void Cabling(SignalGenerator& signalGenerator)
+    {
+        System::UnMute();
+        signalGenerator.setFreq(1000, { -10, -15 });
+        Measurement m;
+        GetdB(m);
+        Serial.println(SignalGenerator::String(1000, { -10, -15 }));
+        Serial.println(m.String(2).c_str());
+        SwapChannels = (m.dBIn.first < m.dBIn.second);
+        Serial.print(F("SwapChannels: ")); Serial.println(SwapChannels);
+        System::PopRelayStack();
     }
 };
 Relay dBMeter::inputpregainRelay(Relay(30));

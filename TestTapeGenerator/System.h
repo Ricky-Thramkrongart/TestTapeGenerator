@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ArduinoSTL.h>
+#include <stack>
 #include <EEPROM.h>
 #include <I2C_eeprom.h>
 #include <fp64lib.h>
@@ -19,8 +20,6 @@ constexpr auto DBOUT_MIN = -31;
 constexpr auto DBOUT_HEADROOM = 5;
 constexpr auto DBOUT_MAX_SERVICE = DBOUT_MAX - DBOUT_HEADROOM;
 constexpr auto DBOUT_MIN_SERVICE = DBOUT_MIN + DBOUT_HEADROOM;
-
-
 
 bool Is_dB_OutOfRange(const double dB)
 {
@@ -82,29 +81,68 @@ private:
 protected:
     static Relay muteRelay;
     static Relay calibrationRelay;
+    static std::stack<std::pair<bool, bool>> relayStack;
+
 public:
+
+
+    static void PopRelayStack()
+    {
+        if (!relayStack.empty()) {
+            std::pair<bool, bool> relayStatus = relayStack.top();
+            relayStack.pop();
+            if (relayStatus.first)
+                muteRelay.Enable();
+            else
+                muteRelay.Disable();
+            if (relayStatus.second)
+                calibrationRelay.Enable();
+            else
+                calibrationRelay.Disable();
+        }
+    }
+
+    static void PrintRelayState()
+    {
+        Serial.print(F("M: ")); Serial.print(System::GetMute());
+        Serial.print(F(" C: ")); Serial.print(System::GetCalibration());
+        Serial.print(F(" Stack: ")); Serial.println(relayStack.size());
+    }
+
     static void UnMute()
     {
+        relayStack.push({ muteRelay.IsEnabled(), calibrationRelay.IsEnabled() });
         muteRelay.Disable();
         calibrationRelay.Disable();
+        Serial.print(F("UnMute(): "));
+        PrintRelayState();
     }
 
     static void Mute()
     {
+        relayStack.push({ muteRelay.IsEnabled(), calibrationRelay.IsEnabled() });
         muteRelay.Enable();
         calibrationRelay.Disable();
+        Serial.print(F("Mute(): "));
+        PrintRelayState();
     }
 
     static void CalibrationMode()
     {
+        relayStack.push({ muteRelay.IsEnabled(), calibrationRelay.IsEnabled() });
         muteRelay.Enable();
         calibrationRelay.Enable();
+        Serial.print(F("CalibrationMode(): "));
+        PrintRelayState();
     }
 
     static void UnmutedCalibrationMode()
     {
+        relayStack.push({ muteRelay.IsEnabled(), calibrationRelay.IsEnabled() });
         muteRelay.Disable();
         calibrationRelay.Enable();
+        Serial.print(F("UnmutedCalibrationMode(): "));
+        PrintRelayState();
     }
 
     static bool GetCalibration()
@@ -218,6 +256,12 @@ public:
             sf_line.print(F("        ")); sf_line.print(s.c_str()); sf_line.print(F("[")); sf_line.print(f.size() - i - 1);  sf_line.print(F("] = ")); sf_line.print(uintToStr(f[f.size() - i - 1], buffer)); sf_line.print(F("LL; //")); sf_line.print(fp64_to_string(f[f.size() - i - 1], 32, 2));            out.println(sf_line.c_str());
         }
     }
+    
+    static void DumpData(void) {
+        DumpData(Serial, fit64, String(F("fit64")));
+        DumpData(Serial, fit64RV45_l, String(F("fit64RV45_l")));
+        DumpData(Serial, fit64RV45_r, String(F("fit64")));
+    }
 
     static void Device1(void) {
         fit64 = std::vector <float64_t>(9);
@@ -230,7 +274,6 @@ public:
         fit64[2] = 13826466162739603870LL; //-0.54610830741448857
         fit64[1] = 4625311246433173744LL; //16.406533912931025
         fit64[0] = 4643170361447727206LL; //254.83884893125213
-        DumpData(Serial, fit64, String(F("fit64")));
 
         fit64RV45_l = std::vector <float64_t>(15);
         fit64RV45_l[14] = 13295144786331457814LL; //-1.6779235851105009E-36
@@ -248,7 +291,6 @@ public:
         fit64RV45_l[2] = 13794669453749475540LL; //-4.0309723796864878E-3
         fit64RV45_l[1] = 4598729032677225461LL; //0.28074280452147998
         fit64RV45_l[0] = 13852328171936497664LL; //-29.355779672332574
-        DumpData(Serial, fit64RV45_l, String(F("fit64RV45_l")));
 
         fit64RV45_r = std::vector <float64_t>(15);
         fit64RV45_r[14] = 13296494190582714881LL; //-2.1287535929115348E-36
@@ -266,7 +308,6 @@ public:
         fit64RV45_r[2] = 13794839316444044651LL; //-4.1783047816673453E-3
         fit64RV45_r[1] = 4598738819454652931LL; //0.28128607980332293
         fit64RV45_r[0] = 13852251674767900672LL; //-29.084007135068532
-        DumpData(Serial, fit64RV45_r, String(F("fit64")));
     }
 
     static void Device2(void) {
@@ -278,7 +319,6 @@ public:
         fit64[2] = 4587701044841159231LL; //0.052320812997141967
         fit64[1] = 4625656428956659744LL; //17.632868585802612
         fit64[0] = 4643186195694485085LL; //255.28888529165388        DumpData(Serial, fit64, String(F("fit64")));
-        DumpData(Serial, fit64, String(F("fit64")));
 
         fit64RV45_l = std::vector <float64_t>(15);
         fit64RV45_l[14] = 13308501763921255139LL; //-1.3012260559125937E-35
@@ -296,7 +336,6 @@ public:
         fit64RV45_l[2] = 13809812090832753964LL; //-0.043570931183732092
         fit64RV45_l[1] = 4612427963337731302LL; //2.3294897289866752
         fit64RV45_l[0] = 13858875308489361013LL; //-82.463525042659811
-        DumpData(Serial, fit64RV45_l, String(F("fit64RV45_l")));
 
         fit64RV45_r = std::vector <float64_t>(15);
         fit64RV45_r[14] = 13309034534757754102LL; //-1.4436231649486664E-35
@@ -314,16 +353,18 @@ public:
         fit64RV45_r[2] = 13809933705389921679LL; //-0.044414801693089527
         fit64RV45_r[1] = 4612466344284899237LL; //2.3465342934877804
         fit64RV45_r[0] = 13858859640482057285LL; //-82.240869267189808
-        DumpData(Serial, fit64RV45_r, String(F("fit64RV45_r")));
     }
 
     static std::vector<float64_t> fit64RV45_l;
     static std::vector<float64_t> fit64RV45_r;
     static std::vector<float64_t> fit64;
 };
+std::stack<std::pair<bool, bool>> System::relayStack;
+
 Relay System::muteRelay(Relay(28, true));
 Relay System::calibrationRelay(Relay(26));
 
 std::vector<float64_t> System::fit64;
 std::vector<float64_t> System::fit64RV45_l(0);
 std::vector<float64_t> System::fit64RV45_r(0);
+

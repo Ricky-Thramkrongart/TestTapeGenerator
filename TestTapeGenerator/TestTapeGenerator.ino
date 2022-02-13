@@ -144,7 +144,8 @@ void StartSignalGenerator()
     Serial.flush();
     lcdhelper.Show(Serial);
     SignalGenerator signalGenerator;
-    System::UnmutedCalibrationMode();
+    //System::UnmutedCalibrationMode();
+    System::UnMute();
     dBMeter dbMeter;
 
     do {
@@ -212,9 +213,11 @@ void setup()
     {
         System::Device1();
         Serial.println("Device1");
-        //SignalGenerator signalGenerator;
-        //dBMeter dbMeter;
-        //System::UnmutedCalibrationMode();
+        SignalGenerator signalGenerator;
+        dBMeter dbMeter;
+        dbMeter.Cabling(signalGenerator);
+
+
         //std::pair <double, double> dB = { 0.0, 0.0 };
         //signalGenerator.setFreq(1000, dB);
         //dBMeter::Measurement m(dB, 45);
@@ -228,7 +231,7 @@ void setup()
         //    System::Device1();
         //}
     }
-    selftest();
+    //selftest();
 
     Serial.setTimeout(500);
     Serial.println("Prompt>");

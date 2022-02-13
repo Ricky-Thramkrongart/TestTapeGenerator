@@ -41,9 +41,6 @@ public:
 
     SignalGenerator() : potentio(AD5254_ASUKIAAA_ADDR_A0_GND_A1_GND)
     {
-        System::UnMute();
-
-
         if (System::fit64.empty()) {
             Serial.print("System::fit64.empty()");
             delay(1000);

@@ -48,6 +48,8 @@ std::pair<double, double> g(SignalGenerator& signalGenerator, dBMeter& dbMeter, 
 
 std::pair<double, double> FindDb(SignalGenerator& signalGenerator, dBMeter& dbMeter, const uint32_t Targetfreq, std::pair<double, double> TargetdB)
 {
+    dbMeter.Cabling(signalGenerator);
+    
     std::pair<double, double> x0, x1, f0, f1, g0;
     int step = 1, N = 10;
     

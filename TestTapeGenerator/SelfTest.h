@@ -58,6 +58,11 @@ void selftest()
     //    }
     //}
 
+    System::Mute(); System::PopRelayStack();
+    System::UnMute(); System::PopRelayStack();
+    System::UnmutedCalibrationMode(); System::PopRelayStack();
+    System::CalibrationMode(); System::PopRelayStack();
+
     std::vector<std::pair<double, double>> dbFinddBTest{ { DBOUT_MAX_SERVICE, DBOUT_MAX_SERVICE }, { DBOUT_MIN_SERVICE, DBOUT_MIN_SERVICE },  { -9.4, -10.6 } };
     for (std::vector<uint32_t>::iterator f = freqTest.begin(); f != freqTest.end(); f++) {
         for (std::vector<std::pair<double, double>>::iterator d = dbFinddBTest.begin(); d != dbFinddBTest.end(); d++) {

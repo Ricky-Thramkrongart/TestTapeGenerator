@@ -41,12 +41,17 @@ public:
         signalGenerator.setFreq(Targetfreq, { d, d });
         System::UnMute();
     }
+    ~AdjustingReferenceLevelMonitor()
+    {
+        System::PopRelayStack();
+    }
     void Update()
     {
         double Target = tapeInfo->Target;
         dBMeter::Measurement m({ Target ,Target });
         dbMeter.GetdB(m);
         Serial.println(m.String(2));
+        Serial.println(m.ToString().c_str());
 
         std::string statuscontrol = StatusControl(1.5, m.dBIn.first - Target, m.dBIn.second - Target);
         if (fabs(m.dBIn.first - Target) < 1.5 && fabs(m.dBIn.second - Target) < 1.5) {
@@ -69,6 +74,7 @@ public:
 
         if (manual_calibration_ok_count >= 3) {
             Beep();
+            dbMeter.Cabling(signalGenerator);
             buttonPanel.returncode = ButtonPanel<DialogOk>::IDOK;
         }
     }
@@ -85,37 +91,6 @@ public:
     }
 };
 
-class AdjustingReferenceLevelProgress : public Dialog
-{
-protected:
-    SignalGenerator signalGenerator;
-    dBMeter dbMeter;
-public:
-    std::shared_ptr<TapeInfo> tapeInfo;
-    uint16_t i;
-    AdjustingReferenceLevelProgress(TapeInfo::Tapes Tape) : Dialog(1000), tapeInfo(TapeInfo::Get(Tape)), i(0)
-    {
-        System::UnMute();
-    }
-    void FullUpdate() {
-        const uint32_t Targetfreq(1000);
-        double Target = tapeInfo->Target;
-        dBMeter::Measurement m({ Target ,Target });
-        std::pair<double, double>dbOut = FindDb(signalGenerator, dbMeter, Targetfreq, { Target, Target });
-        signalGenerator.setFreq(Targetfreq, dbOut);
-        dbMeter.GetdB(m);
-        lcdhelper.Line(0, F("Reference Level (2/2)"));
-        lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
-        lcdhelper.Line(2, SignalGenerator::String(Targetfreq, dbOut, 2));
-        lcdhelper.Line(3, m.String(2));
-        tapeInfo->ReferenceLevel = dbOut;
-        lcdhelper.Show(Serial);
-        Beep();
-        lcdhelper.Show(2000);
-        finished = true;
-    }
-};
-
 class AdjustingRecordLevelProgress : public Dialog
 {
 protected:
@@ -127,6 +102,10 @@ public:
     AdjustingRecordLevelProgress(TapeInfo::Tapes Tape) : Dialog(1000), tapeInfo(TapeInfo::Get(Tape)), ptr(tapeInfo->RecordSteps.begin())
     {
         System::UnMute();
+    }
+    ~AdjustingRecordLevelProgress()
+    {
+        System::PopRelayStack();
     }
     void FullUpdate() {
         lcdhelper.Line(0, F("Record Level"));
@@ -209,9 +188,6 @@ void NewTestTape()
         return;
     }
     if (!AdjustingReferenceLevelMonitor(tape).Execute()) {
-        return;
-    }
-    if (!AdjustingReferenceLevelProgress(tape).Execute()) {
         return;
     }
     if (!AdjustingRecordLevelProgress(tape).Execute()) {
