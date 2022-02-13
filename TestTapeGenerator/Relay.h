@@ -16,7 +16,7 @@ protected:
     const uint8_t relay_delay;
 
 public:
-    Relay(const uint8_t pin_, bool reverse_ = false, const uint8_t relay_delay_ = 100) : pin(pin_), reverse(reverse_), relay_delay(relay_delay_)
+    Relay(const uint8_t pin_, bool reverse_ = false, const uint8_t relay_delay_ = 500) : pin(pin_), reverse(reverse_), relay_delay(relay_delay_)
     {
         pinMode(pin, OUTPUT);
         enabled = true;

@@ -188,8 +188,10 @@ void StartdBMeter()
     lcdhelper.Line(0, F("dBMeter"));
     lcdhelper.Show();
     lcdhelper.Show(Serial);
-    System::Mute();
+    SignalGenerator signalGenerator;
     dBMeter dbMeter;
+    System::UnMute();
+    signalGenerator.setFreq(1000, { -8, -8 });
     do {
         dBMeter::Measurement m;
         dbMeter.GetdB(m);
@@ -212,11 +214,34 @@ void setup()
     splashscreen();
     {
         System::Device1();
-        Serial.println("Device1");
+        if (!ManualReferenceLevelAdjustment(TapeInfo::WOW_AND_FLUTTER_TEST_TAPE_3).Execute()) {
+            return;
+        }
+       
+
         SignalGenerator signalGenerator;
         dBMeter dbMeter;
-        dbMeter.Cabling(signalGenerator);
+        System::UnMute();
+        std::pair<double, double> r(FindDb(signalGenerator, dbMeter, 1000, { -5.0, -5.0 }));
+        Serial.println(SignalGenerator::String(1000, r, 2));
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+        //Serial.println("Device1");
 
         //std::pair <double, double> dB = { 0.0, 0.0 };
         //signalGenerator.setFreq(1000, dB);
@@ -232,6 +257,11 @@ void setup()
         //}
     }
     //selftest();
+
+
+
+
+
 
     Serial.setTimeout(500);
     Serial.println("Prompt>");

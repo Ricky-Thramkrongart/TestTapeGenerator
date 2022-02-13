@@ -25,7 +25,7 @@ public:
 
 };
 
-class AdjustingReferenceLevelMonitor : public DialogOk
+class ManualReferenceLevelAdjustment : public DialogOk
 {
 protected:
     SignalGenerator signalGenerator;
@@ -35,13 +35,13 @@ public:
     std::shared_ptr<TapeInfo> tapeInfo;
     const uint32_t Targetfreq;
 
-    AdjustingReferenceLevelMonitor(TapeInfo::Tapes Tape) : tapeInfo(TapeInfo::Get(Tape)), Targetfreq(1000)
+    ManualReferenceLevelAdjustment(TapeInfo::Tapes Tape) : tapeInfo(TapeInfo::Get(Tape)), Targetfreq(1000)
     {
         double d = tapeInfo->Target - 6;
         signalGenerator.setFreq(Targetfreq, { d, d });
         System::UnMute();
     }
-    ~AdjustingReferenceLevelMonitor()
+    ~ManualReferenceLevelAdjustment()
     {
         System::PopRelayStack();
     }
@@ -51,7 +51,6 @@ public:
         dBMeter::Measurement m({ Target ,Target });
         dbMeter.GetdB(m);
         Serial.println(m.String(2));
-        Serial.println(m.ToString().c_str());
 
         std::string statuscontrol = StatusControl(1.5, m.dBIn.first - Target, m.dBIn.second - Target);
         if (fabs(m.dBIn.first - Target) < 1.5 && fabs(m.dBIn.second - Target) < 1.5) {
@@ -85,7 +84,7 @@ public:
         sf_line.print(F("Target: "));
         sf_line.print(Target, 1, 4);
         sf_line.print(F(" dBm  Actuel (L:R):        "));
-        lcdhelper.Line(0, F("Reference Level (1/2)"));
+        lcdhelper.Line(0, F("Manual Reference Level Adjustment"));
         lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
         lcdhelper.Line(2, sf_line);
     }
@@ -120,7 +119,9 @@ public:
         sf_line.print(F(")"));
         lcdhelper.Line(2, sf_line);
         Serial.println(sf_line);
+        System::PrintRelayState();
         (*ptr)->RecordLevel = FindDb(signalGenerator, dbMeter, (*ptr)->Frequency, { (*ptr)->Level, (*ptr)->Level });
+        System::PrintRelayState();
         lcdhelper.Line(3, dBMeter::Measurement((*ptr)->RecordLevel).String(2));
         Beep();
         ptr++;
@@ -187,7 +188,7 @@ void NewTestTape()
     if (!AdjustingReferenceLevelOkDialog(tape).Execute()) {
         return;
     }
-    if (!AdjustingReferenceLevelMonitor(tape).Execute()) {
+    if (!ManualReferenceLevelAdjustment(tape).Execute()) {
         return;
     }
     if (!AdjustingRecordLevelProgress(tape).Execute()) {

@@ -43,12 +43,12 @@ public:
             cSF(sf_line, 41);
             sf_line.print(RV);
             sf_line.print(F(","));
-            if (Is_dB_OutOfRange(dBOut.first))
+            if (Is_dBOut_OutOfRange(dBOut.first))
                 sf_line.print(F("ovf"));
             else
                 sf_line.print(dBOut.first, decs, 4 + decs);
             sf_line.print(F(","));
-            if (Is_dB_OutOfRange(dBOut.second))
+            if (Is_dBOut_OutOfRange(dBOut.second))
                 sf_line.print(F("ovf"));
             else
                 sf_line.print(dBOut.first, decs, 4 + decs);
@@ -62,13 +62,13 @@ public:
         String String(const uint8_t decs = 1) {
             cSF(sf_line, 41);
             sf_line.print(F("dBMeter:           "));
-            if (Is_dB_OutOfRange(dBIn.first))
-                sf_line.print(F("ovf"));
+            if (Is_dBIn_OutOfRange(dBIn.first))
+                sf_line.print(F("ovf."));
             else
                 sf_line.print(dBIn.first, decs, 4 + decs);
             sf_line.print(F("dBm "));
-            if (Is_dB_OutOfRange(dBIn.second))
-                sf_line.print(F("ovf"));
+            if (Is_dBIn_OutOfRange(dBIn.second))
+                sf_line.print(F("ovf."));
             else
                 sf_line.print(dBIn.second, decs, 4 + decs);
             sf_line.print(F("dBm "));
@@ -87,8 +87,9 @@ public:
 
 private:
     bool SwapChannels;
+    bool ChannelsVerified;
 public:
-    dBMeter() :potentio(AD5254_ASUKIAAA_ADDR_A0_GND_A1_GND), SwapChannels(false)
+    dBMeter() :potentio(AD5254_ASUKIAAA_ADDR_A0_GND_A1_GND), SwapChannels(false), ChannelsVerified(false)
     {
         potentio.begin();
         inputpregainRelay.Disable();
@@ -125,6 +126,10 @@ public:
                 m.dBIn.second = PolyVal(System::fit64RV45_r, m.Raw.second) - 12.0;
             }
             inputpregainRelay.Disable();
+        }
+        if (ChannelsVerified&&SwapChannels || !ChannelsVerified && !System::GetCalibration()) {
+            std::swap<double>(m.dBIn.first, m.dBIn.second);
+            std::swap<double>(m.Raw.first, m.Raw.second);
         }
     }
 
@@ -263,8 +268,10 @@ public:
         Serial.println(SignalGenerator::String(1000, { -10, -15 }));
         Serial.println(m.String(2).c_str());
         SwapChannels = (m.dBIn.first < m.dBIn.second);
+        ChannelsVerified = true;
         Serial.print(F("SwapChannels: ")); Serial.println(SwapChannels);
         System::PopRelayStack();
+
     }
 };
 Relay dBMeter::inputpregainRelay(Relay(30));

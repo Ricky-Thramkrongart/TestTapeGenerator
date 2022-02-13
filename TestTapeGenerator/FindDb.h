@@ -15,7 +15,7 @@ void FatalError(const char* Msg)
 
 std::pair<double, double> f(SignalGenerator& signalGenerator, dBMeter& dbMeter, const std::pair<double, double> x0, const uint32_t Targetfreq, const std::pair<double, double>TargetdB)
 {
-    if (Is_dB_OutOfRange(x0))
+    if (Is_dBOut_OutOfRange(x0))
     {
         FatalError("f: x0 out of range");
     }
@@ -32,7 +32,7 @@ std::pair<double, double> g(SignalGenerator& signalGenerator, dBMeter& dbMeter, 
     std::pair<double, double> f1;
     unsigned int count = 0;
     do {
-        if (Is_dB_OutOfRange(x0))
+        if (Is_dBOut_OutOfRange(x0))
         {
             FatalError("g: x0 out of range");
         }

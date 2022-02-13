@@ -11,26 +11,40 @@
 
 constexpr auto DBIN_MAX = 0;
 constexpr auto DBIN_MIN = -40;
-constexpr auto DBIN_HEADROOM = 5;
+constexpr auto DBIN_HEADROOM = 0;
 constexpr auto DBIN_MAX_SERVICE = DBIN_MAX - DBIN_HEADROOM;
 constexpr auto DBIN_MIN_SERVICE = DBIN_MIN + DBIN_HEADROOM;
 
 constexpr auto DBOUT_MAX = 0;
 constexpr auto DBOUT_MIN = -31;
-constexpr auto DBOUT_HEADROOM = 5;
+constexpr auto DBOUT_HEADROOM = 0;
 constexpr auto DBOUT_MAX_SERVICE = DBOUT_MAX - DBOUT_HEADROOM;
 constexpr auto DBOUT_MIN_SERVICE = DBOUT_MIN + DBOUT_HEADROOM;
 
-bool Is_dB_OutOfRange(const double dB)
+bool Is_dBIn_OutOfRange(const double dB)
+{
+    if (dB > DBIN_MAX || dB < DBIN_MIN)
+        return true;
+    return false;
+}
+
+bool Is_dBIn_OutOfRange(const std::pair<double, double>& dB)
+{
+    if (Is_dBIn_OutOfRange(dB.first) || Is_dBIn_OutOfRange(dB.second))
+        return true;
+    return false;
+}
+
+bool Is_dBOut_OutOfRange(const double dB)
 {
     if (dB > DBOUT_MAX || dB < DBOUT_MIN)
         return true;
     return false;
 }
 
-bool Is_dB_OutOfRange(const std::pair<double, double>& dB)
+bool Is_dBOut_OutOfRange(const std::pair<double, double>& dB)
 {
-    if (Is_dB_OutOfRange(dB.first) || Is_dB_OutOfRange(dB.second))
+    if (Is_dBIn_OutOfRange(dB.first) || Is_dBIn_OutOfRange(dB.second))
         return true;
     return false;
 }
