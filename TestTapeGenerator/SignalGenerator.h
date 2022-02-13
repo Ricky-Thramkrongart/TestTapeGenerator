@@ -116,6 +116,7 @@ public:
         const uint8_t rightChannelOut(0);
         potentio.writeRDAC(leftChannelOut, output.first);
         potentio.writeRDAC(rightChannelOut, output.second);
+        delay(200);
     }
 
     void ManualOutPut(const uint8_t output)
@@ -132,6 +133,7 @@ public:
 
     void setFreq(const uint32_t f, const std::pair<double, double>& dB)
     {
+        //Serial.println(String(f, dB, 2));
         setdB(dB);
 
         const uint16_t b28 = (1UL << 13);

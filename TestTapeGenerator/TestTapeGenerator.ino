@@ -212,35 +212,19 @@ void setup()
 {
     Serial.begin(115200);
     splashscreen();
+    System::Device1();
     {
-        System::Device1();
         if (!ManualReferenceLevelAdjustment(TapeInfo::WOW_AND_FLUTTER_TEST_TAPE_3).Execute()) {
             return;
-        }
+      }
        
-
         SignalGenerator signalGenerator;
         dBMeter dbMeter;
+        dbMeter.Cabling(signalGenerator);
         System::UnMute();
-        std::pair<double, double> r(FindDb(signalGenerator, dbMeter, 1000, { -5.0, -5.0 }));
+        std::pair<double, double> r(FindDb(signalGenerator, dbMeter, 1000, { -10.0, -12.5 }));
         Serial.println(SignalGenerator::String(1000, r, 2));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
+    
         //Serial.println("Device1");
 
         //std::pair <double, double> dB = { 0.0, 0.0 };

@@ -37,9 +37,9 @@ public:
 
     ManualReferenceLevelAdjustment(TapeInfo::Tapes Tape) : tapeInfo(TapeInfo::Get(Tape)), Targetfreq(1000)
     {
-        double d = tapeInfo->Target - 6;
-        signalGenerator.setFreq(Targetfreq, { d, d });
+        double d = tapeInfo->Target;
         System::UnMute();
+        signalGenerator.setFreq(Targetfreq, { d, d });
     }
     ~ManualReferenceLevelAdjustment()
     {

@@ -62,14 +62,14 @@ public:
         String String(const uint8_t decs = 1) {
             cSF(sf_line, 41);
             sf_line.print(F("dBMeter:           "));
-            if (Is_dBIn_OutOfRange(dBIn.first))
-                sf_line.print(F("ovf."));
-            else
+            //if (Is_dBIn_OutOfRange(dBIn.first))
+            //    sf_line.print(F("ovf."));
+            //else
                 sf_line.print(dBIn.first, decs, 4 + decs);
             sf_line.print(F("dBm "));
-            if (Is_dBIn_OutOfRange(dBIn.second))
-                sf_line.print(F("ovf."));
-            else
+            //if (Is_dBIn_OutOfRange(dBIn.second))
+            //    sf_line.print(F("ovf."));
+            //else
                 sf_line.print(dBIn.second, decs, 4 + decs);
             sf_line.print(F("dBm "));
             return sf_line.c_str();
@@ -113,21 +113,22 @@ public:
         (this->*GetRawInput)(m);
         m.dBIn.first = PolyVal(System::fit64RV45_l, m.Raw.first);
         m.dBIn.second = PolyVal(System::fit64RV45_r, m.Raw.second);
-        if (m.dBIn.first < -28 || m.dBIn.second < -28) {
+       if (m.dBIn.first < DBIN_MIN || m.dBIn.second < DBIN_MIN) {
             inputpregainRelay.Enable();
             Measurement n(m);
             (this->*GetRawInput)(n);
-            if (m.dBIn.first < -28) {
+            if (m.dBIn.first < DBIN_MIN) {
                 m.Raw.first = n.Raw.first;
                 m.dBIn.first = PolyVal(System::fit64RV45_l, m.Raw.first) - 12.0;
             }
-            if (m.dBIn.second < -28) {
+            if (m.dBIn.second < DBIN_MIN) {
                 m.Raw.second = n.Raw.second;
                 m.dBIn.second = PolyVal(System::fit64RV45_r, m.Raw.second) - 12.0;
             }
             inputpregainRelay.Disable();
         }
-        if (ChannelsVerified&&SwapChannels || !ChannelsVerified && !System::GetCalibration()) {
+        //if (false ChannelsVerified&&SwapChannels || !ChannelsVerified && !System::GetCalibration()) {
+        if (false) {
             std::swap<double>(m.dBIn.first, m.dBIn.second);
             std::swap<double>(m.Raw.first, m.Raw.second);
         }
@@ -135,6 +136,7 @@ public:
 
     void GetRawInputInternal(Measurement& m)
     {
+        Serial.println(F("GetRawInputInternal"));
         static uint8_t rv = 0;
         if (rv != m.RV) {
             rv = m.RV;
@@ -171,6 +173,7 @@ public:
 
     void GetRawInputExternal(Measurement& m)
     {
+        //Serial.println(F("GetRawInputExternal"));
         static uint8_t rv = 0;
         if (rv != m.RV) {
             rv = m.RV;
@@ -194,6 +197,16 @@ public:
         using index_t = decltype(buffer)::index_t;
         float64_t dBLeftSum = fp64_sd(0.0);
         float64_t dBRightSum = fp64_sd(0.0);
+        float64_t dBRightMax = fp64_sd(0.0);
+        float64_t dBRightMin = fp64_sd(0.0);
+
+        for (index_t i = 0; i < buffer.size(); i++) {
+            dBLeftSum = fp64_add(dBLeftSum, fp64_sd(buffer[i].Raw.first));
+            dBRightSum = fp64_add(dBRightSum, fp64_sd(buffer[i].Raw.second));
+        }
+
+
+
         for (index_t i = 0; i < buffer.size(); i++) {
             dBLeftSum = fp64_add(dBLeftSum, fp64_sd(buffer[i].Raw.first));
             dBRightSum = fp64_add(dBRightSum, fp64_sd(buffer[i].Raw.second));
