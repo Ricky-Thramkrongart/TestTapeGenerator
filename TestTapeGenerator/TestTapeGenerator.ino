@@ -15,9 +15,6 @@
 #include "SelfTest.h"
 #include "NewTestTape.h"
 
-
-#include "FindDb.h"
-
 using namespace std;
 
 
@@ -39,7 +36,7 @@ public:
 class MainMenu : public Menu
 {
 public:
-    MainMenu() : Menu(7) {}
+    MainMenu() : Menu(8) {}
     void FullUpdate() {
         const __FlashStringHelper* str = 0;
         switch (Current) {
@@ -47,7 +44,7 @@ public:
             str = F("Create Test Tape");
             break;
         case 1:
-            str = F("Set Time");
+            str = F("Self Test");
             break;
         case 2:
             str = F("Start Signal Generator");
@@ -63,6 +60,9 @@ public:
             break;
         case 6:
             str = F("dBMeter RV Scan");
+            break;
+        case 7:
+            str = F("Set Time");
             break;
         }
         lcdhelper.Line(0, F("== Main Menu =================="));
@@ -122,7 +122,7 @@ void SetDateTime()
 
 void OutputHardwareCalibration(void)
 {
-    //PotentioMeterOutputSelection().Execute();
+    PotentioMeterOutputSelection().Execute();
 }
 
 void dBMeterScan(void)
@@ -190,6 +190,7 @@ void StartdBMeter()
     lcdhelper.Show(Serial);
     SignalGenerator signalGenerator;
     dBMeter dbMeter;
+    //System::UnmutedCalibrationMode();
     System::UnMute();
     signalGenerator.setFreq(1000, { -8, -8 });
     do {
@@ -213,40 +214,20 @@ void setup()
     Serial.begin(115200);
     splashscreen();
     System::Device1();
-    {
-        if (!ManualReferenceLevelAdjustment(TapeInfo::WOW_AND_FLUTTER_TEST_TAPE_3).Execute()) {
-            return;
-      }
-       
-        SignalGenerator signalGenerator;
-        dBMeter dbMeter;
-        dbMeter.Cabling(signalGenerator);
-        System::UnMute();
-        std::pair<double, double> r(FindDb(signalGenerator, dbMeter, 1000, { -10.0, -12.5 }));
-        Serial.println(SignalGenerator::String(1000, r, 2));
+
+    //std::pair <double, double> dB = { 0.0, 0.0 };
+    //signalGenerator.setFreq(1000, dB);
+    //dBMeter::Measurement m(dB, 45);
+    //dbMeter.GetdB(m);
+    //Serial.println(SignalGenerator::String(1000, dB, 2));
+    //Serial.println(m.String(2));
+    //delay(1000);
+
+    //if (fabs(m.dBOut.first - dB.first) > 1 || fabs(m.dBOut.second - dB.second) > 1) {
+    //    Serial.println("Device1");
+    //    System::Device1();
+    //}
     
-        //Serial.println("Device1");
-
-        //std::pair <double, double> dB = { 0.0, 0.0 };
-        //signalGenerator.setFreq(1000, dB);
-        //dBMeter::Measurement m(dB, 45);
-        //dbMeter.GetdB(m);
-        //Serial.println(SignalGenerator::String(1000, dB, 2));
-        //Serial.println(m.String(2));
-        //delay(1000);
-
-        //if (fabs(m.dBOut.first - dB.first) > 1 || fabs(m.dBOut.second - dB.second) > 1) {
-        //    Serial.println("Device1");
-        //    System::Device1();
-        //}
-    }
-    //selftest();
-
-
-
-
-
-
     Serial.setTimeout(500);
     Serial.println("Prompt>");
     String str(Serial.readString());
@@ -256,7 +237,6 @@ void setup()
         if (REGEXP_MATCHED == ms.Match("RVSweep"))
             InputHardwareCalibration();
     }
-
     do {
         MainMenu mainMenu;
         if (mainMenu.Execute()) {
@@ -266,7 +246,7 @@ void setup()
                 NewTestTape();
                 break;
             case 1:
-                SetDateTime();
+                selftest();
                 break;
             case 2:
                 StartSignalGenerator();
@@ -282,6 +262,9 @@ void setup()
                 break;
             case 6:
                 dBMeterScan();
+                break;
+            case 7:
+                SetDateTime();
                 break;
 
             };

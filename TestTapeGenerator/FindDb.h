@@ -18,7 +18,6 @@ std::pair<double, double> f(SignalGenerator& signalGenerator, dBMeter& dbMeter, 
 {
     if (Is_dBOut_OutOfRange(x0))
     {
-        Serial.print(x0.first); Serial.print(F(" ")); Serial.println(x0.second);
         FatalError("f: x0 out of range");
     }
     signalGenerator.setFreq(Targetfreq, x0);
@@ -43,7 +42,6 @@ std::pair<double, double> g(SignalGenerator& signalGenerator, dBMeter& dbMeter, 
         f1 = f(signalGenerator, dbMeter, x_delta, Targetfreq, TargetdB);
 
         if (++count > 1) {
-            Serial.println(F("++count > 1"));
             delta += delta;
         }
         g0 = { (f1.first - f0.first) / delta, (f1.second - f0.second) / delta };
@@ -54,46 +52,35 @@ std::pair<double, double> g(SignalGenerator& signalGenerator, dBMeter& dbMeter, 
 std::pair<double, double> FindDb(SignalGenerator& signalGenerator, dBMeter& dbMeter, const uint32_t Targetfreq, std::pair<double, double> TargetdB)
 {
     dbMeter.Cabling(signalGenerator);
-    
+
     std::pair<double, double> x0, x1, f0, f1, g0;
-    int step = 1, N = 10;
     
-    auto epsilon = 0.05;//(0.05 + fabs(0.01 * (TargetdB.second + TargetdB.first) / DBOUT_MAX_SERVICE) + fabs(0.05 * Targetfreq / 25000.0));
-    const auto epsilon_max = 1;
-    Serial.print("epsilon: "); Serial.println(epsilon);
+    auto epsilon = 0.05 + fabs(0.01 * (TargetdB.second + TargetdB.first) / DBOUT_MAX_SERVICE) + fabs(0.05 * Targetfreq / 25000.0);
 
-    x0 = TargetdB;
-    Serial.print("Target: "); Serial.print(Targetfreq); Serial.print(" "); Serial.print(TargetdB.first); Serial.print(" "); Serial.println(TargetdB.second);
-
-    double delta = 2*epsilon;
-    do
+    for (int i = 1;  i != 10; ++i)
     {
-        f0 = f(signalGenerator, dbMeter, x0, Targetfreq, TargetdB);
-        if (fabs(f0.first) <= epsilon && fabs(f0.second) <= epsilon) {
-            return x0;
-        }
-
-        g0 = g(signalGenerator, dbMeter, x0, Targetfreq, TargetdB, f0, delta);
-        if (g0.first == 0.0/* || g0.second == 0.0*/)
+        x0 = TargetdB;
+        epsilon += 0.05;
+        double delta = 4 * epsilon;
+        Serial.print("Target: "); Serial.print(Targetfreq); Serial.print(" "); Serial.print(TargetdB.first); Serial.print(" "); Serial.print(TargetdB.second); Serial.print(" epsilon: "); Serial.println(epsilon);
+        
+        do
         {
-            FatalError("g0 is invalid (0.0)");
-        }
+            f0 = f(signalGenerator, dbMeter, x0, Targetfreq, TargetdB);
+            if (fabs(f0.first) <= epsilon && fabs(f0.second) <= epsilon) {
+                return x0;
+            }
 
-        x1.first = x0.first - f0.first / g0.first;
-        x1.second = x0.second - f0.second / g0.second;
-        x0 = x1;
-        step = step + 1;
+            g0 = g(signalGenerator, dbMeter, x0, Targetfreq, TargetdB, f0, delta);
+            if (g0.first == 0.0/* || g0.second == 0.0*/)
+            {
+                FatalError("g0 is invalid (0.0)");
+            }
 
-        if (step > N)
-        {
-            step = 1;
-            x0 = TargetdB;
-            epsilon += 0.05;
-            delta = 2*epsilon;
-            if (epsilon >= epsilon_max)
-                FatalError("f is not convergent");
-        }
-
-        Serial.print(F("step: ")); Serial.println(step);
-    } while (true);
+            x1.first = x0.first - f0.first / g0.first;
+            x1.second = x0.second - f0.second / g0.second;
+            x0 = x1;
+        } while (true);
+    }
+    FatalError("f is not convergent");
 }

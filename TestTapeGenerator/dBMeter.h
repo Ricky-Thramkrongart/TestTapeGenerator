@@ -127,8 +127,7 @@ public:
             }
             inputpregainRelay.Disable();
         }
-        //if (false ChannelsVerified&&SwapChannels || !ChannelsVerified && !System::GetCalibration()) {
-        if (false) {
+        if (ChannelsVerified&&SwapChannels) {
             std::swap<double>(m.dBIn.first, m.dBIn.second);
             std::swap<double>(m.Raw.first, m.Raw.second);
         }
@@ -136,7 +135,7 @@ public:
 
     void GetRawInputInternal(Measurement& m)
     {
-        Serial.println(F("GetRawInputInternal"));
+        //Serial.println(F("GetRawInputInternal"));
         static uint8_t rv = 0;
         if (rv != m.RV) {
             rv = m.RV;
@@ -274,17 +273,18 @@ public:
 
     void Cabling(SignalGenerator& signalGenerator)
     {
-        System::UnMute();
-        signalGenerator.setFreq(1000, { -10, -15 });
-        Measurement m;
-        GetdB(m);
-        Serial.println(SignalGenerator::String(1000, { -10, -15 }));
-        Serial.println(m.String(2).c_str());
-        SwapChannels = (m.dBIn.first < m.dBIn.second);
-        ChannelsVerified = true;
-        Serial.print(F("SwapChannels: ")); Serial.println(SwapChannels);
-        System::PopRelayStack();
-
+        if (!ChannelsVerified) {
+            System::UnMute();
+            signalGenerator.setFreq(1000, { -10, -15 });
+            Measurement m;
+            GetdB(m);
+            //Serial.println(SignalGenerator::String(1000, { -10, -15 }));
+            //Serial.println(m.String(2).c_str());
+            SwapChannels = (m.dBIn.first < m.dBIn.second);
+            ChannelsVerified = true;
+            //Serial.print(F("SwapChannels: ")); Serial.println(SwapChannels);
+            System::PopRelayStack();
+        }
     }
 };
 Relay dBMeter::inputpregainRelay(Relay(30));

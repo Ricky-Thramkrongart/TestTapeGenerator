@@ -34,29 +34,20 @@ void selftest()
     System::UnmutedCalibrationMode();
     dBMeter dbMeter;
 
-    //for (double d = -16.0; d < 0.1; d += 0.1) {
-    //    cSF(sf_line, 41);
-    //    sf_line.print(F("dBm: ")); sf_line.print(d); sf_line.print(F(" "));
-    //    sf_line.print(F("OutPutFit64: ")); sf_line.print(signalGenerator.OutPutFit64(d));
-    //    Serial.println(sf_line.c_str());
-    //    delay(50);
-    //}
-
-    std::vector<uint32_t> freqTest{ 1000, 25000 };
-    //std::vector<std::pair<double, double>> dbTest{ { 0.0, 0.0}, { -4.9, -5.1},  { -5.1, -4.9}, { -5.5, -5.5}, { -30.0, -20.0}, { -20.0, -30.0} };
-
-    //for (std::vector<uint32_t>::iterator f = freqTest.begin(); f != freqTest.end(); f++) {
-    //    for (std::vector<std::pair<double, double>>::iterator d = dbTest.begin(); d != dbTest.end(); d++) {
-    //        signalGenerator.setFreq(*f, *d);
-    //        dBMeter::Measurement m(*d);
-    //        dbMeter.GetdB(m);
-    //        lcdHelper.Line(0, String(F("Free Memory: ")) + String(freeMemory()));
-    //        lcdHelper.Line(2, SignalGenerator::String(*f, *d));
-    //        lcdHelper.Line(3, m.String());
-    //        lcdHelper.Show();
-    //        lcdHelper.Show(Serial);
-    //    }
-    //}
+    std::vector<uint32_t> freqTest{ 1000, 20000 };
+    std::vector<std::pair<double, double>> dbTest{ { 0.0, 0.0}, { -4.9, -5.1},  { -5.1, -4.9}, { -5.5, -5.5}, { -30.0, -20.0}, { -20.0, -30.0} };
+    for (std::vector<uint32_t>::iterator f = freqTest.begin(); f != freqTest.end(); f++) {
+        for (std::vector<std::pair<double, double>>::iterator d = dbTest.begin(); d != dbTest.end(); d++) {
+            signalGenerator.setFreq(*f, *d);
+            dBMeter::Measurement m(*d);
+            dbMeter.GetdB(m);
+            lcdHelper.Line(0, String(F("Free Memory: ")) + String(freeMemory()));
+            lcdHelper.Line(2, SignalGenerator::String(*f, *d));
+            lcdHelper.Line(3, m.String());
+            lcdHelper.Show();
+            lcdHelper.Show(Serial);
+        }
+    }
 
     System::Mute(); System::PopRelayStack();
     System::UnMute(); System::PopRelayStack();
