@@ -215,13 +215,17 @@ void setup()
     splashscreen();
     System::Device1();
 
-    //std::pair <double, double> dB = { 0.0, 0.0 };
-    //signalGenerator.setFreq(1000, dB);
-    //dBMeter::Measurement m(dB, 45);
-    //dbMeter.GetdB(m);
-    //Serial.println(SignalGenerator::String(1000, dB, 2));
-    //Serial.println(m.String(2));
-    //delay(1000);
+    SignalGenerator  signalGenerator;
+    dBMeter dbMeter;
+    System::UnmutedCalibrationMode();
+    std::pair <double, double> dB = { -10.0, -10.0 };
+    signalGenerator.setFreq(1000, dB);
+    dBMeter::Measurement m(dB, 45);
+    dbMeter.GetdB(m);
+    Serial.println(SignalGenerator::String(1000, dB, 2));
+    Serial.println(m.String(2));
+    delay(100);
+    exit(EXIT_FAILURE);
 
     //if (fabs(m.dBOut.first - dB.first) > 1 || fabs(m.dBOut.second - dB.second) > 1) {
     //    Serial.println("Device1");
