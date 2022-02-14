@@ -80,7 +80,7 @@ std::pair<double, double> FindDb(SignalGenerator& signalGenerator, dBMeter& dbMe
             x1.first = x0.first - f0.first / g0.first;
             x1.second = x0.second - f0.second / g0.second;
             x0 = x1;
-        } while (true);
+        } while (!Is_dBOut_OutOfRange(x0));
     }
     FatalError("f is not convergent");
 }
