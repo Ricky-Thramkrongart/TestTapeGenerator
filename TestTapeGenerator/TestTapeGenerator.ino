@@ -65,7 +65,7 @@ public:
             str = F("Set Time");
             break;
         }
-        lcdhelper.Line(0, F("== Main Menu =================="));
+        lcdhelper.Line(0, F("== Main Menu ====================="));
         lcdhelper.Line(1, str);
     }
 };

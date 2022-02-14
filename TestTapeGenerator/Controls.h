@@ -83,7 +83,7 @@ public:
     virtual void OnTimerClock(Timer<BasePanel>* timer)
     {
         digitalWrite(8, HIGH);
-        lcdhelper.lcd.setCursor(32, 0);
+        lcdhelper.lcd.setCursor(35, 0);
         lcdhelper.lcd.print(rtchelper.ToString());
     }
     virtual void OnTimerLCD(Timer<BasePanel>* timer)
@@ -121,7 +121,7 @@ public:
     }
     virtual void OnUpdate(ButtonPanel<BasePanel>* buttonPanel) {
         FullUpdate();
-        lcdhelper.Line(0, 32, rtchelper.ToString());
+        lcdhelper.Line(0, 35, rtchelper.ToString());
         lcdhelper.Show();
     }
     virtual void OnLoop(ButtonPanel<BasePanel>* buttonPanel)

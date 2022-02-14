@@ -118,9 +118,9 @@ public:
 
     static void PrintRelayState()
     {
-        Serial.print(F("M: ")); Serial.print(System::GetMute());
-        Serial.print(F(" C: ")); Serial.print(System::GetCalibration());
-        Serial.print(F(" Stack: ")); Serial.println(relayStack.size());
+        //Serial.print(F("M: ")); Serial.print(System::GetMute());
+        //Serial.print(F(" C: ")); Serial.print(System::GetCalibration());
+        //Serial.print(F(" Stack: ")); Serial.println(relayStack.size());
     }
 
     static void UnMute()
@@ -128,7 +128,7 @@ public:
         relayStack.push({ muteRelay.IsEnabled(), calibrationRelay.IsEnabled() });
         muteRelay.Disable();
         calibrationRelay.Disable();
-        Serial.print(F("UnMute(): "));
+        //Serial.print(F("UnMute(): "));
         PrintRelayState();
     }
 
@@ -137,7 +137,7 @@ public:
         relayStack.push({ muteRelay.IsEnabled(), calibrationRelay.IsEnabled() });
         muteRelay.Enable();
         calibrationRelay.Disable();
-        Serial.print(F("Mute(): "));
+        //Serial.print(F("Mute(): "));
         PrintRelayState();
     }
 
@@ -146,7 +146,7 @@ public:
         relayStack.push({ muteRelay.IsEnabled(), calibrationRelay.IsEnabled() });
         muteRelay.Enable();
         calibrationRelay.Enable();
-        Serial.print(F("CalibrationMode(): "));
+        //Serial.print(F("CalibrationMode(): "));
         PrintRelayState();
     }
 
@@ -155,7 +155,7 @@ public:
         relayStack.push({ muteRelay.IsEnabled(), calibrationRelay.IsEnabled() });
         muteRelay.Disable();
         calibrationRelay.Enable();
-        Serial.print(F("UnmutedCalibrationMode(): "));
+        //Serial.print(F("UnmutedCalibrationMode(): "));
         PrintRelayState();
     }
 

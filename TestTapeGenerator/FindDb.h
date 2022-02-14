@@ -23,8 +23,8 @@ std::pair<double, double> f(SignalGenerator& signalGenerator, dBMeter& dbMeter, 
     signalGenerator.setFreq(Targetfreq, x0);
     dBMeter::Measurement m;
     dbMeter.GetdB(m);
-    Serial.println(SignalGenerator::String(Targetfreq, x0, 2));
-    Serial.println(m.String(2).c_str());
+    Serial.println(SignalGenerator::String(Targetfreq, x0, 1));
+    Serial.println(m.String(1).c_str());
     return { m.dBIn.first - TargetdB.first, m.dBIn.second - TargetdB.second };
 }
 

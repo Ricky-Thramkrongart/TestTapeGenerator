@@ -38,8 +38,8 @@ public:
         pad(sf, hour());
         sf.print(F(":"));
         pad(sf, minute());
-        sf.print(F(":"));
-        pad(sf, second());
+        //sf.print(F(":"));
+        //pad(sf, second());
         return sf.c_str();
     }
 

@@ -15,9 +15,8 @@ public:
     const __FlashStringHelper* Comment;
     RecordStep(uint32_t Frequency_, uint8_t Time_, int8_t Level_, const __FlashStringHelper* Comment_ = 0) : Frequency(Frequency_), Time(Time_), Level(Level_), Comment(Comment_)
     {
-        //Level = std::max(Level, (int8_t)DBOUT_MIN_SERVICE);
-        //Level = std::min(Level, (int8_t)DBOUT_MAX_SERVICE);
-        Level = -10;
+        Level = std::max(Level, (int8_t)DBOUT_MIN_SERVICE);
+        Level = std::min(Level, (int8_t)DBOUT_MAX_SERVICE);
     }
 
     std::string ToString()
@@ -68,9 +67,8 @@ public:
         int8_t Target_,
         std::vector<RecordStep*> RecordSteps_) : Description(Description_), Tracks(Tracks_), Flux(Flux_), Format(Format_), Target(Target_), RecordSteps(RecordSteps_), ReferenceLevel{ 0.0,0.0 }
     {
-        //Target = std::max(Target, (int8_t)DBOUT_MIN_SERVICE);
-        //Target = std::min(Target, (int8_t)DBOUT_MAX_SERVICE);
-        Target = -10;
+        Target = std::max(Target, (int8_t)DBOUT_MIN_SERVICE);
+        Target = std::min(Target, (int8_t)DBOUT_MAX_SERVICE);
         Length = 0;
         for (std::vector<RecordStep*>::iterator ptr = RecordSteps.begin(); ptr < RecordSteps.end(); ptr++) {
             Length += (*ptr)->Time;

@@ -20,7 +20,7 @@ public:
     {
         if (!Updated) {
             FullUpdate();
-            lcdhelper.Line(0, 32, rtchelper.ToString().c_str());
+            lcdhelper.Line(0, 35, rtchelper.ToString().c_str());
             lcdhelper.Show();
             Updated = true;
         }
@@ -33,7 +33,7 @@ public:
     void OnTimerClock(Timer<DialogOk>* timer)
     {
         digitalWrite(8, HIGH);
-        lcdhelper.lcd.setCursor(32, 0);
+        lcdhelper.lcd.setCursor(35, 0);
         lcdhelper.lcd.print(rtchelper.ToString().c_str());
     }
     RTC_Helper rtchelper;
