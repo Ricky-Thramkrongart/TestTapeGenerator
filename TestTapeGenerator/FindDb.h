@@ -16,10 +16,6 @@ void FatalError(const char* Msg)
 
 std::pair<double, double> f(SignalGenerator& signalGenerator, dBMeter& dbMeter, const std::pair<double, double> x0, const uint32_t Targetfreq, const std::pair<double, double>TargetdB)
 {
-    if (Is_dBOut_OutOfRange(x0))
-    {
-        FatalError("f: x0 out of range");
-    }
     signalGenerator.setFreq(Targetfreq, x0);
     dBMeter::Measurement m;
     dbMeter.GetdB(m);
@@ -34,11 +30,10 @@ std::pair<double, double> g(SignalGenerator& signalGenerator, dBMeter& dbMeter, 
     unsigned int count = 0;
     std::pair<double, double> g0;
     do {
-        if (Is_dBOut_OutOfRange(x0))
-        {
-            FatalError("g: x0 out of range");
-        }
         std::pair<double, double> x_delta{ x0.first + delta,x0.second + delta };
+        if (Is_dBOut_OutOfRange(x_delta)) {
+            return { 0.0, 0.0 };
+        }
         f1 = f(signalGenerator, dbMeter, x_delta, Targetfreq, TargetdB);
 
         if (++count > 1) {
@@ -72,9 +67,9 @@ std::pair<double, double> FindDb(SignalGenerator& signalGenerator, dBMeter& dbMe
             }
 
             g0 = g(signalGenerator, dbMeter, x0, Targetfreq, TargetdB, f0, delta);
-            if (g0.first == 0.0/* || g0.second == 0.0*/)
+            if (g0.first == 0.0 || g0.second == 0.0)
             {
-                FatalError("g0 is invalid (0.0)");
+                break;
             }
 
             x1.first = x0.first - f0.first / g0.first;
