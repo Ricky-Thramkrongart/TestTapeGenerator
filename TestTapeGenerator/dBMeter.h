@@ -143,6 +143,7 @@ public:
             const uint8_t rightChannelIn(3);
             potentio.writeRDAC(leftChannelIn, rv);
             potentio.writeRDAC(rightChannelIn, rv);
+            delay(600);
         }
 
         bool measure_again;
@@ -196,20 +197,12 @@ public:
         using index_t = decltype(buffer)::index_t;
         float64_t dBLeftSum = fp64_sd(0.0);
         float64_t dBRightSum = fp64_sd(0.0);
-        float64_t dBRightMax = fp64_sd(0.0);
-        float64_t dBRightMin = fp64_sd(0.0);
 
         for (index_t i = 0; i < buffer.size(); i++) {
             dBLeftSum = fp64_add(dBLeftSum, fp64_sd(buffer[i].Raw.first));
             dBRightSum = fp64_add(dBRightSum, fp64_sd(buffer[i].Raw.second));
         }
 
-
-
-        for (index_t i = 0; i < buffer.size(); i++) {
-            dBLeftSum = fp64_add(dBLeftSum, fp64_sd(buffer[i].Raw.first));
-            dBRightSum = fp64_add(dBRightSum, fp64_sd(buffer[i].Raw.second));
-        }
         float64_t dBLeftMean = fp64_div(dBLeftSum, fp64_sd(buffer.size()));
         float64_t dBRightMean = fp64_div(dBRightSum, fp64_sd(buffer.size()));
         m.Raw.first = atoi(fp64_to_string(dBLeftMean, 15, 2));
