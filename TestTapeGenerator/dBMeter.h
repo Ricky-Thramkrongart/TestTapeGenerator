@@ -61,22 +61,21 @@ public:
 
         String String(const uint8_t decs = 1) {
             cSF(sf_line, 41);
-            sf_line.print(F("dBMeter:           "));
+            sf_line.print(F("dBm: "));
             //if (Is_dBIn_OutOfRange(dBIn.first))
             //    sf_line.print(F("ovf."));
             //else
-                sf_line.print(dBIn.first, decs, 4 + decs);
-            sf_line.print(F("dBm "));
+            sf_line.print(dBIn.first, decs, 4 + decs); sf_line.print(F("~")); sf_line.print(Std.first, decs, 2 + decs); sf_line.print(F(" "));
             //if (Is_dBIn_OutOfRange(dBIn.second))
             //    sf_line.print(F("ovf."));
             //else
-                sf_line.print(dBIn.second, decs, 4 + decs);
-            sf_line.print(F("dBm "));
+            sf_line.print(dBIn.second, decs, 4 + decs); sf_line.print(F("~")); sf_line.print(Std.second, decs, 2 + decs);
             return sf_line.c_str();
         }
         std::pair<double, double> dBOut;
         std::pair<double, double> dBIn;
         std::pair<double, double> Raw;
+        std::pair<double, double> Std;
         uint8_t RV;
     };
 
@@ -113,7 +112,7 @@ public:
         (this->*GetRawInput)(m);
         m.dBIn.first = PolyVal(System::fit64RV45_l, m.Raw.first);
         m.dBIn.second = PolyVal(System::fit64RV45_r, m.Raw.second);
-       if (m.dBIn.first < DBIN_MIN || m.dBIn.second < DBIN_MIN) {
+        if (m.dBIn.first < DBIN_MIN || m.dBIn.second < DBIN_MIN) {
             inputpregainRelay.Enable();
             Measurement n(m);
             (this->*GetRawInput)(n);
@@ -127,7 +126,7 @@ public:
             }
             inputpregainRelay.Disable();
         }
-        if (ChannelsVerified&&SwapChannels) {
+        if (ChannelsVerified && SwapChannels) {
             std::swap<double>(m.dBIn.first, m.dBIn.second);
             std::swap<double>(m.Raw.first, m.Raw.second);
         }
@@ -148,6 +147,8 @@ public:
 
         bool measure_again;
         CircularBuffer<Measurement, CIRCULARBUFFERSIZE> buffer;
+        m.Std.first = 0.0;
+        m.Std.second = 0.0;
         do {
             const int CH1(A0);
             const int CH2(A1);
@@ -195,18 +196,30 @@ public:
         } while (!buffer.isFull());
 
         using index_t = decltype(buffer)::index_t;
-        float64_t dBLeftSum = fp64_sd(0.0);
-        float64_t dBRightSum = fp64_sd(0.0);
+        float64_t dBLeftSum64 = fp64_sd(0.0);
+        float64_t dBRightSum64 = fp64_sd(0.0);
 
+        //Mean
         for (index_t i = 0; i < buffer.size(); i++) {
-            dBLeftSum = fp64_add(dBLeftSum, fp64_sd(buffer[i].Raw.first));
-            dBRightSum = fp64_add(dBRightSum, fp64_sd(buffer[i].Raw.second));
+            dBLeftSum64 = fp64_add(dBLeftSum64, fp64_sd(buffer[i].Raw.first));
+            dBRightSum64 = fp64_add(dBRightSum64, fp64_sd(buffer[i].Raw.second));
         }
+        float64_t dBLeftMean64 = fp64_div(dBLeftSum64, fp64_sd(buffer.size()));
+        float64_t dBRightMean64 = fp64_div(dBRightSum64, fp64_sd(buffer.size()));
+        m.Raw.first = atoi(fp64_to_string(dBLeftMean64, 15, 2));
+        m.Raw.second = atoi(fp64_to_string(dBRightMean64, 15, 2));
 
-        float64_t dBLeftMean = fp64_div(dBLeftSum, fp64_sd(buffer.size()));
-        float64_t dBRightMean = fp64_div(dBRightSum, fp64_sd(buffer.size()));
-        m.Raw.first = atoi(fp64_to_string(dBLeftMean, 15, 2));
-        m.Raw.second = atoi(fp64_to_string(dBRightMean, 15, 2));
+        //Standard Deviation
+        double dBLeftMean = atof(fp64_to_string(dBLeftMean64, 15, 2));
+        double dBRightMean = atof(fp64_to_string(dBRightMean64, 15, 2));
+        double dBLeftSum = 0.0;
+        double dBRightSum = 0.0;
+        for (index_t i = 0; i < buffer.size(); i++) {
+            dBLeftSum += square(buffer[i].Raw.first - dBLeftMean);
+            dBRightSum += square(buffer[i].Raw.second - dBRightMean);
+        }
+        m.Std.first = sqrt(dBLeftSum / buffer.size());
+        m.Std.second = sqrt(dBRightSum / buffer.size());
     }
 
     void RVSweep()

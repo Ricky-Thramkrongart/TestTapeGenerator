@@ -19,8 +19,8 @@ std::pair<double, double> f(SignalGenerator& signalGenerator, dBMeter& dbMeter, 
     signalGenerator.setFreq(Targetfreq, x0);
     dBMeter::Measurement m;
     dbMeter.GetdB(m);
-    Serial.println(SignalGenerator::String(Targetfreq, x0, 1));
-    Serial.println(m.String(1).c_str());
+    //Serial.println(SignalGenerator::String(Targetfreq, x0, 1));
+    //Serial.println(m.String(1).c_str());
     return { m.dBIn.first - TargetdB.first, m.dBIn.second - TargetdB.second };
 }
 
@@ -50,13 +50,13 @@ std::pair<double, double> FindDb(SignalGenerator& signalGenerator, dBMeter& dbMe
 
     std::pair<double, double> x0, x1, f0, f1, g0;
     
-    auto epsilon = 0.05 + fabs(0.01 * (TargetdB.second + TargetdB.first) / DBOUT_MAX_SERVICE) + fabs(0.05 * Targetfreq / 25000.0);
+    auto epsilon = 0.05 + fabs(0.01 * (TargetdB.second + TargetdB.first) / DBOUT_MAX_SERVICE) + fabs(0.1 * Targetfreq / 25000.0);
 
     for (int i = 1;  i != 10; ++i)
     {
         x0 = TargetdB;
         epsilon += 0.05;
-        double delta = 4 * epsilon;
+        double delta = 8 * epsilon;
         Serial.print("Target: "); Serial.print(Targetfreq); Serial.print(" "); Serial.print(TargetdB.first); Serial.print(" "); Serial.print(TargetdB.second); Serial.print(" epsilon: "); Serial.println(epsilon);
         
         do

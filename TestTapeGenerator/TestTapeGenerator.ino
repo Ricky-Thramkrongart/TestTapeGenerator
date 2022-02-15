@@ -234,6 +234,7 @@ void setup()
         }
         System::PopRelayStack();
     }
+
     Serial.setTimeout(500);
     Serial.println("Prompt>");
     String str(Serial.readString());
@@ -252,6 +253,7 @@ void setup()
                 NewTestTape();
                 break;
             case 1:
+                FindDbTest();
                 selftest();
                 break;
             case 2:

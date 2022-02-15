@@ -52,8 +52,8 @@ public:
         dbMeter.GetdB(m);
         Serial.println(m.String(2));
 
-        std::string statuscontrol = StatusControl(1.5, m.dBIn.first - Target, m.dBIn.second - Target);
-        if (fabs(m.dBIn.first - Target) < 1.5 && fabs(m.dBIn.second - Target) < 1.5) {
+        std::string statuscontrol = StatusControl(.5, m.dBIn.first - Target, m.dBIn.second - Target);
+        if (fabs(m.dBIn.first - Target) < .5 && fabs(m.dBIn.second - Target) < .5) {
             manual_calibration_ok_count++;
             Beep();
         }
@@ -71,7 +71,7 @@ public:
         lcdhelper.lcd.setCursor(0,1);
         lcdhelper.lcd.print(m.String(2));
 
-        if (manual_calibration_ok_count >= 3) {
+        if (manual_calibration_ok_count >= 5) {
             Beep();
             dbMeter.Cabling(signalGenerator);
             buttonPanel.returncode = ButtonPanel<DialogOk>::IDOK;
@@ -121,8 +121,14 @@ public:
         Serial.println(sf_line);
         System::PrintRelayState();
         (*ptr)->RecordLevel = FindDb(signalGenerator, dbMeter, (*ptr)->Frequency, { (*ptr)->Level, (*ptr)->Level });
-        System::PrintRelayState();
-        lcdhelper.Line(3, dBMeter::Measurement((*ptr)->RecordLevel).String(2));
+        signalGenerator.setFreq((*ptr)->Frequency, (*ptr)->RecordLevel);
+        dBMeter::Measurement m((*ptr)->RecordLevel);
+        dbMeter.GetdB(m);
+        lcdhelper.Line(2, SignalGenerator::String((*ptr)->Frequency, (*ptr)->RecordLevel, 2));
+        lcdhelper.Line(3, m.String(2));
+        Serial.println(SignalGenerator::String((*ptr)->Frequency, (*ptr)->RecordLevel, 2));
+        Serial.println(m.String(2));
+        lcdhelper.Show();
         Beep();
         ptr++;
         if (ptr == tapeInfo->RecordSteps.end()) {
