@@ -59,7 +59,7 @@ std::pair<double, double> FindDb(SignalGenerator& signalGenerator, dBMeter& dbMe
         x0 = TargetdB;
         epsilon += 0.05;
         double delta = 8 * epsilon;
-        Serial.print("Target: "); Serial.print(Targetfreq); Serial.print(" "); Serial.print(TargetdB.first); Serial.print(" "); Serial.print(TargetdB.second); Serial.print(" epsilon: "); Serial.println(epsilon);
+        //Serial.print("Target: "); Serial.print(Targetfreq); Serial.print(" "); Serial.print(TargetdB.first); Serial.print(" "); Serial.print(TargetdB.second); Serial.print(" epsilon: "); Serial.println(epsilon);
         
         do
         {

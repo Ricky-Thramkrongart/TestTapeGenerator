@@ -236,6 +236,8 @@ void setup()
         System::PopRelayStack();
     }
 
+    //NewTestTape();
+
     Serial.setTimeout(500);
     Serial.println("Prompt>");
     String str(Serial.readString());

@@ -8,6 +8,8 @@
 #include <SafeString.h>
 #include "Relay.h"
 
+constexpr auto SkinnersKonstant = 5;
+
 
 constexpr auto DBIN_MAX = 0;
 constexpr auto DBIN_MIN = -28;

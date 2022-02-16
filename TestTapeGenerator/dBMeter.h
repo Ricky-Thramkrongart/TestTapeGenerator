@@ -61,7 +61,7 @@ public:
 
         String String(const uint8_t decs = 1) {
             cSF(sf_line, 41);
-            sf_line.print(F("dBm: "));
+            sf_line.print(F("In: "));
             //if (Is_dBIn_OutOfRange(dBIn.first))
             //    sf_line.print(F("ovf."));
             //else
@@ -128,7 +128,7 @@ public:
                 }
                 inputpregainRelay.Disable();
             }
-            if (m.Std.first > 2 || m.Std.second > 2) {
+            if (m.Std.first > SkinnersKonstant || m.Std.second > SkinnersKonstant) {
                 delay(200); //settling time
                 retry = true;
             }

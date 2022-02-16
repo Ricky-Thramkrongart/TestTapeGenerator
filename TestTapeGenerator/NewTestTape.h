@@ -1,5 +1,7 @@
 #pragma once
 
+
+#include <list>
 #include "FindDb.h"
 #include "Beep.h"
 
@@ -68,7 +70,7 @@ public:
         digitalWrite(8, LOW);
         lcdhelper.lcd.setCursor(sf_line.length(), 0);
         lcdhelper.lcd.print(statuscontrol.c_str());
-        lcdhelper.lcd.setCursor(0,1);
+        lcdhelper.lcd.setCursor(0, 1);
         lcdhelper.lcd.print(m.String(2));
 
         if (manual_calibration_ok_count >= 5) {
@@ -128,7 +130,6 @@ public:
         dbMeter.GetdB(m);
         lcdhelper.Line(2, SignalGenerator::String((*ptr)->Frequency, (*ptr)->RecordLevel));
         lcdhelper.Line(3, m.String());
-        Serial.println(SignalGenerator::String((*ptr)->Frequency, (*ptr)->RecordLevel));
         Serial.println(m.String());
         lcdhelper.Show();
         Beep();
@@ -147,9 +148,9 @@ protected:
 public:
     TapeInfo* tapeInfo;
     std::vector<RecordStep*>::iterator ptr;
-    RecordTestTape(TapeInfo * tapeInfo_) : Dialog(1000), tapeInfo(tapeInfo_), ptr(tapeInfo->RecordSteps.begin())
+    RecordTestTape(TapeInfo* tapeInfo_) : Dialog(1000), tapeInfo(tapeInfo_), ptr(tapeInfo->RecordSteps.begin())
     {
-        System::UnMute();
+        System::Mute();
     }
     ~RecordTestTape()
     {
@@ -168,20 +169,34 @@ public:
         sf_line.print(F(")"));
         lcdhelper.Line(2, sf_line);
         Serial.println(sf_line);
-        System::PrintRelayState();
-        std::pair<double, double> x0((* ptr)->RecordLevel);
+        std::pair<double, double> x0((*ptr)->RecordLevel);
         uint32_t f((*ptr)->Frequency);
         signalGenerator.setFreq(f, x0);
         dBMeter::Measurement m(x0);
-        delay(1000); //Setteling time
-        dbMeter.GetdB(m);
-        lcdhelper.Line(2, SignalGenerator::String(f, x0));
-        lcdhelper.Line(3, m.String());
-        Serial.println(SignalGenerator::String(f, x0));
-        Serial.println(m.String());
-        lcdhelper.Show();
-        delay(100);
-        delay(20000);
+        delay(2000); //Setteling time //Blank space
+        System::UnMute();
+        long ms = millis();
+        std::pair<double, double> stdsum{ 0.0, 0.0 };
+        std::pair<double, double> std;
+        uint16_t count = 0;
+        do {
+            dbMeter.GetdB(m);
+            count++;
+
+            stdsum.first += square(m.dBIn.first - (*ptr)->Level);
+            stdsum.second += square(m.dBIn.second - (*ptr)->Level);
+            std.first = sqrt(stdsum.first / count);
+            std.second = sqrt(stdsum.second / count);
+            cSF(sf_line, 41);
+            
+            sf_line.print(m.String().c_str()); sf_line.print(F(" ")); sf_line.print(std.first); sf_line.print(F(" ")); sf_line.print(std.second);
+            lcdhelper.Line(2, SignalGenerator::String(f, x0));
+            lcdhelper.Line(3, sf_line);
+            Serial.println(sf_line);
+            lcdhelper.Show();
+        } while (millis() - ms < 20000);
+        System::PopRelayStack();
+
         Beep();
         ptr++;
         if (ptr == tapeInfo->RecordSteps.end()) {
@@ -204,6 +219,7 @@ public:
 
 void NewTestTape()
 {
+    //std::shared_ptr<TapeInfo> tapeInfo(TapeInfo::Get(TapeInfo::AKAI_GX_75_95_TEST_TAPE));
     std::shared_ptr<TapeInfo> tapeInfo;
     {
         SelectTape selectTape;
@@ -222,9 +238,9 @@ void NewTestTape()
         return;
     }
     if (!RecordTestTape(tapeInfo.get()).Execute()) {
-       return;
+        return;
     }
-//    if (!PrintProgress(tape).Execute()) {
-//        return;
-//    }
+    //    if (!PrintProgress(tape).Execute()) {
+    //        return;
+    //    }
 }

@@ -156,7 +156,7 @@ public:
         cSF(sf_line, 41);
 
         char buffer[21];
-        sf_line.print(F("Generator: "));
+        sf_line.print(F("Out: "));
         sf_line.print(uintToStr(f, 5, buffer)); //Unsafe
         sf_line.print(F("Hz "));
         sf_line.print(dB.first, decs, 4 + decs);
