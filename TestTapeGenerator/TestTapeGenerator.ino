@@ -212,6 +212,7 @@ void InputHardwareCalibration(void)
 void setup()
 {
     Serial.begin(115200);
+    System::Mute();
     splashscreen();
     { 
         System::Device2();

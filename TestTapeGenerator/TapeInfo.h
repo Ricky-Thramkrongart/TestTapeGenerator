@@ -12,8 +12,9 @@ public:
     uint8_t Time;
     int8_t Level;
     std::pair<double, double> RecordLevel;
+    double e;
     const __FlashStringHelper* Comment;
-    RecordStep(uint32_t Frequency_, uint8_t Time_, int8_t Level_, const __FlashStringHelper* Comment_ = 0) : Frequency(Frequency_), Time(Time_), Level(Level_), Comment(Comment_)
+    RecordStep(uint32_t Frequency_, uint8_t Time_, int8_t Level_, const __FlashStringHelper* Comment_ = 0) : Frequency(Frequency_), Time(Time_), Level(Level_), Comment(Comment_), e(0.0)
     {
         Level = std::max(Level, (int8_t)DBOUT_MIN_SERVICE);
         Level = std::min(Level, (int8_t)DBOUT_MAX_SERVICE);

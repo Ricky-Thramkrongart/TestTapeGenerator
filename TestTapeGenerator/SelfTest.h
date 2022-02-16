@@ -57,7 +57,8 @@ void selftest()
     std::vector<std::pair<double, double>> dbFinddBTest{ { DBOUT_MAX_SERVICE, DBOUT_MAX_SERVICE }, { DBOUT_MIN_SERVICE, DBOUT_MIN_SERVICE },  { -9.4, -10.6 } };
     for (std::vector<uint32_t>::iterator f = freqTest.begin(); f != freqTest.end(); f++) {
         for (std::vector<std::pair<double, double>>::iterator d = dbFinddBTest.begin(); d != dbFinddBTest.end(); d++) {
-            std::pair<double, double> dbIn = FindDb(signalGenerator, dbMeter, *f, *d);
+            double e = 0.0;
+            std::pair<double, double> dbIn = FindDb(signalGenerator, dbMeter, *f, *d, *d, e);
             signalGenerator.setFreq(*f, dbIn);
             dBMeter::Measurement m(dbIn);
             dbMeter.GetdB(m);
@@ -82,7 +83,8 @@ void FindDbTest()
     std::vector<std::pair<double, double>> dbFinddBTest{ { DBOUT_MAX_SERVICE, DBOUT_MAX_SERVICE }, {-15,-15}, { DBOUT_MIN_SERVICE, DBOUT_MIN_SERVICE } };
     for (std::vector<uint32_t>::iterator f = freqTest.begin(); f != freqTest.end(); f++) {
         for (std::vector<std::pair<double, double>>::iterator d = dbFinddBTest.begin(); d != dbFinddBTest.end(); d++) {
-            std::pair<double, double> dbIn = FindDb(signalGenerator, dbMeter, *f, *d);
+            double e = 0.0;
+            std::pair<double, double> dbIn = FindDb(signalGenerator, dbMeter, *f, *d, *d, e);
             signalGenerator.setFreq(*f, dbIn);
             dBMeter::Measurement m(dbIn);
             dbMeter.GetdB(m);

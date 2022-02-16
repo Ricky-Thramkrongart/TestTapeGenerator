@@ -44,13 +44,15 @@ std::pair<double, double> g(SignalGenerator& signalGenerator, dBMeter& dbMeter, 
     return g0;
 }
 
-std::pair<double, double> FindDb(SignalGenerator& signalGenerator, dBMeter& dbMeter, const uint32_t Targetfreq, std::pair<double, double> TargetdB)
+std::pair<double, double> FindDb(SignalGenerator& signalGenerator, dBMeter& dbMeter, const uint32_t Targetfreq, std::pair<double, double> TargetdB, std::pair<double, double> StartGuess, double& epsilon)
 {
     dbMeter.Cabling(signalGenerator);
 
     std::pair<double, double> x0, x1, f0, f1, g0;
     
-    auto epsilon = 0.05 + fabs(0.01 * (TargetdB.second + TargetdB.first) / DBOUT_MAX_SERVICE) + fabs(0.1 * Targetfreq / 25000.0);
+    if (epsilon == 0.0) {
+        epsilon = 0.05 + fabs(0.01 * (TargetdB.second + TargetdB.first) / DBOUT_MAX_SERVICE) + fabs(0.1 * Targetfreq / 25000.0);
+    }
 
     for (int i = 1;  i != 10; ++i)
     {

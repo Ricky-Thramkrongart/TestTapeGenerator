@@ -109,23 +109,33 @@ public:
         m.RV = 45;
         inputpregainRelay.Disable();
         GetRawInputType GetRawInput = System::GetCalibration() ? &GetRawInputInternal : &GetRawInputExternal;
-        (this->*GetRawInput)(m);
-        m.dBIn.first = PolyVal(System::fit64RV45_l, m.Raw.first);
-        m.dBIn.second = PolyVal(System::fit64RV45_r, m.Raw.second);
-        if (m.dBIn.first < DBIN_MIN || m.dBIn.second < DBIN_MIN) {
-            inputpregainRelay.Enable();
-            Measurement n(m);
-            (this->*GetRawInput)(n);
-            if (m.dBIn.first < DBIN_MIN) {
-                m.Raw.first = n.Raw.first;
-                m.dBIn.first = PolyVal(System::fit64RV45_l, m.Raw.first) - 12.0;
+        bool retry;
+        do {
+            (this->*GetRawInput)(m);
+            m.dBIn.first = PolyVal(System::fit64RV45_l, m.Raw.first);
+            m.dBIn.second = PolyVal(System::fit64RV45_r, m.Raw.second);
+            if (m.dBIn.first < DBIN_MIN || m.dBIn.second < DBIN_MIN) {
+                inputpregainRelay.Enable();
+                Measurement n(m);
+                (this->*GetRawInput)(n);
+                if (m.dBIn.first < DBIN_MIN) {
+                    m.Raw.first = n.Raw.first;
+                    m.dBIn.first = PolyVal(System::fit64RV45_l, m.Raw.first) - 12.0;
+                }
+                if (m.dBIn.second < DBIN_MIN) {
+                    m.Raw.second = n.Raw.second;
+                    m.dBIn.second = PolyVal(System::fit64RV45_r, m.Raw.second) - 12.0;
+                }
+                inputpregainRelay.Disable();
             }
-            if (m.dBIn.second < DBIN_MIN) {
-                m.Raw.second = n.Raw.second;
-                m.dBIn.second = PolyVal(System::fit64RV45_r, m.Raw.second) - 12.0;
+            if (m.Std.first > 2 || m.Std.second > 2) {
+                delay(200); //settling time
+                retry = true;
             }
-            inputpregainRelay.Disable();
-        }
+            else 
+                retry = false;
+            
+        } while (retry);
         if (ChannelsVerified && SwapChannels) {
             std::swap<double>(m.dBIn.first, m.dBIn.second);
             std::swap<double>(m.Raw.first, m.Raw.second);
