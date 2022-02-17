@@ -129,6 +129,7 @@ public:
                 inputpregainRelay.Disable();
             }
             if (m.Std.first > SkinnersKonstant || m.Std.second > SkinnersKonstant) {
+                Serial.println("m.Std.first > SkinnersKonstant || m.Std.second > SkinnersKonstant");
                 delay(200); //settling time
                 retry = true;
             }
@@ -289,7 +290,7 @@ public:
 
     void Cabling(SignalGenerator& signalGenerator)
     {
-        if (!ChannelsVerified) {
+        if (!System::GetCalibration() && !ChannelsVerified) {
             System::UnMute();
             signalGenerator.setFreq(1000, { -10, -15 });
             Measurement m;

@@ -234,8 +234,8 @@ void setup()
             }
         }
         System::PopRelayStack();
-    }
-
+      }
+       selftest();
     //NewTestTape();
 
     Serial.setTimeout(500);

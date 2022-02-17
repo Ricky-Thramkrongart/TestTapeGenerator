@@ -383,4 +383,3 @@ Relay System::calibrationRelay(Relay(26));
 std::vector<float64_t> System::fit64;
 std::vector<float64_t> System::fit64RV45_l(0);
 std::vector<float64_t> System::fit64RV45_r(0);
-
