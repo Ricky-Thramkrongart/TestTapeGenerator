@@ -144,8 +144,8 @@ void StartSignalGenerator()
     Serial.flush();
     lcdhelper.Show(Serial);
     SignalGenerator signalGenerator;
-    //System::UnmutedCalibrationMode();
-    System::UnMute();
+   //System::UnmutedCalibrationMode(); 
+   System::UnMute();
     dBMeter dbMeter;
 
     do {
@@ -190,7 +190,7 @@ void StartdBMeter()
     lcdhelper.Show(Serial);
     SignalGenerator signalGenerator;
     dBMeter dbMeter;
-    //System::UnmutedCalibrationMode();
+   // System::UnmutedCalibrationMode();
     System::UnMute();
     signalGenerator.setFreq(1000, { -8, -8 });
     do {
@@ -216,7 +216,7 @@ void setup()
     splashscreen();
     { 
         System::Device2();
-        Serial.println("System::Device2();");
+ /*       Serial.println("System::Device2();");
         SignalGenerator  signalGenerator;
         dBMeter dbMeter;
         System::UnmutedCalibrationMode();
@@ -234,8 +234,8 @@ void setup()
             }
         }
         System::PopRelayStack();
-      }
-       selftest();
+*/      }
+    
     //NewTestTape();
 
     Serial.setTimeout(500);
@@ -256,7 +256,7 @@ void setup()
                 NewTestTape();
                 break;
             case 1:
-                FindDbTest();
+                //FindDbTest();
                 selftest();
                 break;
             case 2:

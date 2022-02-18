@@ -44,8 +44,8 @@ void selftest()
             dBMeter::Measurement m(*d);
             dbMeter.GetdB(m);
             lcdHelper.Line(0, String(F("Free Memory: ")) + String(freeMemory()));
-            lcdHelper.Line(2, SignalGenerator::String(*f, *d));
-            lcdHelper.Line(3, m.String());
+            lcdHelper.Line(2, SignalGenerator::String(*f, *d, 3));
+            lcdHelper.Line(3, m.String(3));
             lcdHelper.Show(Serial);
             lcdHelper.Show(20000);
         }

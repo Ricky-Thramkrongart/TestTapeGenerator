@@ -11,15 +11,15 @@
 constexpr auto SkinnersKonstant = 5;
 
 
-constexpr auto DBIN_MAX = 0;
-constexpr auto DBIN_MIN = -28;
-constexpr auto DBIN_HEADROOM = 5;
+constexpr auto DBIN_MAX = 5;
+constexpr auto DBIN_MIN = -23;
+constexpr auto DBIN_HEADROOM = 3;
 constexpr auto DBIN_MAX_SERVICE = DBIN_MAX - DBIN_HEADROOM;
 constexpr auto DBIN_MIN_SERVICE = DBIN_MIN + DBIN_HEADROOM;
 
 constexpr auto DBOUT_MAX = 0;
 constexpr auto DBOUT_MIN = -31;
-constexpr auto DBOUT_HEADROOM = 5;
+constexpr auto DBOUT_HEADROOM = 3;
 constexpr auto DBOUT_MAX_SERVICE = DBOUT_MAX - DBOUT_HEADROOM;
 constexpr auto DBOUT_MIN_SERVICE = DBOUT_MIN + DBOUT_HEADROOM;
 

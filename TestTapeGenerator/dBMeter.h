@@ -109,6 +109,7 @@ public:
         m.RV = 45;
         inputpregainRelay.Disable();
         GetRawInputType GetRawInput = System::GetCalibration() ? &GetRawInputInternal : &GetRawInputExternal;
+        long ms = millis();
         bool retry;
         do {
             (this->*GetRawInput)(m);
@@ -128,7 +129,7 @@ public:
                 }
                 inputpregainRelay.Disable();
             }
-            if (m.Std.first > SkinnersKonstant || m.Std.second > SkinnersKonstant) {
+            if ((m.Std.first > SkinnersKonstant || m.Std.second > SkinnersKonstant)&& millis() - ms < 5000) {
                 Serial.println("m.Std.first > SkinnersKonstant || m.Std.second > SkinnersKonstant");
                 delay(200); //settling time
                 retry = true;
@@ -141,6 +142,9 @@ public:
             std::swap<double>(m.dBIn.first, m.dBIn.second);
             std::swap<double>(m.Raw.first, m.Raw.second);
         }
+        m.dBIn.first += 5.0;
+        m.dBIn.second += 5.0;
+        
     }
 
     void GetRawInputInternal(Measurement& m)
