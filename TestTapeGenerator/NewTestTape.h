@@ -194,6 +194,7 @@ public:
             lcdhelper.Line(2, VUMeter[1].c_str());
             lcdhelper.Line(3, VUMeter[2].c_str());
             lcdhelper.Show();
+            lcdhelper.Show(Serial);
         } while (millis() - ms < 20000);
         System::PopRelayStack();
 
