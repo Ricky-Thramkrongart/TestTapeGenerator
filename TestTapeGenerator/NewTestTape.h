@@ -188,11 +188,11 @@ public:
             std.first = sqrt(stdsum.first / count);
             std.second = sqrt(stdsum.second / count);
             cSF(sf_line, 41);
-            
-            sf_line.print(m.String().c_str()); sf_line.print(F(" ")); sf_line.print(std.first); sf_line.print(F(" ")); sf_line.print(std.second);
-            lcdhelper.Line(2, SignalGenerator::String(f, x0));
-            lcdhelper.Line(3, sf_line);
-            Serial.println(sf_line);
+
+            std::vector<std::string> VUMeter(GetVUMeterStrings(std.first, std.second));
+            lcdhelper.Line(1, VUMeter[0].c_str());
+            lcdhelper.Line(2, VUMeter[1].c_str());
+            lcdhelper.Line(3, VUMeter[2].c_str());
             lcdhelper.Show();
         } while (millis() - ms < 20000);
         System::PopRelayStack();
