@@ -190,6 +190,7 @@ public:
             cSF(sf_line, 41);
 
             std::vector<std::string> VUMeter(GetVUMeterStrings(std.first, std.second));
+            lcdhelper.Line(0, tapeInfo->ToString()[0].c_str());
             lcdhelper.Line(1, VUMeter[0].c_str());
             lcdhelper.Line(2, VUMeter[1].c_str());
             lcdhelper.Line(3, VUMeter[2].c_str());

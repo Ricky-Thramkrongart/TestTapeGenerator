@@ -216,25 +216,33 @@ void setup()
     splashscreen();
     { 
         System::Device2();
- /*       Serial.println("System::Device2();");
-        SignalGenerator  signalGenerator;
+        
+        LCD_Helper lcdhelper;
+        lcdhelper.Line(0, F("New offset measurement"));
+        
+        SignalGenerator signalGenerator;
         dBMeter dbMeter;
         System::UnmutedCalibrationMode();
-        std::pair <double, double> dB = { -2.5, -2.5 };
-        signalGenerator.setFreq(1000, dB);
-        dBMeter::Measurement m(dB, 45);
+        signalGenerator.setFreq(1000, { 0, 0 });
+        dBMeter::Measurement m;
         dbMeter.GetdB(m);
-        if (fabs(m.dBIn.first - dB.first) > 0.1 || fabs(m.dBIn.second - dB.second) > 0.1) {
-            System::Device1();
-            Serial.println("System::Device1();");
-            signalGenerator.setFreq(1000, dB);
-            dbMeter.GetdB(m);
-            if (fabs(m.dBIn.first - dB.first) > 0.1 || fabs(m.dBIn.second - dB.second) > 0.1) {
-                exit(EXIT_FAILURE);
-            }
-        }
+        System::_5dBInputAttenuator.first += m.dBIn.first;
+        System::_5dBInputAttenuator.second += m.dBIn.second;
+        Serial.println("System::Device2();");
+        
+//        if (fabs(m.dBIn.first - dB.first) > 0.1 || fabs(m.dBIn.second - dB.second) > 0.1) {
+//            System::Device1();
+//            Serial.println("System::Device1();");
+//            signalGenerator.setFreq(1000, dB);
+//            dbMeter.GetdB(m);
+//            System::_5dBInputAttenuator.first += m.dBIn.first;
+//            System::_5dBInputAttenuator.second += m.dBIn.second;
+//            if (fabs(m.dBIn.first - dB.first) > 0.1 || fabs(m.dBIn.second - dB.second) > 0.1) {
+//                exit(EXIT_FAILURE);
+//            }
+//        }
         System::PopRelayStack();
-*/      }
+      }
     
     //NewTestTape();
 

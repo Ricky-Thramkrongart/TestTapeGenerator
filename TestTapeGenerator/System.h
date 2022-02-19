@@ -8,7 +8,7 @@
 #include <SafeString.h>
 #include "Relay.h"
 
-constexpr auto SkinnersKonstant = 5;
+constexpr auto SkinnersKonstant = 7;
 
 
 constexpr auto DBIN_MAX = 5;
@@ -369,14 +369,18 @@ public:
         fit64RV45_r[2] = 13809933705389921679LL; //-0.044414801693089527
         fit64RV45_r[1] = 4612466344284899237LL; //2.3465342934877804
         fit64RV45_r[0] = 13858859640482057285LL; //-82.240869267189808
+
+        _5dBInputAttenuator = {-5.0,-5.0};
     }
 
     static std::vector<float64_t> fit64RV45_l;
     static std::vector<float64_t> fit64RV45_r;
     static std::vector<float64_t> fit64;
+    static std::pair<double, double> _5dBInputAttenuator;
+    
 };
 std::stack<std::pair<bool, bool>> System::relayStack;
-
+static std::pair<double, double>System::_5dBInputAttenuator({0.0, 0.0});
 Relay System::muteRelay(Relay(28, true));
 Relay System::calibrationRelay(Relay(26));
 

@@ -142,9 +142,8 @@ public:
             std::swap<double>(m.dBIn.first, m.dBIn.second);
             std::swap<double>(m.Raw.first, m.Raw.second);
         }
-        m.dBIn.first += 5.0;
-        m.dBIn.second += 5.0;
-
+        m.dBIn.first -= System::_5dBInputAttenuator.first;
+        m.dBIn.second -= System::_5dBInputAttenuator.second;
     }
 
     void GetRawInputInternal(Measurement& m)
