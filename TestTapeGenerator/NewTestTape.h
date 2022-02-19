@@ -123,7 +123,7 @@ public:
         Serial.println(sf_line);
         System::PrintRelayState();
         std::pair<double, double> x0({ (*ptr)->Level, (*ptr)->Level });
-        (*ptr)->RecordLevel = FindDb(signalGenerator, dbMeter, (*ptr)->Frequency, x0, x0, (*ptr)->e);
+        (*ptr)->RecordLevel = FindDb(signalGenerator, dbMeter, (*ptr)->Frequency, x0, x0, (*ptr)->e, lcdhelper);
         signalGenerator.setFreq((*ptr)->Frequency, (*ptr)->RecordLevel);
         delay(1000); //Setteling time
         dBMeter::Measurement m((*ptr)->RecordLevel);
@@ -179,6 +179,8 @@ public:
         std::pair<double, double> stdsum{ 0.0, 0.0 };
         std::pair<double, double> std;
         uint16_t count = 0;
+
+        lcdhelper.Line(0, sf_line);
         do {
             dbMeter.GetdB(m);
             count++;
@@ -190,7 +192,6 @@ public:
             cSF(sf_line, 41);
 
             std::vector<std::string> VUMeter(GetVUMeterStrings(std.first, std.second));
-            lcdhelper.Line(0, tapeInfo->ToString()[0].c_str());
             lcdhelper.Line(1, VUMeter[0].c_str());
             lcdhelper.Line(2, VUMeter[1].c_str());
             lcdhelper.Line(3, VUMeter[2].c_str());

@@ -87,7 +87,7 @@ void FindDbTest()
     for (std::vector<uint32_t>::iterator f = freqTest.begin(); f != freqTest.end(); f++) {
         for (std::vector<std::pair<double, double>>::iterator d = dbFinddBTest.begin(); d != dbFinddBTest.end(); d++) {
             double e = 0.0;
-            std::pair<double, double> dbIn = FindDb(signalGenerator, dbMeter, *f, *d, *d, e);
+            std::pair<double, double> dbIn = FindDb(signalGenerator, dbMeter, *f, *d, *d, e, lcdHelper);
             signalGenerator.setFreq(*f, dbIn);
             dBMeter::Measurement m(dbIn);
             dbMeter.GetdB(m);

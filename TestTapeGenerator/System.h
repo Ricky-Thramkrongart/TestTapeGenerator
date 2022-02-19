@@ -8,11 +8,10 @@
 #include <SafeString.h>
 #include "Relay.h"
 
-constexpr auto SkinnersKonstant = 7;
+constexpr auto SkinnersKonstant = 3;
 
-
-constexpr auto DBIN_MAX = 5;
-constexpr auto DBIN_MIN = -23;
+constexpr auto DBIN_MAX = 0;
+constexpr auto DBIN_MIN = -28;
 constexpr auto DBIN_HEADROOM = 3;
 constexpr auto DBIN_MAX_SERVICE = DBIN_MAX - DBIN_HEADROOM;
 constexpr auto DBIN_MIN_SERVICE = DBIN_MIN + DBIN_HEADROOM;
@@ -25,29 +24,37 @@ constexpr auto DBOUT_MIN_SERVICE = DBOUT_MIN + DBOUT_HEADROOM;
 
 bool Is_dBIn_OutOfRange(const double dB)
 {
-    if (dB > DBIN_MAX || dB < DBIN_MIN)
+    if (dB > DBIN_MAX || dB < DBIN_MIN) {
+        Serial.println(F("Is_dBIn_OutOfRange"));
         return true;
+    }
     return false;
 }
 
 bool Is_dBIn_OutOfRange(const std::pair<double, double>& dB)
 {
-    if (Is_dBIn_OutOfRange(dB.first) || Is_dBIn_OutOfRange(dB.second))
+    if (Is_dBIn_OutOfRange(dB.first) || Is_dBIn_OutOfRange(dB.second)) {
+        Serial.println(F("Is_dBIn_OutOfRange"));
         return true;
+    }
     return false;
 }
 
 bool Is_dBOut_OutOfRange(const double dB)
 {
-    if (dB > DBOUT_MAX || dB < DBOUT_MIN)
+    if (dB > DBOUT_MAX || dB < DBOUT_MIN) {
+        Serial.println(F("Is_dBOut_OutOfRange"));
         return true;
+    }
     return false;
 }
 
 bool Is_dBOut_OutOfRange(const std::pair<double, double>& dB)
 {
-    if (Is_dBIn_OutOfRange(dB.first) || Is_dBIn_OutOfRange(dB.second))
+    if (Is_dBOut_OutOfRange(dB.first) || Is_dBOut_OutOfRange(dB.second)) {
+        Serial.println(F("Is_dBOut_OutOfRange"));
         return true;
+    }
     return false;
 }
 
@@ -324,6 +331,9 @@ public:
         fit64RV45_r[2] = 13794839316444044651LL; //-4.1783047816673453E-3
         fit64RV45_r[1] = 4598738819454652931LL; //0.28128607980332293
         fit64RV45_r[0] = 13852251674767900672LL; //-29.084007135068532
+
+        _5dBInputAttenuator = { 0.0, 0.0 };
+
     }
 
     static void Device2(void) {
