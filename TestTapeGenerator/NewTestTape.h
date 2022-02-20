@@ -212,7 +212,8 @@ public:
             lcdhelper.Line(3, VUMeter[2].c_str());
             lcdhelper.Show();
             lcdhelper.Show(Serial);
-        } while (millis() - ms < 20000);
+         } while (millis() - ms < (*ptr)->Time*1000);
+            //} while (millis() - ms < 20000);
         System::PopRelayStack();
 
         Beep();
