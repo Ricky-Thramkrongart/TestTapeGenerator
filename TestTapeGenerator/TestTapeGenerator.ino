@@ -45,7 +45,7 @@ public:
             str = F("Create Test Tape");
             break;
         case 1:
-            str = F("Self Test");
+            str = F("Tests...");
             break;
         case 2:
             str = F("Start Signal Generator");
@@ -115,8 +115,7 @@ void setup()
                 NewTestTape();
                 break;
             case 1:
-                //FindDbTest();
-                selftest();
+                Tests();
                 break;
             case 2:
                 SignalGeneratorOkDialog().Execute();
@@ -125,13 +124,13 @@ void setup()
                 dBMeterOkDialog().Execute();
                 break;
             case 4:
-                OutputHardwareCalibration();
+            //   OutputHardwareCalibration();
                 break;
             case 5:
-                InputHardwareCalibration();
+            //   InputHardwareCalibration();
                 break;
             case 6:
-                dBMeterScan();
+            //    dBMeterScan();
                 break;
             case 7:
                 SetDateTime();

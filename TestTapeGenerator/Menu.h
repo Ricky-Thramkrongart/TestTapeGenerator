@@ -78,6 +78,7 @@ public:
 
     virtual  ButtonPanel<BasePanel>::ReturnCode Execute()
     {
+        Display = End;
         return buttonPanel.Execute();
     }
 };
