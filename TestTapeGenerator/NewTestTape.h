@@ -224,21 +224,21 @@ void NewTestTape()
     std::shared_ptr<TapeInfo> tapeInfo;
     {
         SelectTape selectTape;
-        if (!selectTape.Execute()) {
+        if (selectTape.Execute() != ButtonPanel<BasePanel>::IDOK) {
             return;
         }
         tapeInfo = std::shared_ptr<TapeInfo>(TapeInfo::Get((TapeInfo::Tapes)selectTape.Current));
     }
-    if (!AdjustingReferenceLevelOkDialog(tapeInfo.get()).Execute()) {
+    if (AdjustingReferenceLevelOkDialog(tapeInfo.get()).Execute()!= ButtonPanel<DialogOk>::IDOK) {
         return;
     }
-    if (!ManualReferenceLevelAdjustment(tapeInfo.get()).Execute()) {
+    if (ManualReferenceLevelAdjustment(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
         return;
     }
-    if (!AdjustingRecordLevel(tapeInfo.get()).Execute()) {
+    if (AdjustingRecordLevel(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
         return;
     }
-    if (!RecordTestTape(tapeInfo.get()).Execute()) {
+    if (RecordTestTape(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
         return;
     }
     //    if (!PrintProgress(tape).Execute()) {

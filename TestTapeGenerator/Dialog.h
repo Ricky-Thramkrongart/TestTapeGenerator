@@ -50,7 +50,7 @@ public:
         TimerClock.enable();
     }
 
-    bool Execute()
+    ButtonPanel<DialogOk>::ReturnCode Execute()
     {
         return buttonPanel.Execute();
     }
