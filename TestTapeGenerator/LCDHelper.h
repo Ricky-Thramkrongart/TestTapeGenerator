@@ -23,7 +23,6 @@ public:
             line[i][0] = 0;
         }
 
-        initilize = true;
         pinMode(8, OUTPUT);  // disp line select
         lcd.setBacklight(HIGH);  // SET LCD LYS ON / OFF
         digitalWrite(8, HIGH);   // disp line

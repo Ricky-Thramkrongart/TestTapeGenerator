@@ -123,7 +123,7 @@ public:
     {
         setFreq(1000, { 0.0, 0.0 }); //ATTNUATOR OFF
 
-        System::UnMute();
+        System::OutPutOn();
 
         const uint8_t leftChannelOut(0);
         const uint8_t rightChannelOut(1);

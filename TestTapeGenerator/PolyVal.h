@@ -3,7 +3,7 @@
 #include <fp64lib.h>
 #include <ArduinoSTL.h>
 
-double PolyVal(const std::vector <float64_t>& fit64, uint16_t v)
+double PolyVal(const std::vector <float64_t>& fit64, uint16_t v, double offset)
 {
     float64_t x = fp64_sd(v);
     float64_t y = fp64_add(fit64[0], fp64_mul(fit64[1], x));
@@ -15,5 +15,5 @@ double PolyVal(const std::vector <float64_t>& fit64, uint16_t v)
     y = fp64_fmax(y, fp64_sd(-29.2));
     y = fp64_fmin(y, fp64_sd(0));
 
-    return atof(fp64_to_string(y, 15, 2));
+    return atof(fp64_to_string(y, 15, 2)) + offset;
 }

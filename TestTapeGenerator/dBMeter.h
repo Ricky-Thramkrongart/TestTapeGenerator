@@ -32,8 +32,9 @@ public:
             int bitsLeft = ceil(log(Raw.first) / log(2));
             int bitsRight = ceil(log(Raw.second) / log(2));
             cSF(sf_line, 41);
-            sf_line.print(F("RV:")); sf_line.print(RV);
-            sf_line.print(F(" Out:")); sf_line.print(dBOut.first, 2, 4); sf_line.print(F(" ")); sf_line.print(dBOut.second, 2, 4);
+            //sf_line.print(F("RV:")); sf_line.print(RV);
+            //sf_line.print(F(" Out:")); sf_line.print(dBOut.first, 2, 4); sf_line.print(F(" ")); sf_line.print(dBOut.second, 2, 4);
+            sf_line.print(F("Out:")); sf_line.print(dBOut.first, 2, 4); sf_line.print(F(" ")); sf_line.print(dBOut.second, 2, 4);
             sf_line.print(F(" Raw:")); sf_line.print(Raw.first, 0, 4); sf_line.print(F(" ")); sf_line.print(Raw.second, 0, 4);
             sf_line.print(F(" B:")); sf_line.print(bitsLeft); sf_line.print(F("/")); sf_line.print(bitsRight);
             return sf_line.c_str();
@@ -65,11 +66,20 @@ public:
             //if (Is_dBIn_OutOfRange(dBIn.first))
             //    sf_line.print(F("ovf."));
             //else
-            sf_line.print(dBIn.first, decs, 4 + decs); sf_line.print(F("~")); sf_line.print(Std.first, decs, 2 + decs); sf_line.print(F(" "));
+            sf_line.print(dBIn.first, decs, 4 + decs); 
+            if (Std.first > 0.1) {
+                sf_line.print(F("~"));
+                sf_line.print(Std.first, decs, 2 + decs);
+            }
             //if (Is_dBIn_OutOfRange(dBIn.second))
             //    sf_line.print(F("ovf."));
             //else
-            sf_line.print(dBIn.second, decs, 4 + decs); sf_line.print(F("~")); sf_line.print(Std.second, decs, 2 + decs);
+            sf_line.print(F(" "));
+            sf_line.print(dBIn.second, decs, 4 + decs); 
+            if (Std.second > 0.1) {
+                sf_line.print(F("~"));
+                sf_line.print(Std.second, decs, 2 + decs);
+            }
             return sf_line.c_str();
         }
         std::pair<double, double> dBOut;
@@ -113,19 +123,19 @@ public:
         bool retry;
         do {
             (this->*GetRawInput)(m);
-            m.dBIn.first = PolyVal(System::fit64RV45_l, m.Raw.first);
-            m.dBIn.second = PolyVal(System::fit64RV45_r, m.Raw.second);
+            m.dBIn.first = PolyVal(System::fit64RV45_l, m.Raw.first, -System::_5dBInputAttenuator.first);
+            m.dBIn.second = PolyVal(System::fit64RV45_r, m.Raw.second, -System::_5dBInputAttenuator.second);
             if (m.dBIn.first < DBIN_MIN || m.dBIn.second < DBIN_MIN) {
                 inputpregainRelay.Enable();
                 Measurement n(m);
                 (this->*GetRawInput)(n);
                 if (m.dBIn.first < DBIN_MIN) {
                     m.Raw.first = n.Raw.first;
-                    m.dBIn.first = PolyVal(System::fit64RV45_l, m.Raw.first) - 12.0;
+                    m.dBIn.first = PolyVal(System::fit64RV45_l, m.Raw.first, - System::_5dBInputAttenuator.first - 12.0);
                 }
                 if (m.dBIn.second < DBIN_MIN) {
                     m.Raw.second = n.Raw.second;
-                    m.dBIn.second = PolyVal(System::fit64RV45_r, m.Raw.second) - 12.0;
+                    m.dBIn.second = PolyVal(System::fit64RV45_r, m.Raw.second, -System::_5dBInputAttenuator.second - 12.0);
                 }
                 inputpregainRelay.Disable();
             }
@@ -142,8 +152,6 @@ public:
             std::swap<double>(m.dBIn.first, m.dBIn.second);
             std::swap<double>(m.Raw.first, m.Raw.second);
         }
-        m.dBIn.first -= System::_5dBInputAttenuator.first;
-        m.dBIn.second -= System::_5dBInputAttenuator.second;
     }
 
     void GetRawInputInternal(Measurement& m)
@@ -294,7 +302,7 @@ public:
     void Cabling(SignalGenerator& signalGenerator)
     {
         if (!System::GetCalibration() && !ChannelsVerified) {
-            System::UnMute();
+            System::OutPutOn();
             signalGenerator.setFreq(1000, { -10, -15 });
             Measurement m;
             GetdB(m);
@@ -308,3 +316,38 @@ public:
     }
 };
 Relay dBMeter::inputpregainRelay(Relay(30));
+
+
+void System::SetupDevice(void) {
+    System::Device2();
+
+    LCD_Helper lcdhelper;
+    lcdhelper.Line(0, F("Setting System Paramaters"));
+    lcdhelper.Show();
+
+    SignalGenerator signalGenerator;
+    dBMeter dbMeter;
+    System::UnmutedCalibrationMode();
+    std::pair<double, double> dB({ 0, 0 });
+    signalGenerator.setFreq(1000, dB);
+    dBMeter::Measurement m;
+    dbMeter.GetdB(m);
+    System::_5dBInputAttenuator.first += m.dBIn.first;
+    System::_5dBInputAttenuator.second += m.dBIn.second;
+    Serial.print(F("System::_5dBInputAttenuator: ")); Serial.println(m.String(6));
+    Serial.println("System::Device2();");
+
+    if (fabs(m.dBIn.first - dB.first) > 0.1 || fabs(m.dBIn.second - dB.second) > 0.1) {
+        System::Device1();
+        Serial.println("System::Device1();");
+        signalGenerator.setFreq(1000, dB);
+        dbMeter.GetdB(m);
+        Serial.print(F("System::_5dBInputAttenuator: ")); Serial.println(m.String(6));
+        System::_5dBInputAttenuator.first += m.dBIn.first;
+        System::_5dBInputAttenuator.second += m.dBIn.second;
+        if (fabs(m.dBIn.first - dB.first) > 0.1 || fabs(m.dBIn.second - dB.second) > 0.1) {
+            exit(EXIT_FAILURE);
+        }
+    }
+    System::PopRelayStack();
+}

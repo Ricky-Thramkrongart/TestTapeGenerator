@@ -1,14 +1,12 @@
 #pragma once
 
-
-#include <list>
 #include "FindDb.h"
 #include "Beep.h"
 
-double randomDouble(double minf, double maxf)
-{
-    return minf + random(1UL << 31) * (maxf - minf) / (1UL << 31);  // use 1ULL<<63 for max double values)
-}
+//double randomDouble(double minf, double maxf)
+//{
+//    return minf + random(1UL << 31) * (maxf - minf) / (1UL << 31);  // use 1ULL<<63 for max double values)
+//}
 
 class AdjustingReferenceLevelOkDialog : public DialogOk
 {
@@ -40,7 +38,7 @@ public:
     ManualReferenceLevelAdjustment(TapeInfo* tapeInfo_) : tapeInfo(tapeInfo_), Targetfreq(1000)
     {
         double d = tapeInfo->Target;
-        System::UnMute();
+        System::OutPutOn();
         signalGenerator.setFreq(Targetfreq, { d, d });
     }
     ~ManualReferenceLevelAdjustment()
@@ -102,7 +100,7 @@ public:
     std::vector<RecordStep*>::iterator ptr;
     AdjustingRecordLevel(TapeInfo* tapeInfo_) : Dialog(1000), tapeInfo(tapeInfo_), ptr(tapeInfo->RecordSteps.begin())
     {
-        System::UnMute();
+        System::OutPutOn();
     }
     ~AdjustingRecordLevel()
     {
@@ -150,7 +148,7 @@ public:
     std::vector<RecordStep*>::iterator ptr;
     RecordTestTape(TapeInfo* tapeInfo_) : Dialog(1000), tapeInfo(tapeInfo_), ptr(tapeInfo->RecordSteps.begin())
     {
-        System::Mute();
+        System::OutPutOff();
     }
     ~RecordTestTape()
     {
@@ -174,7 +172,7 @@ public:
         signalGenerator.setFreq(f, x0);
         dBMeter::Measurement m(x0);
         delay(2000); //Setteling time //Blank space
-        System::UnMute();
+        System::OutPutOn();
         long ms = millis();
         std::pair<double, double> stdsum{ 0.0, 0.0 };
         std::pair<double, double> std;

@@ -14,6 +14,7 @@
 #include "Splash.h"
 #include "SelfTest.h"
 #include "NewTestTape.h"
+#include "Tools.h"
 
 using namespace std;
 
@@ -145,7 +146,7 @@ void StartSignalGenerator()
     lcdhelper.Show(Serial);
     SignalGenerator signalGenerator;
    //System::UnmutedCalibrationMode(); 
-   System::UnMute();
+   System::OutPutOn();
     dBMeter dbMeter;
 
     do {
@@ -182,25 +183,6 @@ void StartSignalGenerator()
 
 }
 
-void StartdBMeter()
-{
-    LCD_Helper lcdhelper;
-    lcdhelper.Line(0, F("dBMeter"));
-    lcdhelper.Show();
-    lcdhelper.Show(Serial);
-    SignalGenerator signalGenerator;
-    dBMeter dbMeter;
-    //System::UnmutedCalibrationMode();
-    System::UnMute();
-    signalGenerator.setFreq(1000, { -2.0, -2.0 });
-    do {
-        dBMeter::Measurement m;
-        dbMeter.GetdB(m);
-        Serial.println(m.String(2));
-        lcdhelper.Line(3, m.String(2));
-        lcdhelper.Show(1000);
-    } while (true);
-}
 
 void InputHardwareCalibration(void)
 {
@@ -211,41 +193,10 @@ void InputHardwareCalibration(void)
 void setup()
 {
     Serial.begin(115200);
-    System::Mute();
     splashscreen();
-    { 
-        System::Device2();
-        //
-        ////LCD_Helper lcdhelper;
-        ////lcdhelper.Line(0, F("New offset measurement"));
-        ////
-        //SignalGenerator signalGenerator;
-        //dBMeter dbMeter;
-        //System::UnmutedCalibrationMode();
-        //std::pair<double, double> dB({ 0, 0 });
-        //signalGenerator.setFreq(1000, dB);
-        //dBMeter::Measurement m;
-        //dbMeter.GetdB(m);
-        ////System::_5dBInputAttenuator.first += m.dBIn.first;
-        ////System::_5dBInputAttenuator.second += m.dBIn.second;
-        //Serial.println("System::Device2();");
-        //
-        //if (fabs(m.dBIn.first - dB.first) > 0.1 || fabs(m.dBIn.second - dB.second) > 0.1) {
-        //    System::Device1();
-        //    Serial.println("System::Device1();");
-        //    signalGenerator.setFreq(1000, dB);
-        //    dbMeter.GetdB(m);
-        //    //System::_5dBInputAttenuator.first += m.dBIn.first;
-        //    //System::_5dBInputAttenuator.second += m.dBIn.second;
-        //    if (fabs(m.dBIn.first - dB.first) > 0.1 || fabs(m.dBIn.second - dB.second) > 0.1) {
-        //        exit(EXIT_FAILURE);
-        //    }
-        //}
-        //System::PopRelayStack();
-      }
+    System::OutPutOff();
+    System::SetupDevice();
     
-    //NewTestTape();
-
     Serial.setTimeout(500);
     Serial.println("Prompt>");
     String str(Serial.readString());
@@ -257,7 +208,7 @@ void setup()
     }
     do {
         MainMenu mainMenu;
-        if (mainMenu.Execute()) {
+        if (mainMenu.Execute()== ButtonPanel<BasePanel>::IDOK) {
             switch (mainMenu.Current)
             {
             case 0:
@@ -271,7 +222,7 @@ void setup()
                 StartSignalGenerator();
                 break;
             case 3:
-                StartdBMeter();
+                dBMeterOkDialog().Execute();
                 break;
             case 4:
                 OutputHardwareCalibration();

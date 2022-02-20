@@ -132,7 +132,7 @@ public:
         //Serial.print(F(" Stack: ")); Serial.println(relayStack.size());
     }
 
-    static void UnMute()
+    static void OutPutOn()
     {
         relayStack.push({ muteRelay.IsEnabled(), calibrationRelay.IsEnabled() });
         muteRelay.Disable();
@@ -141,21 +141,21 @@ public:
         PrintRelayState();
     }
 
-    static void Mute()
+    static void OutPutOff()
     {
         relayStack.push({ muteRelay.IsEnabled(), calibrationRelay.IsEnabled() });
         muteRelay.Enable();
         calibrationRelay.Disable();
-        //Serial.print(F("Mute(): "));
+        //Serial.print(F("OutPutOff(): "));
         PrintRelayState();
     }
 
-    static void CalibrationMode()
+    static void InternalMeasurementOn()
     {
         relayStack.push({ muteRelay.IsEnabled(), calibrationRelay.IsEnabled() });
         muteRelay.Enable();
         calibrationRelay.Enable();
-        //Serial.print(F("CalibrationMode(): "));
+        //Serial.print(F("InternalMeasurementOn(): "));
         PrintRelayState();
     }
 
@@ -279,7 +279,7 @@ public:
             sf_line.print(F("        ")); sf_line.print(s.c_str()); sf_line.print(F("[")); sf_line.print(f.size() - i - 1);  sf_line.print(F("] = ")); sf_line.print(uintToStr(f[f.size() - i - 1], buffer)); sf_line.print(F("LL; //")); sf_line.print(fp64_to_string(f[f.size() - i - 1], 32, 2));            out.println(sf_line.c_str());
         }
     }
-    
+
     static void DumpData(void) {
         DumpData(Serial, fit64, String(F("fit64")));
         DumpData(Serial, fit64RV45_l, String(F("fit64RV45_l")));
@@ -380,17 +380,20 @@ public:
         fit64RV45_r[1] = 4612466344284899237LL; //2.3465342934877804
         fit64RV45_r[0] = 13858859640482057285LL; //-82.240869267189808
 
-        _5dBInputAttenuator = {-5.0,-5.0};
+        _5dBInputAttenuator = { -5.0,-5.0 };
     }
+
+    static void SetupDevice(void);
 
     static std::vector<float64_t> fit64RV45_l;
     static std::vector<float64_t> fit64RV45_r;
     static std::vector<float64_t> fit64;
     static std::pair<double, double> _5dBInputAttenuator;
-    
+
 };
+
 std::stack<std::pair<bool, bool>> System::relayStack;
-static std::pair<double, double>System::_5dBInputAttenuator({0.0, 0.0});
+std::pair<double, double>System::_5dBInputAttenuator({ 0.0, 0.0 });
 Relay System::muteRelay(Relay(28, true));
 Relay System::calibrationRelay(Relay(26));
 

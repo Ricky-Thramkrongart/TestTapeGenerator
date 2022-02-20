@@ -76,7 +76,7 @@ public:
         buttonPanel.OnLoop = &BasePanel::OnLoop;
     }
 
-    virtual bool Execute()
+    virtual  ButtonPanel<BasePanel>::ReturnCode Execute()
     {
         return buttonPanel.Execute();
     }
