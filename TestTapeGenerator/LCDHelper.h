@@ -19,6 +19,7 @@ public:
     LiquidCrystal_I2C lcd;
     LCD_Helper(bool initilize = true) : lcd(0x25, 40, 2)
     {
+        initilize = true;
         for (int i = 0; i != 4; ++i) {
             line[i][0] = 0;
         }
