@@ -27,7 +27,6 @@ void SelfTest()
 
     lcdHelper.Line(0, String(F("Free Memory: ")) + String(freeMemory()));
     lcdHelper.Line(1, F("DISP:OK EEPROM:OK RTC:OK DATT:OK"));
-    lcdHelper.Line(2, F("Frequncy response test"));
     lcdHelper.Show();
     lcdHelper.Show(Serial);
 
@@ -67,7 +66,7 @@ void FrequencyResponseTest(const __FlashStringHelper* HeadLine, const std::vecto
 
 void FrequencyResponseTest_1()
 {
-    FrequencyResponseTest(F("Frequency Response Test #1"), std::vector<uint32_t>{ 1000, 20000 }, std::vector<std::pair<double, double>> { { 0.0, 0.0 } });
+    FrequencyResponseTest(F("Frequency Response Test #1"), std::vector<uint32_t>{ 20, 20000 }, std::vector<std::pair<double, double>> { { 0.0, 0.0 } });
 }
 
 void FrequencyResponseTest_2()
@@ -168,4 +167,3 @@ void Tests()
         };
     }
 }
-

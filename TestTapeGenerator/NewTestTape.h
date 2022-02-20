@@ -138,6 +138,23 @@ public:
     }
 };
 
+class RecordTestTapeOkDialog: public DialogOk
+{
+public:
+    TapeInfo* tapeInfo;
+    RecordTestTapeOkDialog(TapeInfo* tapeInfo_) : tapeInfo(tapeInfo_)
+    {
+    }
+    void FullUpdate() {
+        lcdhelper.Line(0, F("Record Test Tape"));
+        lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
+        lcdhelper.Line(2, F("Rewind Tape and Start Recording"));
+    }
+    void Update() {
+    }
+
+};
+
 class RecordTestTape : public Dialog
 {
 protected:
@@ -236,6 +253,9 @@ void NewTestTape()
         return;
     }
     if (AdjustingRecordLevel(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
+        return;
+    }
+    if (RecordTestTapeOkDialog(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
         return;
     }
     if (RecordTestTape(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
