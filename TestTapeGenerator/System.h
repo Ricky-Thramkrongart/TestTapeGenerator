@@ -380,7 +380,7 @@ public:
         fit64RV45_r[1] = 4612466344284899237LL; //2.3465342934877804
         fit64RV45_r[0] = 13858859640482057285LL; //-82.240869267189808
 
-        _5dBInputAttenuator = { -5.0,-5.0 };
+        _5dBInputAttenuator = { -5.11,-5.03 };
     }
 
     static void SetupDevice(void);
