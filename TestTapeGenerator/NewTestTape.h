@@ -8,11 +8,11 @@
 //    return minf + random(1UL << 31) * (maxf - minf) / (1UL << 31);  // use 1ULL<<63 for max double values)
 //}
 
-class AdjustingReferenceLevelOkDialog : public DialogOk
+class StartRecording : public DialogOk
 {
 public:
     TapeInfo* tapeInfo;
-    AdjustingReferenceLevelOkDialog(TapeInfo* tapeInfo_) : tapeInfo(tapeInfo_)
+    StartRecording(TapeInfo* tapeInfo_) : tapeInfo(tapeInfo_)
     {
     }
     void FullUpdate() {
@@ -25,7 +25,7 @@ public:
 
 };
 
-class ManualReferenceLevelAdjustment : public DialogOk
+class AmplificationAdjustment: public DialogOk
 {
 protected:
     SignalGenerator signalGenerator;
@@ -35,19 +35,20 @@ public:
     TapeInfo* tapeInfo;
     const uint32_t Targetfreq;
 
-    ManualReferenceLevelAdjustment(TapeInfo* tapeInfo_) : tapeInfo(tapeInfo_), Targetfreq(1000)
+    AmplificationAdjustment(TapeInfo* tapeInfo_) : tapeInfo(tapeInfo_), Targetfreq(1000)
     {
-        double d = tapeInfo->Target;
+        Serial.print(F("DBOUT_MAX_SERVICE: ")); Serial.print(DBOUT_MAX_SERVICE); Serial.print(F(" Amp. Adj.: ")); Serial.println(tapeInfo->GetAmplificationAdjustment());
+        double d = -tapeInfo->GetAmplificationAdjustment();
         System::OutPutOn();
         signalGenerator.setFreq(Targetfreq, { d, d });
     }
-    ~ManualReferenceLevelAdjustment()
+    ~AmplificationAdjustment()
     {
         System::PopRelayStack();
     }
     void Update()
     {
-        double Target = tapeInfo->Target;
+        double Target = 0;
         dBMeter::Measurement m({ Target ,Target });
         dbMeter.GetdB(m);
         Serial.println(m.String(2));
@@ -79,18 +80,18 @@ public:
     }
 
     void FullUpdate() {
-        double Target = tapeInfo->Target;
+        double Target = 0;
         cSF(sf_line, 41);
         sf_line.print(F("Target: "));
         sf_line.print(Target, 1, 4);
         sf_line.print(F(" dBm  Actuel (L:R):        "));
-        lcdhelper.Line(0, F("Manual Reference Level Adjustment"));
+        lcdhelper.Line(0, F("Amplification Adjustment"));
         lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
         lcdhelper.Line(2, sf_line);
     }
 };
 
-class AdjustingRecordLevel : public Dialog
+class RecordLevelAdjustment : public Dialog
 {
 protected:
     SignalGenerator signalGenerator;
@@ -98,17 +99,19 @@ protected:
 public:
     TapeInfo* tapeInfo;
     std::vector<RecordStep*>::iterator ptr;
-    AdjustingRecordLevel(TapeInfo* tapeInfo_) : Dialog(1000), tapeInfo(tapeInfo_), ptr(tapeInfo->RecordSteps.begin())
+    RecordLevelAdjustment(TapeInfo* tapeInfo_) : Dialog(1000), tapeInfo(tapeInfo_), ptr(tapeInfo->RecordSteps.begin())
     {
         System::OutPutOn();
     }
-    ~AdjustingRecordLevel()
+    ~RecordLevelAdjustment()
     {
         System::PopRelayStack();
     }
     void FullUpdate() {
         lcdhelper.Line(0, F("Adjusting Record Level"));
         lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
+        lcdhelper.Line(3, "");
+        lcdhelper.Show();
 
         cSF(sf_line, 41);
         sf_line.print((*ptr)->ToString().c_str());
@@ -121,7 +124,8 @@ public:
         Serial.println(sf_line);
         System::PrintRelayState();
         std::pair<double, double> x0({ (*ptr)->Level, (*ptr)->Level });
-        (*ptr)->RecordLevel = FindDb(signalGenerator, dbMeter, (*ptr)->Frequency, x0, x0, (*ptr)->e, lcdhelper);
+        std::pair<double, double> start_guess{ x0.first - tapeInfo->GetAmplificationAdjustment(),  x0.second - tapeInfo->GetAmplificationAdjustment() };
+        (*ptr)->RecordLevel = FinddB(signalGenerator, dbMeter, (*ptr)->Frequency, x0, start_guess, (*ptr)->e, lcdhelper);
         signalGenerator.setFreq((*ptr)->Frequency, (*ptr)->RecordLevel);
         delay(1000); //Setteling time
         dBMeter::Measurement m((*ptr)->RecordLevel);
@@ -129,7 +133,7 @@ public:
         lcdhelper.Line(2, SignalGenerator::String((*ptr)->Frequency, (*ptr)->RecordLevel));
         lcdhelper.Line(3, m.String());
         Serial.println(m.String());
-        lcdhelper.Show();
+        lcdhelper.Show(2000);
         Beep();
         ptr++;
         if (ptr == tapeInfo->RecordSteps.end()) {
@@ -138,11 +142,11 @@ public:
     }
 };
 
-class RecordTestTapeOkDialog: public DialogOk
+class RewindTape: public DialogOk
 {
 public:
     TapeInfo* tapeInfo;
-    RecordTestTapeOkDialog(TapeInfo* tapeInfo_) : tapeInfo(tapeInfo_)
+    RewindTape(TapeInfo* tapeInfo_) : tapeInfo(tapeInfo_)
     {
     }
     void FullUpdate() {
@@ -160,10 +164,11 @@ class RecordTestTape : public Dialog
 protected:
     SignalGenerator signalGenerator;
     dBMeter dbMeter;
+    unsigned long ms_progress;
 public:
     TapeInfo* tapeInfo;
     std::vector<RecordStep*>::iterator ptr;
-    RecordTestTape(TapeInfo* tapeInfo_) : Dialog(1000), tapeInfo(tapeInfo_), ptr(tapeInfo->RecordSteps.begin())
+    RecordTestTape(TapeInfo* tapeInfo_) : Dialog(1000), tapeInfo(tapeInfo_), ptr(tapeInfo->RecordSteps.begin()), ms_progress(millis())
     {
         System::OutPutOff();
     }
@@ -183,6 +188,7 @@ public:
         sf_line.print((int)tapeInfo->RecordSteps.size());
         sf_line.print(F(")"));
         lcdhelper.Line(2, sf_line);
+        lcdhelper.Show();
         Serial.println(sf_line);
         std::pair<double, double> x0((*ptr)->RecordLevel);
         uint32_t f((*ptr)->Frequency);
@@ -190,7 +196,7 @@ public:
         dBMeter::Measurement m(x0);
         delay(2000); //Setteling time //Blank space
         System::OutPutOn();
-        long ms = millis();
+        unsigned long ms = millis();
         std::pair<double, double> stdsum{ 0.0, 0.0 };
         std::pair<double, double> std;
         uint16_t count = 0;
@@ -204,15 +210,16 @@ public:
             stdsum.second += square(m.dBIn.second - (*ptr)->Level);
             std.first = sqrt(stdsum.first / count);
             std.second = sqrt(stdsum.second / count);
-            cSF(sf_line, 41);
-
+            cSF(sf_line2, 41);
+            sf_line2 = sf_line; sf_line2.print(F(" ")); sf_line2.print((*ptr)->Time - (millis() - ms) / 1000); sf_line2.print(F("s ")); sf_line2.print((millis() - ms_progress)/(tapeInfo->Length * 10.0)); sf_line2.print(F("%"));
+            lcdhelper.Line(0, sf_line2);
             std::vector<std::string> VUMeter(GetVUMeterStrings(std.first, std.second));
             lcdhelper.Line(1, VUMeter[0].c_str());
             lcdhelper.Line(2, VUMeter[1].c_str());
             lcdhelper.Line(3, VUMeter[2].c_str());
             lcdhelper.Show();
             lcdhelper.Show(Serial);
-         } while (millis() - ms < (*ptr)->Time*1000);
+         } while (millis() < (*ptr)->Time*1000.0 + ms);
             //} while (millis() - ms < 20000);
         System::PopRelayStack();
 
@@ -247,22 +254,22 @@ void NewTestTape()
         }
         tapeInfo = std::shared_ptr<TapeInfo>(TapeInfo::Get((TapeInfo::Tapes)selectTape.Current));
     }
-    if (AdjustingReferenceLevelOkDialog(tapeInfo.get()).Execute()!= ButtonPanel<DialogOk>::IDOK) {
+    if (StartRecording(tapeInfo.get()).Execute()!= ButtonPanel<DialogOk>::IDOK) {
         return;
     }
-    if (ManualReferenceLevelAdjustment(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
+    if (AmplificationAdjustment(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
         return;
     }
-    if (AdjustingRecordLevel(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
+    if (RecordLevelAdjustment(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
         return;
     }
-    if (RecordTestTapeOkDialog(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
+    if (RewindTape(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
         return;
     }
     if (RecordTestTape(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
         return;
     }
-    //    if (!PrintProgress(tape).Execute()) {
-    //        return;
-    //    }
+//    if (!PrintProgress(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
+//           return;
+//    }
 }

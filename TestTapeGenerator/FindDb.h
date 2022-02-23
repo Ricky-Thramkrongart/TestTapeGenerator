@@ -44,7 +44,7 @@ std::pair<double, double> g(SignalGenerator& signalGenerator, dBMeter& dbMeter, 
     return g0;
 }
 
-std::pair<double, double> FindDb(SignalGenerator& signalGenerator, dBMeter& dbMeter, const uint32_t Targetfreq, std::pair<double, double> TargetdB, std::pair<double, double> StartGuess, double& epsilon, LCD_Helper& lcdHelper)
+std::pair<double, double> FinddB(SignalGenerator& signalGenerator, dBMeter& dbMeter, const uint32_t Targetfreq, std::pair<double, double> TargetdB, std::pair<double, double> StartGuess, double& epsilon, LCD_Helper& lcdHelper)
 {
     dbMeter.Cabling(signalGenerator);
 
@@ -56,12 +56,12 @@ std::pair<double, double> FindDb(SignalGenerator& signalGenerator, dBMeter& dbMe
 
     for (int i = 1;  i != 10; ++i)
     {
-        x0 = TargetdB;
+        x0 = StartGuess;
         epsilon += 0.05;
         double delta = 8 * epsilon;
 
         cSF(sf_line, 41);
-        sf_line.print("Target: "); sf_line.print(Targetfreq); sf_line.print(" "); sf_line.print(TargetdB.first); sf_line.print(" "); sf_line.print(TargetdB.second); sf_line.print(" epsilon: "); sf_line.print(epsilon);
+        sf_line.print("-> "); sf_line.print(Targetfreq,0,5); sf_line.print("Hz "); sf_line.print(TargetdB.first,1,5); sf_line.print("dBm "); sf_line.print(TargetdB.second, 1, 5); sf_line.print("dBm e: "); sf_line.print(epsilon,2);
         lcdHelper.Line(1, sf_line);
         lcdHelper.Show(Serial);
         lcdHelper.Show();

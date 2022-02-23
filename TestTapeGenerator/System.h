@@ -8,19 +8,19 @@
 #include <SafeString.h>
 #include "Relay.h"
 
-constexpr auto SkinnersKonstant = 7;
+constexpr int8_t SkinnersKonstant = 7;
 
-constexpr auto DBIN_MAX = 0;
-constexpr auto DBIN_MIN = -28;
-constexpr auto DBIN_HEADROOM = 3;
-constexpr auto DBIN_MAX_SERVICE = DBIN_MAX - DBIN_HEADROOM;
-constexpr auto DBIN_MIN_SERVICE = DBIN_MIN + DBIN_HEADROOM;
+constexpr int8_t DBIN_MAX = 5;
+constexpr int8_t DBIN_MIN = -23;
+constexpr int8_t DBIN_HEADROOM = 3;
+constexpr int8_t DBIN_MAX_SERVICE = DBIN_MAX - DBIN_HEADROOM;
+constexpr int8_t DBIN_MIN_SERVICE = DBIN_MIN + DBIN_HEADROOM;
 
-constexpr auto DBOUT_MAX = 0;
-constexpr auto DBOUT_MIN = -31;
-constexpr auto DBOUT_HEADROOM = 3;
-constexpr auto DBOUT_MAX_SERVICE = DBOUT_MAX - DBOUT_HEADROOM;
-constexpr auto DBOUT_MIN_SERVICE = DBOUT_MIN + DBOUT_HEADROOM;
+constexpr int8_t DBOUT_MAX = 0;
+constexpr int8_t DBOUT_MIN = -31;
+constexpr int8_t DBOUT_HEADROOM = 3;
+constexpr int8_t DBOUT_MAX_SERVICE = DBOUT_MAX - DBOUT_HEADROOM;
+constexpr int8_t DBOUT_MIN_SERVICE = DBOUT_MIN + DBOUT_HEADROOM;
 
 bool Is_dBIn_OutOfRange(const double dB)
 {
@@ -332,7 +332,7 @@ public:
         fit64RV45_r[1] = 4598738819454652931LL; //0.28128607980332293
         fit64RV45_r[0] = 13852251674767900672LL; //-29.084007135068532
 
-        _5dBInputAttenuator = { 0.0, 0.0 };
+        _5dBInputAttenuator = { -5.19, -5.18 };
 
     }
 

@@ -4,11 +4,11 @@ class Relay
 {
 private:
     //Disables copy constructor
-    Relay(const Relay&) = delete;
-    Relay(Relay&) = delete;
+    //Relay(const Relay&) = delete;
+    //Relay(Relay&) = delete;
     //Disables assignment operator
-    Relay& operator=(const Relay&) = delete;
-    Relay& operator=(Relay&) = delete;
+    //Relay& operator=(const Relay&) = delete;
+    //Relay& operator=(Relay&) = delete;
 protected:
     bool enabled;
     const uint8_t pin;

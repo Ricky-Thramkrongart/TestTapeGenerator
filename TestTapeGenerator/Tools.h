@@ -12,7 +12,8 @@ class dBMeterOkDialog : public DialogOk
 public:
     dBMeterOkDialog() :dBOut{ -2.0, -2.0 }, counter(0)
     {
-        System::UnmutedCalibrationMode();
+        //System::UnmutedCalibrationMode();
+        System::OutPutOn();
         signalGenerator.setFreq(1000, dBOut);
     }
     ~dBMeterOkDialog()
@@ -70,7 +71,8 @@ class SignalGeneratorOkDialog : public DialogOk
 public:
     SignalGeneratorOkDialog() :dBOut{ -2.0, -2.0 }, frequencyOut(1000), counter(0)
     {
-        System::UnmutedCalibrationMode();
+        //System::UnmutedCalibrationMode();
+        System::OutPutOn();
     }
     ~SignalGeneratorOkDialog()
     {

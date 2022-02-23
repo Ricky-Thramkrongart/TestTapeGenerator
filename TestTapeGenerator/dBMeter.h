@@ -207,7 +207,7 @@ public:
             delay(600);
         }
 
-        CircularBuffer<Measurement, CIRCULARBUFFERSIZE> buffer;
+        CircularBuffer<Measurement, 2*CIRCULARBUFFERSIZE> buffer;
         do {
             const int CH1(A0);
             const int CH2(A1);
@@ -328,24 +328,29 @@ void System::SetupDevice(void) {
     SignalGenerator signalGenerator;
     dBMeter dbMeter;
     System::UnmutedCalibrationMode();
-    std::pair<double, double> dB({ 0, 0 });
+    std::pair<double, double> dB({ -2, -2 });
     signalGenerator.setFreq(1000, dB);
     dBMeter::Measurement m;
     dbMeter.GetdB(m);
-    System::_5dBInputAttenuator.first += m.dBIn.first;
-    System::_5dBInputAttenuator.second += m.dBIn.second;
+    System::_5dBInputAttenuator.first += m.dBIn.first - dB.first;
+    System::_5dBInputAttenuator.second += m.dBIn.second - dB.second;
     Serial.print(F("System::_5dBInputAttenuator: ")); Serial.println(m.String(6));
     Serial.println("System::Device2();");
 
-    if (fabs(m.dBIn.first - dB.first) > 0.1 || fabs(m.dBIn.second - dB.second) > 0.1) {
+    if (fabs(m.dBIn.first - dB.first) > 0.02 || fabs(m.dBIn.second - dB.second) > 0.02) {
         System::Device1();
         Serial.println("System::Device1();");
         signalGenerator.setFreq(1000, dB);
         dbMeter.GetdB(m);
         Serial.print(F("System::_5dBInputAttenuator: ")); Serial.println(m.String(6));
-        System::_5dBInputAttenuator.first += m.dBIn.first;
-        System::_5dBInputAttenuator.second += m.dBIn.second;
-        if (fabs(m.dBIn.first - dB.first) > 0.1 || fabs(m.dBIn.second - dB.second) > 0.1) {
+        System::_5dBInputAttenuator.first += m.dBIn.first - dB.first;
+        System::_5dBInputAttenuator.second += m.dBIn.second - dB.second;
+
+        Serial.println(fabs(m.dBIn.first - dB.first));
+        Serial.println(fabs(m.dBIn.second - dB.second));
+        delay(10);
+
+        if (fabs(m.dBIn.first - dB.first) > 0.02 || fabs(m.dBIn.second - dB.second) > 0.02) {
             exit(EXIT_FAILURE);
         }
     }

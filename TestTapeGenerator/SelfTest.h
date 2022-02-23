@@ -71,7 +71,7 @@ void FrequencyResponseTest_1()
 
 void FrequencyResponseTest_2()
 {
-    FrequencyResponseTest(F("Frequency Response Test #2"), std::vector<uint32_t>{ 1000 }, std::vector<std::pair<double, double>> { { 0.0, 0.0}, { -4.9, -5.1},  { -5.1, -4.9}, { -5.5, -5.5}, {-30.0, -20.0}, {-20.0, -30.0} });
+    FrequencyResponseTest(F("Frequency Response Test #2"), std::vector<uint32_t>{ 1000 }, std::vector<std::pair<double, double>> { { 0.0, 0.0 }, { -4.9, -5.1},  { -5.1, -4.9}, { -5.5, -5.5}, {-30.0, -20.0}, {-20.0, -30.0} });
 }
 
 
@@ -100,7 +100,7 @@ void FinddBTest()
             lcdHelper.Line(3, F(""));
             lcdHelper.Show();
             double e = 0.0;
-            std::pair<double, double> dbIn = FindDb(signalGenerator, dbMeter, *f, *d, *d, e, lcdHelper);
+            std::pair<double, double> dbIn = FinddB(signalGenerator, dbMeter, *f, *d, *d, e, lcdHelper);
             signalGenerator.setFreq(*f, dbIn);
             dBMeter::Measurement m(dbIn);
             dbMeter.GetdB(m);

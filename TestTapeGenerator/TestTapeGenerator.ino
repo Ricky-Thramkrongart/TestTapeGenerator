@@ -96,44 +96,45 @@ void setup()
     splashscreen();
     System::OutPutOff();
     System::SetupDevice();
-    
+
     Serial.setTimeout(500);
     Serial.println("Prompt>");
     String str(Serial.readString());
     str.trim();
     if (str.length()) {
         MatchState ms(const_cast<char*>(str.c_str()));
-        if (REGEXP_MATCHED == ms.Match("RVSweep"))
-            InputHardwareCalibration();
+        if (REGEXP_MATCHED == ms.Match("RVSweep")) {
+            //InputHardwareCalibration();
+        }
     }
     do {
         MainMenu mainMenu;
-        if (mainMenu.Execute()== ButtonPanel<BasePanel>::IDOK) {
+        if (mainMenu.Execute() == ButtonPanel<BasePanel>::IDOK) {
             switch (mainMenu.Current)
             {
             case 0:
                 NewTestTape();
                 break;
             case 1:
-                Tests();
+                //Tests();
                 break;
             case 2:
-                SignalGeneratorOkDialog().Execute();
+                //SignalGeneratorOkDialog().Execute();
                 break;
             case 3:
-                dBMeterOkDialog().Execute();
+                //dBMeterOkDialog().Execute();
                 break;
             case 4:
-            //   OutputHardwareCalibration();
+                //OutputHardwareCalibration();
                 break;
             case 5:
-            //   InputHardwareCalibration();
+                //InputHardwareCalibration();
                 break;
             case 6:
-            //    dBMeterScan();
+                //dBMeterScan();
                 break;
             case 7:
-                SetDateTime();
+                //SetDateTime();
                 break;
 
             };
