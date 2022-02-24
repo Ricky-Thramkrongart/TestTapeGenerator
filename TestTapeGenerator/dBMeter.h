@@ -140,7 +140,6 @@ public:
                 inputpregainRelay.Disable();
             }
             if ((m.Std.first > SkinnersKonstant || m.Std.second > SkinnersKonstant) && millis() - ms < 5000) {
-                Serial.println("m.Std.first > SkinnersKonstant || m.Std.second > SkinnersKonstant");
                 delay(200); //settling time
                 retry = true;
             }

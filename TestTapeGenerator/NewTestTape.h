@@ -37,7 +37,7 @@ public:
 
     AmplificationAdjustment(TapeInfo* tapeInfo_) : tapeInfo(tapeInfo_), Targetfreq(1000)
     {
-        Serial.print(F("DBOUT_MAX_SERVICE: ")); Serial.print(DBOUT_MAX_SERVICE); Serial.print(F(" Amp. Adj.: ")); Serial.println(tapeInfo->GetAmplificationAdjustment());
+        //Serial.print(F("DBOUT_MAX_SERVICE: ")); Serial.print(DBOUT_MAX_SERVICE); Serial.print(F(" Amp. Adj.: ")); Serial.println(tapeInfo->GetAmplificationAdjustment());
         double d = -tapeInfo->GetAmplificationAdjustment();
         System::OutPutOn();
         signalGenerator.setFreq(Targetfreq, { d, d });
@@ -73,8 +73,6 @@ public:
         lcdhelper.lcd.print(m.String(2));
 
         if (manual_calibration_ok_count >= 5) {
-            Beep();
-            dbMeter.Cabling(signalGenerator);
             buttonPanel.returncode = ButtonPanel<DialogOk>::IDOK;
         }
     }
@@ -181,6 +179,7 @@ public:
         lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
 
         cSF(sf_line, 41);
+        cSF(sf_line2, 41);
         sf_line.print((*ptr)->ToString().c_str());
         sf_line.print(F(" ("));
         sf_line.print((ptr - tapeInfo->RecordSteps.begin()) + 1);
@@ -188,21 +187,31 @@ public:
         sf_line.print((int)tapeInfo->RecordSteps.size());
         sf_line.print(F(")"));
         lcdhelper.Line(2, sf_line);
+        sf_line2.print(F("Blank Space: "));  sf_line2.print(tapeInfo->Pause); sf_line2.print(F("s"));
+        lcdhelper.Line(3, sf_line2);
         lcdhelper.Show();
-        Serial.println(sf_line);
+        lcdhelper.Show(Serial);
         std::pair<double, double> x0((*ptr)->RecordLevel);
         uint32_t f((*ptr)->Frequency);
         signalGenerator.setFreq(f, x0);
         dBMeter::Measurement m(x0);
-        delay(2000); //Setteling time //Blank space
+        delay(tapeInfo->Pause*1000); //Setteling time //Blank space
         System::OutPutOn();
         unsigned long ms = millis();
         std::pair<double, double> stdsum{ 0.0, 0.0 };
         std::pair<double, double> std;
         uint16_t count = 0;
 
+        lcdhelper.Line(1, F(""));
+        lcdhelper.Line(2, F(""));
+        lcdhelper.Line(3, F(""));
+
         lcdhelper.Line(0, sf_line);
         do {
+            sf_line2 = sf_line; sf_line2.print(F(" ")); sf_line2.print((*ptr)->Time - (millis() - ms) / 1000.0,0,3); sf_line2.print(F("s ")); sf_line2.print((millis() - ms_progress) / (tapeInfo->Length * 10.0),0,3); sf_line2.print(F("%"));
+            lcdhelper.Line(0, sf_line2);
+            lcdhelper.Show();
+
             dbMeter.GetdB(m);
             count++;
 
@@ -210,9 +219,6 @@ public:
             stdsum.second += square(m.dBIn.second - (*ptr)->Level);
             std.first = sqrt(stdsum.first / count);
             std.second = sqrt(stdsum.second / count);
-            cSF(sf_line2, 41);
-            sf_line2 = sf_line; sf_line2.print(F(" ")); sf_line2.print((*ptr)->Time - (millis() - ms) / 1000); sf_line2.print(F("s ")); sf_line2.print((millis() - ms_progress)/(tapeInfo->Length * 10.0)); sf_line2.print(F("%"));
-            lcdhelper.Line(0, sf_line2);
             std::vector<std::string> VUMeter(GetVUMeterStrings(std.first, std.second));
             lcdhelper.Line(1, VUMeter[0].c_str());
             lcdhelper.Line(2, VUMeter[1].c_str());
