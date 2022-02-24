@@ -166,7 +166,7 @@ public:
             delay(600);
         }
 
-        bool measure_again;
+        bool measure_again;           
         CircularBuffer<Measurement, CIRCULARBUFFERSIZE> buffer;
         m.Std.first = 0.0;
         m.Std.second = 0.0;
@@ -249,7 +249,7 @@ public:
         lcdhelper.Line(0, F("dBMeter RVSweep"));
         lcdhelper.Show();
         SignalGenerator signalGenerator;
-        System::UnmutedCalibrationMode();
+        System::InternalMeasurementOn();
         //std::vector<int> rv{45, 146, 255};
         std::vector<int> rv{ 45 };
         for (std::vector<int>::iterator r = rv.begin(); r != rv.end(); r++) {
@@ -273,7 +273,7 @@ public:
         lcdhelper.Line(0, F("dBMeter Scan"));
         lcdhelper.Show();
         SignalGenerator signalGenerator;
-        System::UnmutedCalibrationMode();;
+        System::InternalMeasurementOn();;
         int i = 44;
         for (float d = 0.0; d > -32.1; d -= .1) {
             signalGenerator.setFreq(1000, { d, d });
@@ -326,7 +326,7 @@ void System::SetupDevice(void) {
 
     SignalGenerator signalGenerator;
     dBMeter dbMeter;
-    System::UnmutedCalibrationMode();
+    System::InternalMeasurementOn();
     std::pair<double, double> dB({ -2, -2 });
     signalGenerator.setFreq(1000, dB);
     dBMeter::Measurement m;
@@ -336,7 +336,9 @@ void System::SetupDevice(void) {
     Serial.print(F("System::_5dBInputAttenuator: ")); Serial.println(m.String(6));
     Serial.println("System::Device2();");
 
-    if (fabs(m.dBIn.first - dB.first) > 0.02 || fabs(m.dBIn.second - dB.second) > 0.02) {
+    constexpr double std_dev = 0.04;
+
+    if (fabs(m.dBIn.first - dB.first) > std_dev || fabs(m.dBIn.second - dB.second) > std_dev) {
         System::Device1();
         Serial.println("System::Device1();");
         signalGenerator.setFreq(1000, dB);
@@ -349,7 +351,7 @@ void System::SetupDevice(void) {
         Serial.println(fabs(m.dBIn.second - dB.second));
         delay(10);
 
-        if (fabs(m.dBIn.first - dB.first) > 0.02 || fabs(m.dBIn.second - dB.second) > 0.02) {
+        if (fabs(m.dBIn.first - dB.first) > std_dev || fabs(m.dBIn.second - dB.second) > std_dev) {
             exit(EXIT_FAILURE);
         }
     }

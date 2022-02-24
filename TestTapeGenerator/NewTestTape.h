@@ -53,8 +53,9 @@ public:
         dbMeter.GetdB(m);
         Serial.println(m.String(2));
 
-        std::string statuscontrol = StatusControl(.5, m.dBIn.first - Target, m.dBIn.second - Target);
-        if (fabs(m.dBIn.first - Target) < .5 && fabs(m.dBIn.second - Target) < .5) {
+         constexpr double std_dev = 1.0;
+        std::string statuscontrol = StatusControl(std_dev, m.dBIn.first - Target, m.dBIn.second - Target);
+        if (fabs(m.dBIn.first - Target) < std_dev && fabs(m.dBIn.second - Target) < std_dev) {
             manual_calibration_ok_count++;
             Beep();
         }

@@ -32,7 +32,7 @@ void SelfTest()
 
     System::OutPutOff(); System::PopRelayStack();
     System::OutPutOn(); System::PopRelayStack();
-    System::UnmutedCalibrationMode(); System::PopRelayStack();
+    System::InternalMeasurementOn(); System::PopRelayStack();
 
     delay(2000);
 }
@@ -46,7 +46,7 @@ void FrequencyResponseTest(const __FlashStringHelper* HeadLine, const std::vecto
     SignalGenerator signalGenerator;
     dBMeter dbMeter;
 
-    System::UnmutedCalibrationMode();
+    System::InternalMeasurementOn();
 
     for (std::vector<uint32_t>::const_iterator f = freqTest.begin(); f != freqTest.end(); f++) {
         for (std::vector<std::pair<double, double>>::const_iterator d = dbTest.begin(); d != dbTest.end(); d++) {
@@ -89,7 +89,7 @@ void FinddBTest()
     SignalGenerator signalGenerator;
     dBMeter dbMeter;
 
-    System::UnmutedCalibrationMode();
+    System::InternalMeasurementOn();
 
     std::vector<std::pair<double, double>> dbFinddBTest{ { DBOUT_MAX_SERVICE, DBOUT_MAX_SERVICE }, {-15,-15}, { DBOUT_MIN_SERVICE, DBOUT_MIN_SERVICE } };
     std::vector<uint32_t> freqTest = { 1000 };

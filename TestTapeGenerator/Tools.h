@@ -10,9 +10,9 @@ class dBMeterOkDialog : public DialogOk
     std::pair<double, double> dBOut;
     unsigned long counter;
 public:
-    dBMeterOkDialog() :dBOut{ -2.0, -2.0 }, counter(0)
+    dBMeterOkDialog() :dBOut{ 0.0, 0.0 }, counter(0)
     {
-        //System::UnmutedCalibrationMode();
+        //System::InternalMeasurementOn();
         System::OutPutOn();
         signalGenerator.setFreq(1000, dBOut);
     }
@@ -71,7 +71,7 @@ class SignalGeneratorOkDialog : public DialogOk
 public:
     SignalGeneratorOkDialog() :dBOut{ -2.0, -2.0 }, frequencyOut(1000), counter(0)
     {
-        //System::UnmutedCalibrationMode();
+        //System::InternalMeasurementOn();
         System::OutPutOn();
     }
     ~SignalGeneratorOkDialog()

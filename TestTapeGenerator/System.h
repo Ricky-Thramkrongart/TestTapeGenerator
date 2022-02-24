@@ -159,15 +159,6 @@ public:
         PrintRelayState();
     }
 
-    static void UnmutedCalibrationMode()
-    {
-        relayStack.push({ muteRelay.IsEnabled(), calibrationRelay.IsEnabled() });
-        muteRelay.Disable();
-        calibrationRelay.Enable();
-        //Serial.print(F("UnmutedCalibrationMode(): "));
-        PrintRelayState();
-    }
-
     static bool GetCalibration()
     {
         return  calibrationRelay.IsEnabled();
