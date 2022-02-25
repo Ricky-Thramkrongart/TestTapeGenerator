@@ -5,8 +5,6 @@
 
 class dBMeterOkDialog : public DialogOk
 {
-    SignalGenerator signalGenerator;
-    dBMeter dbMeter;
     std::pair<double, double> dBOut;
     unsigned long counter;
 public:
@@ -14,7 +12,7 @@ public:
     {
         //System::InternalMeasurementOn();
         System::OutPutOn();
-        signalGenerator.setFreq(1000, dBOut);
+        SignalGenerator::Get().setFreq(15000, dBOut);
     }
     ~dBMeterOkDialog()
     {
@@ -28,7 +26,7 @@ public:
 
         lcdhelper.Line(0, sf_line);
         dBMeter::Measurement m(dBOut);
-        dbMeter.GetdB(m);
+        dBMeter::Get().GetdB(m);
         Serial.println(m.ToString().c_str());
         Serial.println(m.String(4));
         lcdhelper.Line(2, m.ToString().c_str());
@@ -42,7 +40,7 @@ public:
         sf_line.print(++counter);
 
         dBMeter::Measurement m(dBOut);
-        dbMeter.GetdB(m);
+        dBMeter::Get().GetdB(m);
 
         Serial.println(m.ToString().c_str());
         Serial.println(m.String(4));
@@ -62,8 +60,6 @@ public:
 
 class SignalGeneratorOkDialog : public DialogOk
 {
-    SignalGenerator signalGenerator;
-    dBMeter dbMeter;
     std::pair<double, double> dBOut;
     uint32_t frequencyOut;
     unsigned long counter;
@@ -108,9 +104,9 @@ public:
                 ms.GetCapture(cap, index++);
                 double dBRight = atof(cap);
                 std::pair<double, double> dB{ dBLeft , dBRight };
-                signalGenerator.setFreq(freq, dB);
+                SignalGenerator::Get().setFreq(freq, dB);
                 dBMeter::Measurement m(dB);
-                dbMeter.GetdB(m);
+                dBMeter::Get().GetdB(m);
                 lcdhelper.Line(2, SignalGenerator::String(freq, dB));
                 lcdhelper.Line(3, m.String());
                 lcdhelper.Show();

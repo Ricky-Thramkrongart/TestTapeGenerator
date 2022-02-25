@@ -28,8 +28,6 @@ public:
 class AmplificationAdjustment: public DialogOk
 {
 protected:
-    SignalGenerator signalGenerator;
-    dBMeter dbMeter;
     int manual_calibration_ok_count;
 public:
     TapeInfo* tapeInfo;
@@ -40,7 +38,7 @@ public:
         //Serial.print(F("DBOUT_MAX_SERVICE: ")); Serial.print(DBOUT_MAX_SERVICE); Serial.print(F(" Amp. Adj.: ")); Serial.println(tapeInfo->GetAmplificationAdjustment());
         double d = -tapeInfo->GetAmplificationAdjustment();
         System::OutPutOn();
-        signalGenerator.setFreq(Targetfreq, { d, d });
+        SignalGenerator::Get().setFreq(Targetfreq, { d, d });
     }
     ~AmplificationAdjustment()
     {
@@ -50,8 +48,9 @@ public:
     {
         double Target = 0;
         dBMeter::Measurement m({ Target ,Target });
-        dbMeter.GetdB(m);
+        dBMeter::Get().GetdB(m);
         Serial.println(m.String(2));
+        Serial.println(m.ToString().c_str());
 
          constexpr double std_dev = 1.0;
         std::string statuscontrol = StatusControl(std_dev, m.dBIn.first - Target, m.dBIn.second - Target);
@@ -92,9 +91,6 @@ public:
 
 class RecordLevelAdjustment : public Dialog
 {
-protected:
-    SignalGenerator signalGenerator;
-    dBMeter dbMeter;
 public:
     TapeInfo* tapeInfo;
     std::vector<RecordStep*>::iterator ptr;
@@ -124,11 +120,11 @@ public:
         System::PrintRelayState();
         std::pair<double, double> x0({ (*ptr)->Level, (*ptr)->Level });
         std::pair<double, double> start_guess{ x0.first - tapeInfo->GetAmplificationAdjustment(),  x0.second - tapeInfo->GetAmplificationAdjustment() };
-        (*ptr)->RecordLevel = FinddB(signalGenerator, dbMeter, (*ptr)->Frequency, x0, start_guess, (*ptr)->e, lcdhelper);
-        signalGenerator.setFreq((*ptr)->Frequency, (*ptr)->RecordLevel);
+        (*ptr)->RecordLevel = FinddB((*ptr)->Frequency, x0, start_guess, (*ptr)->e, lcdhelper);
+        SignalGenerator::Get().setFreq((*ptr)->Frequency, (*ptr)->RecordLevel);
         delay(1000); //Setteling time
         dBMeter::Measurement m((*ptr)->RecordLevel);
-        dbMeter.GetdB(m);
+        dBMeter::Get().GetdB(m);
         lcdhelper.Line(2, SignalGenerator::String((*ptr)->Frequency, (*ptr)->RecordLevel));
         lcdhelper.Line(3, m.String());
         Serial.println(m.String());
@@ -161,8 +157,6 @@ public:
 class RecordTestTape : public Dialog
 {
 protected:
-    SignalGenerator signalGenerator;
-    dBMeter dbMeter;
     unsigned long ms_progress;
 public:
     TapeInfo* tapeInfo;
@@ -194,7 +188,7 @@ public:
         lcdhelper.Show(Serial);
         std::pair<double, double> x0((*ptr)->RecordLevel);
         uint32_t f((*ptr)->Frequency);
-        signalGenerator.setFreq(f, x0);
+        SignalGenerator::Get().setFreq(f, x0);
         dBMeter::Measurement m(x0);
         delay(tapeInfo->Pause*1000); //Setteling time //Blank space
         System::OutPutOn();
@@ -213,7 +207,7 @@ public:
             lcdhelper.Line(0, sf_line2);
             lcdhelper.Show();
 
-            dbMeter.GetdB(m);
+            dBMeter::Get().GetdB(m);
             count++;
 
             stdsum.first += square(m.dBIn.first - (*ptr)->Level);

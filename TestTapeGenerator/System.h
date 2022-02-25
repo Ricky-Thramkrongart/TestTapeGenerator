@@ -8,7 +8,7 @@
 #include <SafeString.h>
 #include "Relay.h"
 
-constexpr int8_t SkinnersKonstant = 7;
+constexpr double SkinnersKonstant = 2.0;
 
 constexpr int8_t DBIN_MAX = 5;
 constexpr int8_t DBIN_MIN = -23;
@@ -18,7 +18,7 @@ constexpr int8_t DBIN_MIN_SERVICE = DBIN_MIN + DBIN_HEADROOM;
 
 constexpr int8_t DBOUT_MAX = 0;
 constexpr int8_t DBOUT_MIN = -31;
-constexpr int8_t DBOUT_HEADROOM = 3;
+constexpr int8_t DBOUT_HEADROOM = 5;
 constexpr int8_t DBOUT_MAX_SERVICE = DBOUT_MAX - DBOUT_HEADROOM;
 constexpr int8_t DBOUT_MIN_SERVICE = DBOUT_MIN + DBOUT_HEADROOM;
 
@@ -90,6 +90,8 @@ char* uintToStr(const uint64_t num, char* str)
 
     return str;
 }
+class SignalGenerator;
+class dBMeter;
 
 class System
 {
@@ -323,7 +325,7 @@ public:
         fit64RV45_r[1] = 4598738819454652931LL; //0.28128607980332293
         fit64RV45_r[0] = 13852251674767900672LL; //-29.084007135068532
 
-        _5dBInputAttenuator = { -5.19, -5.18 };
+        _5dBInputAttenuator = { -5.21, -5.20 };
 
     }
 
@@ -374,7 +376,7 @@ public:
         _5dBInputAttenuator = { -5.11,-5.03 };
     }
 
-    static void SetupDevice(void);
+    static void SetupDevice();
 
     static std::vector<float64_t> fit64RV45_l;
     static std::vector<float64_t> fit64RV45_r;

@@ -14,17 +14,17 @@ void FatalError(const char* Msg)
     exit(EXIT_FAILURE);
 }
 
-std::pair<double, double> f(SignalGenerator& signalGenerator, dBMeter& dbMeter, const std::pair<double, double> x0, const uint32_t Targetfreq, const std::pair<double, double>TargetdB)
+std::pair<double, double> f(const std::pair<double, double> x0, const uint32_t Targetfreq, const std::pair<double, double>TargetdB)
 {
-    signalGenerator.setFreq(Targetfreq, x0);
+    SignalGenerator::Get().setFreq(Targetfreq, x0);
     dBMeter::Measurement m;
-    dbMeter.GetdB(m);
+    dBMeter::Get().GetdB(m);
     //Serial.println(SignalGenerator::String(Targetfreq, x0, 1));
     //Serial.println(m.String(1).c_str());
     return { m.dBIn.first - TargetdB.first, m.dBIn.second - TargetdB.second };
 }
 
-std::pair<double, double> g(SignalGenerator& signalGenerator, dBMeter& dbMeter, const std::pair<double, double> x0, const uint32_t Targetfreq, const std::pair<double, double>TargetdB, const std::pair<double, double>f0, double& delta)
+std::pair<double, double> g(const std::pair<double, double> x0, const uint32_t Targetfreq, const std::pair<double, double>TargetdB, const std::pair<double, double>f0, double& delta)
 {
     std::pair<double, double> f1;
     unsigned int count = 0;
@@ -34,7 +34,7 @@ std::pair<double, double> g(SignalGenerator& signalGenerator, dBMeter& dbMeter, 
         if (Is_dBOut_OutOfRange(x_delta)) {
             return { 0.0, 0.0 };
         }
-        f1 = f(signalGenerator, dbMeter, x_delta, Targetfreq, TargetdB);
+        f1 = f(x_delta, Targetfreq, TargetdB);
 
         if (++count > 1) {
             delta += delta;
@@ -44,9 +44,9 @@ std::pair<double, double> g(SignalGenerator& signalGenerator, dBMeter& dbMeter, 
     return g0;
 }
 
-std::pair<double, double> FinddB(SignalGenerator& signalGenerator, dBMeter& dbMeter, const uint32_t Targetfreq, std::pair<double, double> TargetdB, std::pair<double, double> StartGuess, double& epsilon, LCD_Helper& lcdHelper)
+std::pair<double, double> FinddB(const uint32_t Targetfreq, std::pair<double, double> TargetdB, std::pair<double, double> StartGuess, double& epsilon, LCD_Helper& lcdHelper)
 {
-    dbMeter.Cabling(signalGenerator);
+    dBMeter::Get().Cabling();
 
     std::pair<double, double> x0, x1, f0, f1, g0;
     
@@ -68,12 +68,12 @@ std::pair<double, double> FinddB(SignalGenerator& signalGenerator, dBMeter& dbMe
 
         do
         {
-            f0 = f(signalGenerator, dbMeter, x0, Targetfreq, TargetdB);
+            f0 = f(x0, Targetfreq, TargetdB);
             if (fabs(f0.first) <= epsilon && fabs(f0.second) <= epsilon) {
                 return x0;
             }
 
-            g0 = g(signalGenerator, dbMeter, x0, Targetfreq, TargetdB, f0, delta);
+            g0 = g(x0, Targetfreq, TargetdB, f0, delta);
             if (g0.first == 0.0 || g0.second == 0.0)
             {
                 break;

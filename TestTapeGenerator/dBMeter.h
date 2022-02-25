@@ -5,6 +5,7 @@
 #include <CircularBuffer.h>
 constexpr auto CIRCULARBUFFERSIZE = 30;
 
+
 class dBMeter
 {
 private:
@@ -12,6 +13,11 @@ private:
     dBMeter& operator=(const dBMeter&) = delete;
 
 public:
+    static dBMeter& Get()
+    {
+        static dBMeter* dbMeter = new dBMeter();
+        return *dbMeter;
+    }
     struct Measurement {
         bool IsSaturated(void) {
             const uint16_t Saturation = 1023;
@@ -66,8 +72,8 @@ public:
             //if (Is_dBIn_OutOfRange(dBIn.first))
             //    sf_line.print(F("ovf."));
             //else
-            sf_line.print(dBIn.first, decs, 4 + decs); 
-            if (Std.first > 0.1) {
+            sf_line.print(dBIn.first, decs, 4 + decs);
+            if (Std.first > 0.01) {
                 sf_line.print(F("~"));
                 sf_line.print(Std.first, decs, 2 + decs);
             }
@@ -75,8 +81,8 @@ public:
             //    sf_line.print(F("ovf."));
             //else
             sf_line.print(F(" "));
-            sf_line.print(dBIn.second, decs, 4 + decs); 
-            if (Std.second > 0.1) {
+            sf_line.print(dBIn.second, decs, 4 + decs);
+            if (Std.second > 0.01) {
                 sf_line.print(F("~"));
                 sf_line.print(Std.second, decs, 2 + decs);
             }
@@ -95,6 +101,10 @@ public:
     AD5254_asukiaaa potentio;
 
 private:
+    typedef CircularBuffer<Measurement, CIRCULARBUFFERSIZE> CirBufType;
+    static CirBufType buffer1;
+    static CirBufType buffer2;
+
     bool SwapChannels;
     bool ChannelsVerified;
 public:
@@ -108,115 +118,17 @@ public:
             delay(1000);
             exit(EXIT_FAILURE);
         }
+        Serial.println(F("dBMeter"));
+        delay(100);
     }
     ~dBMeter()
     {
     }
 
-    typedef void (dBMeter::* GetRawInputType)(Measurement&);
-    double GetdB(Measurement& m)
+    void Calc(CirBufType& buffer, Measurement& m)
     {
-        m.RV = 45;
-        inputpregainRelay.Disable();
-        GetRawInputType GetRawInput = System::GetCalibration() ? &GetRawInputInternal : &GetRawInputExternal;
-        long ms = millis();
-        bool retry;
-        do {
-            (this->*GetRawInput)(m);
-            m.dBIn.first = PolyVal(System::fit64RV45_l, m.Raw.first, -System::_5dBInputAttenuator.first);
-            m.dBIn.second = PolyVal(System::fit64RV45_r, m.Raw.second, -System::_5dBInputAttenuator.second);
-            if (m.dBIn.first < DBIN_MIN || m.dBIn.second < DBIN_MIN) {
-                inputpregainRelay.Enable();
-                Measurement n(m);
-                (this->*GetRawInput)(n);
-                if (m.dBIn.first < DBIN_MIN) {
-                    m.Raw.first = n.Raw.first;
-                    m.dBIn.first = PolyVal(System::fit64RV45_l, m.Raw.first, - System::_5dBInputAttenuator.first - 12.0);
-                }
-                if (m.dBIn.second < DBIN_MIN) {
-                    m.Raw.second = n.Raw.second;
-                    m.dBIn.second = PolyVal(System::fit64RV45_r, m.Raw.second, -System::_5dBInputAttenuator.second - 12.0);
-                }
-                inputpregainRelay.Disable();
-            }
-            if ((m.Std.first > SkinnersKonstant || m.Std.second > SkinnersKonstant) && millis() - ms < 5000) {
-                delay(200); //settling time
-                retry = true;
-            }
-            else
-                retry = false;
+        using index_t = CirBufType::index_t;
 
-        } while (retry);
-        if (ChannelsVerified && SwapChannels) {
-            std::swap<double>(m.dBIn.first, m.dBIn.second);
-            std::swap<double>(m.Raw.first, m.Raw.second);
-        }
-    }
-
-    void GetRawInputInternal(Measurement& m)
-    {
-        //Serial.println(F("GetRawInputInternal"));
-        static uint8_t rv = 0;
-        if (rv != m.RV) {
-            rv = m.RV;
-            const uint8_t leftChannelIn(2);
-            const uint8_t rightChannelIn(3);
-            potentio.writeRDAC(leftChannelIn, rv);
-            potentio.writeRDAC(rightChannelIn, rv);
-            delay(600);
-        }
-
-        bool measure_again;           
-        CircularBuffer<Measurement, CIRCULARBUFFERSIZE> buffer;
-        m.Std.first = 0.0;
-        m.Std.second = 0.0;
-        do {
-            const int CH1(A0);
-            const int CH2(A1);
-            m.Raw.first = analogRead(CH1);
-            m.Raw.second = analogRead(CH2);
-            buffer.push(m);
-            delay(50);
-
-            if (buffer.isFull()) {
-                using index_t = decltype(buffer)::index_t;
-                for (index_t i = 0; i < buffer.size(); i++) {
-                    if (buffer[0].Raw.first != buffer[i].Raw.first || buffer[0].Raw.second != buffer[i].Raw.second) {
-                        measure_again = true;
-                        break;
-                    }
-                }
-                measure_again = false;
-            }
-            else
-                measure_again = true;
-        } while (measure_again);
-    }
-
-    void GetRawInputExternal(Measurement& m)
-    {
-        //Serial.println(F("GetRawInputExternal"));
-        static uint8_t rv = 0;
-        if (rv != m.RV) {
-            rv = m.RV;
-            const uint8_t leftChannelIn(2);
-            const uint8_t rightChannelIn(3);
-            potentio.writeRDAC(leftChannelIn, rv);
-            potentio.writeRDAC(rightChannelIn, rv);
-            delay(600);
-        }
-
-        CircularBuffer<Measurement, 2*CIRCULARBUFFERSIZE> buffer;
-        do {
-            const int CH1(A0);
-            const int CH2(A1);
-            m.Raw.first = analogRead(CH1);
-            m.Raw.second = analogRead(CH2);
-            buffer.push(m);
-            delay(50);
-        } while (!buffer.isFull());
-
-        using index_t = decltype(buffer)::index_t;
         float64_t dBLeftSum64 = fp64_sd(0.0);
         float64_t dBRightSum64 = fp64_sd(0.0);
 
@@ -243,18 +155,141 @@ public:
         m.Std.second = sqrt(dBRightSum / buffer.size());
     }
 
+    typedef void (dBMeter::* GetRawInputType)(Measurement&);
+    double GetdB(Measurement& m)
+    {
+        Serial.println("**");
+        m.RV = 45;
+        inputpregainRelay.Disable();
+        GetRawInputType GetRawInput = System::GetCalibration() ? &GetRawInputInternal : &GetRawInputExternal;
+        long ms = millis();
+        bool retry;
+        buffer1.clear();
+        int counter = 0;
+        do {
+            (this->*GetRawInput)(m); 
+            m.dBIn.first = PolyVal(System::fit64RV45_l, m.Raw.first, -System::_5dBInputAttenuator.first);
+            m.dBIn.second = PolyVal(System::fit64RV45_r, m.Raw.second, -System::_5dBInputAttenuator.second);
+
+            std::pair<double, double> Std;    
+            Std.first = PolyVal(System::fit64RV45_l, m.Raw.first + m.Std.first, -System::_5dBInputAttenuator.first) - m.dBIn.first;
+            Std.second = PolyVal(System::fit64RV45_r, m.Raw.second + m.Std.second, -System::_5dBInputAttenuator.second) - m.dBIn.second;
+
+            if (m.dBIn.first < DBIN_MIN || m.dBIn.second < DBIN_MIN) {
+                inputpregainRelay.Enable();
+                Measurement n(m);
+                (this->*GetRawInput)(n);
+                if (m.dBIn.first < DBIN_MIN) {
+                    m.Raw.first = n.Raw.first;
+                    m.dBIn.first = PolyVal(System::fit64RV45_l, m.Raw.first, -System::_5dBInputAttenuator.first - 12.0);
+                    Std.first = PolyVal(System::fit64RV45_l, m.Raw.first + m.Std.first, -System::_5dBInputAttenuator.first) - m.dBIn.first;
+                }
+                if (m.dBIn.second < DBIN_MIN) {
+                    m.Raw.second = n.Raw.second;
+                    m.dBIn.second = PolyVal(System::fit64RV45_r, m.Raw.second, -System::_5dBInputAttenuator.second - 12.0);
+                    Std.second = PolyVal(System::fit64RV45_r, m.Raw.second + m.Std.second, -System::_5dBInputAttenuator.second) - m.dBIn.second;
+                }
+                inputpregainRelay.Disable();
+            }
+            m.Std.first = Std.first;
+            m.Std.second = Std.second;
+            if (m.Std.first < .2 && m.Std.second < .2)
+                buffer1.push(m);
+            Serial.println(m.String(2));
+            //    if ((m.Std.first > SkinnersKonstant || m.Std.second > SkinnersKonstant) && millis() - ms < 5000) {
+            //        //delay(200); //settling time
+            //        retry = true;
+            //    }
+            //    else
+            //        retry = false;
+            //} while (retry);
+            ++counter;
+        //    } while (buffer1.size() < 10);
+        } while ((counter < 10) && (m.Std.first >= .2 || m.Std.second >= .2));
+        Calc(buffer2, m);
+
+        Serial.println("**");
+        if (ChannelsVerified && SwapChannels) {
+            std::swap<double>(m.dBIn.first, m.dBIn.second);
+            std::swap<double>(m.Raw.first, m.Raw.second);
+        }
+    }
+
+    void GetRawInputInternal(Measurement& m)
+    {
+        //Serial.println(F("GetRawInputInternal"));
+        static uint8_t rv = 0;
+        if (rv != m.RV) {
+            rv = m.RV;
+            const uint8_t leftChannelIn(2);
+            const uint8_t rightChannelIn(3);
+            potentio.writeRDAC(leftChannelIn, rv);
+            potentio.writeRDAC(rightChannelIn, rv);
+            delay(600);
+        }
+
+        bool measure_again;
+        buffer2.clear();;
+        m.Std.first = 0.0;
+        m.Std.second = 0.0;
+        do {
+            const int CH1(A0);
+            const int CH2(A1);
+            m.Raw.first = analogRead(CH1);
+            m.Raw.second = analogRead(CH2);
+            buffer2.push(m);
+            delay(50);
+
+            if (buffer2.isFull()) {
+                using index_t = decltype(buffer2)::index_t;
+                for (index_t i = 0; i < buffer2.size(); i++) {
+                    if (buffer2[0].Raw.first != buffer2[i].Raw.first || buffer2[0].Raw.second != buffer2[i].Raw.second) {
+                        measure_again = true;
+                        break;
+                    }
+                }
+                measure_again = false;
+            }
+            else
+                measure_again = true;
+        } while (measure_again);
+    }
+
+    void GetRawInputExternal(Measurement& m)
+    {
+        //Serial.println(F("GetRawInputExternal"));
+        static uint8_t rv = 0;
+        if (rv != m.RV) {
+            rv = m.RV;
+            const uint8_t leftChannelIn(2);
+            const uint8_t rightChannelIn(3);
+            potentio.writeRDAC(leftChannelIn, rv);
+            potentio.writeRDAC(rightChannelIn, rv);
+            delay(600);
+        }
+        buffer1.clear();
+        do {
+            const int CH1(A0);
+            const int CH2(A1);
+            m.Raw.first = analogRead(CH1);
+            m.Raw.second = analogRead(CH2);
+            buffer1.push(m);
+            delay(50);
+        } while (!buffer1.isFull());
+        Calc(buffer1, m);
+    }
+
     void RVSweep()
     {
         LCD_Helper lcdhelper;
         lcdhelper.Line(0, F("dBMeter RVSweep"));
         lcdhelper.Show();
-        SignalGenerator signalGenerator;
         System::InternalMeasurementOn();
         //std::vector<int> rv{45, 146, 255};
         std::vector<int> rv{ 45 };
         for (std::vector<int>::iterator r = rv.begin(); r != rv.end(); r++) {
             for (float d = 0.0; d > -32.1; d -= 0.05) {
-                signalGenerator.setFreq(1000, { d, d });
+                SignalGenerator::Get().setFreq(1000, { d, d });
                 Measurement m({ d,d }, *r);
                 GetRawInputInternal(m);
                 lcdhelper.lcd.setCursor(0, 0);
@@ -272,11 +307,10 @@ public:
         LCD_Helper lcdhelper;
         lcdhelper.Line(0, F("dBMeter Scan"));
         lcdhelper.Show();
-        SignalGenerator signalGenerator;
         System::InternalMeasurementOn();;
         int i = 44;
         for (float d = 0.0; d > -32.1; d -= .1) {
-            signalGenerator.setFreq(1000, { d, d });
+            SignalGenerator::Get().setFreq(1000, { d, d });
             Measurement next({ d,d }, i);
             GetRawInputInternal(next);
             Measurement prev(next);
@@ -298,11 +332,11 @@ public:
         System::PopRelayStack();
     }
 
-    void Cabling(SignalGenerator& signalGenerator)
+    void Cabling()
     {
         if (!System::GetCalibration() && !ChannelsVerified) {
             System::OutPutOn();
-            signalGenerator.setFreq(1000, { -10, -15 });
+            SignalGenerator::Get().setFreq(1000, { -10, -15 });
             Measurement m;
             GetdB(m);
             //Serial.println(SignalGenerator::String(1000, { -10, -15 }));
@@ -316,24 +350,21 @@ public:
 };
 Relay dBMeter::inputpregainRelay(Relay(30));
 
-
-void System::SetupDevice(void) {
+void System::SetupDevice() {
     System::Device2();
 
     LCD_Helper lcdhelper;
     lcdhelper.Line(0, F("Setting System Paramaters"));
     lcdhelper.Show();
 
-    SignalGenerator signalGenerator;
-    dBMeter dbMeter;
     System::InternalMeasurementOn();
     std::pair<double, double> dB({ -2, -2 });
-    signalGenerator.setFreq(1000, dB);
+    SignalGenerator::Get().setFreq(1000, dB);
     dBMeter::Measurement m;
-    dbMeter.GetdB(m);
+    dBMeter::Get().GetdB(m);
     System::_5dBInputAttenuator.first += m.dBIn.first - dB.first;
     System::_5dBInputAttenuator.second += m.dBIn.second - dB.second;
-    Serial.print(F("System::_5dBInputAttenuator: ")); Serial.println(m.String(6));
+    Serial.print(F("System::_5dBInputAttenuator: ")); Serial.println(m.String(2));
     Serial.println("System::Device2();");
 
     constexpr double std_dev = 0.04;
@@ -341,9 +372,9 @@ void System::SetupDevice(void) {
     if (fabs(m.dBIn.first - dB.first) > std_dev || fabs(m.dBIn.second - dB.second) > std_dev) {
         System::Device1();
         Serial.println("System::Device1();");
-        signalGenerator.setFreq(1000, dB);
-        dbMeter.GetdB(m);
-        Serial.print(F("System::_5dBInputAttenuator: ")); Serial.println(m.String(6));
+        SignalGenerator::Get().setFreq(1000, dB);
+        dBMeter::Get().GetdB(m);
+        Serial.print(F("System::_5dBInputAttenuator: ")); Serial.println(m.String(2));
         System::_5dBInputAttenuator.first += m.dBIn.first - dB.first;
         System::_5dBInputAttenuator.second += m.dBIn.second - dB.second;
 
@@ -357,3 +388,6 @@ void System::SetupDevice(void) {
     }
     System::PopRelayStack();
 }
+
+dBMeter::CirBufType dBMeter::buffer1;
+dBMeter::CirBufType dBMeter::buffer2;

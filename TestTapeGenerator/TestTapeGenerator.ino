@@ -21,15 +21,13 @@ using namespace std;
 
 class PotentioMeterOutputSelection : public Menu
 {
-protected:
-    SignalGenerator signalGenerator;
 public:
     PotentioMeterOutputSelection() : Menu(256) {}
     void FullUpdate() {
         cSF(sf_line, 41);
         sf_line.print(F("Potention Meter Output: "));
         sf_line.print(Current);
-        signalGenerator.ManualOutPut(Current);
+        SignalGenerator::Get().ManualOutPut(Current);
         lcdhelper.Line(0, sf_line);
     }
 };
@@ -78,16 +76,12 @@ void OutputHardwareCalibration(void)
 
 void dBMeterScan(void)
 {
-    dBMeter dbMeter;
-    dbMeter.Scan();
+    dBMeter::Get().Scan();
 }
-
-
 
 void InputHardwareCalibration(void)
 {
-    dBMeter dbMeter;
-    dbMeter.RVSweep();
+    dBMeter::Get().RVSweep();
 }
 
 void setup()

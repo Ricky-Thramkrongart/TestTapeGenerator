@@ -23,6 +23,12 @@ protected:
     AD5254_asukiaaa potentio;
 
 public:
+    static SignalGenerator& Get() 
+    {
+        static SignalGenerator* signalGenerator = new SignalGenerator();
+        return *signalGenerator;
+    }
+
 
     uint16_t OutPutFit64(const double dB)
     {
@@ -58,6 +64,10 @@ public:
         digitalWrite(_fsyncPin, HIGH);
 
         pinMode(_dataPin, OUTPUT);
+        
+        Serial.println(F("SignalGenerator"));
+        delay(100);
+
     }
     ~SignalGenerator()
     {

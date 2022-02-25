@@ -43,9 +43,6 @@ void FrequencyResponseTest(const __FlashStringHelper* HeadLine, const std::vecto
     lcdHelper.Line(0, HeadLine);
     lcdHelper.Show();
 
-    SignalGenerator signalGenerator;
-    dBMeter dbMeter;
-
     System::InternalMeasurementOn();
 
     for (std::vector<uint32_t>::const_iterator f = freqTest.begin(); f != freqTest.end(); f++) {
@@ -53,9 +50,9 @@ void FrequencyResponseTest(const __FlashStringHelper* HeadLine, const std::vecto
             lcdHelper.Line(2, SignalGenerator::String(*f, *d));
             lcdHelper.Line(3, F(""));
             lcdHelper.Show();
-            signalGenerator.setFreq(*f, *d);
+            SignalGenerator::Get().setFreq(*f, *d);
             dBMeter::Measurement m(*d);
-            dbMeter.GetdB(m);
+            dBMeter::Get().GetdB(m);
             lcdHelper.Line(3, m.String());
             lcdHelper.Show(Serial);
             lcdHelper.Show(delay_);
@@ -86,9 +83,6 @@ void FinddBTest()
     lcdHelper.Line(0, F("Find dB Test"));
     lcdHelper.Show();
 
-    SignalGenerator signalGenerator;
-    dBMeter dbMeter;
-
     System::InternalMeasurementOn();
 
     std::vector<std::pair<double, double>> dbFinddBTest{ { DBOUT_MAX_SERVICE, DBOUT_MAX_SERVICE }, {-15,-15}, { DBOUT_MIN_SERVICE, DBOUT_MIN_SERVICE } };
@@ -100,10 +94,10 @@ void FinddBTest()
             lcdHelper.Line(3, F(""));
             lcdHelper.Show();
             double e = 0.0;
-            std::pair<double, double> dbIn = FinddB(signalGenerator, dbMeter, *f, *d, *d, e, lcdHelper);
-            signalGenerator.setFreq(*f, dbIn);
+            std::pair<double, double> dbIn = FinddB(*f, *d, *d, e, lcdHelper);
+            SignalGenerator::Get().setFreq(*f, dbIn);
             dBMeter::Measurement m(dbIn);
-            dbMeter.GetdB(m);
+            dBMeter::Get().GetdB(m);
             lcdHelper.Line(2, SignalGenerator::String(*f, dbIn, 2));
             lcdHelper.Line(3, m.String(2));
             Serial.println(SignalGenerator::String(*f, dbIn, 2));
