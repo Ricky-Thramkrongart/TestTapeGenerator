@@ -33,7 +33,7 @@ public:
     TapeInfo* tapeInfo;
     const uint32_t Targetfreq;
 
-    AmplificationAdjustment(TapeInfo* tapeInfo_) : tapeInfo(tapeInfo_), Targetfreq(15000)
+    AmplificationAdjustment(TapeInfo* tapeInfo_) : tapeInfo(tapeInfo_), Targetfreq(1000)
     {
         Serial.print(F("DBOUT_MAX_SERVICE: ")); Serial.print(DBOUT_MAX_SERVICE); Serial.print(F(" Amp. Adj.: ")); Serial.println(tapeInfo->GetAmplificationAdjustment());
         double d = -tapeInfo->GetAmplificationAdjustment();
