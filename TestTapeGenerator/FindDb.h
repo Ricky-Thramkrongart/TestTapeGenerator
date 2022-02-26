@@ -68,8 +68,7 @@ std::pair<double, double> FinddB(const uint32_t Targetfreq, std::pair<double, do
 
         do
         {
-            Serial.print(F("x0:")); Serial.print(x0.first); Serial.print(F(" ")); Serial.println(x0.second);
-
+            //Serial.print(F("x0:")); Serial.print(x0.first); Serial.print(F(" ")); Serial.println(x0.second);
 
             f0 = f(x0, Targetfreq, TargetdB);
             if (fabs(f0.first) <= epsilon && fabs(f0.second) <= epsilon) {
@@ -82,7 +81,7 @@ std::pair<double, double> FinddB(const uint32_t Targetfreq, std::pair<double, do
                 Serial.println(F("G0 = 0"));
                 break;
             }
-            Serial.print(F("x0:")); Serial.print(x0.first); Serial.print(F(" ")); Serial.println(x0.second);
+            //Serial.print(F("x0:")); Serial.print(x0.first); Serial.print(F(" ")); Serial.println(x0.second);
 
             x1.first = x0.first - f0.first / g0.first;
             x1.second = x0.second - f0.second / g0.second;
@@ -93,7 +92,7 @@ std::pair<double, double> FinddB(const uint32_t Targetfreq, std::pair<double, do
             x0.first = std::min(x0.first, (double)DBOUT_MAX);
             x0.second = std::min(x0.second, (double)DBOUT_MAX);
 
-            Serial.print(F("x0:")); Serial.print(x0.first); Serial.print(F(" ")); Serial.println(x0.second);
+            //Serial.print(F("x0:")); Serial.print(x0.first); Serial.print(F(" ")); Serial.println(x0.second);
         } while (!Is_dBOut_OutOfRange(x0));
     }
     FatalError("f is not convergent");

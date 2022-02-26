@@ -146,11 +146,11 @@ public:
         double dBLeftSum = 0.0;
         double dBRightSum = 0.0;
         for (index_t i = 0; i < buffer.size(); i++) {
-            dBLeftSum += square(buffer[i].Raw.first - dBLeftMean);
-            dBRightSum += square(buffer[i].Raw.second - dBRightMean);
+            dBLeftSum += buffer[i].Std.first;
+            dBRightSum += buffer[i].Std.second;
         }
-        m.Std.first = sqrt(dBLeftSum / buffer.size());
-        m.Std.second = sqrt(dBRightSum / buffer.size());
+        m.Std.first = dBLeftSum / buffer.size();
+        m.Std.second = dBRightSum / buffer.size();
     }
 
     typedef void (dBMeter::* GetRawInputType)(Measurement&);
@@ -195,22 +195,14 @@ public:
                 Serial.println(m.String(2));
 
             }
-            //Serial.println(m.String(2));
-            //    if ((m.Std.first > SkinnersKonstant || m.Std.second > SkinnersKonstant) && millis() - ms < 5000) {
-            //        //delay(200); //settling time
-            //        retry = true;
-            //    }
-            //    else
-            //        retry = false;
-            //} while (retry);
             ++counter;
-        //    } while (buffer1.size() < 10);
         } while ((counter < 10) && (m.Std.first >= .4 || m.Std.second >= .4));
         Calc(buffer2, m);
 
         if (ChannelsVerified && SwapChannels) {
             std::swap<double>(m.dBIn.first, m.dBIn.second);
             std::swap<double>(m.Raw.first, m.Raw.second);
+            std::swap<double>(m.Std.first, m.Std.second);
         }
     }
 
@@ -351,6 +343,7 @@ Relay dBMeter::inputpregainRelay(Relay(30));
 
 void System::SetupDevice() {
     System::Device2();
+    Serial.print("System::Device2(): ");
 
     LCD_Helper lcdhelper;
     lcdhelper.Line(0, F("Setting System Paramaters"));
@@ -363,11 +356,10 @@ void System::SetupDevice() {
     dBMeter::Get().GetdB(m);
     System::_5dBInputAttenuator.first += m.dBIn.first - dB.first;
     System::_5dBInputAttenuator.second += m.dBIn.second - dB.second;
-    Serial.println("System::Device2();");
 
     if (fabs(m.dBIn.first - dB.first) > MAX_DEVICE_STD_DEV || fabs(m.dBIn.second - dB.second) > MAX_DEVICE_STD_DEV) {
         System::Device1();
-        Serial.println("System::Device1();");
+        Serial.print("System::Device1(): ");
         SignalGenerator::Get().setFreq(1000, dB);
         dBMeter::Get().GetdB(m);
         System::_5dBInputAttenuator.first += m.dBIn.first - dB.first;

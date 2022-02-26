@@ -16,7 +16,7 @@ public:
     {
     }
     void FullUpdate() {
-        lcdhelper.Line(0, F("Reference Level"));
+        lcdhelper.Line(0, F("Amplification Adjustment"));
         lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
         lcdhelper.Line(2, F("Start recording"));
     }
@@ -50,7 +50,7 @@ public:
         dBMeter::Measurement m({ Target ,Target });
         dBMeter::Get().GetdB(m);
         Serial.println(m.String(2));
-        Serial.println(m.ToString().c_str());
+        //Serial.println(m.ToString().c_str());
 
          constexpr double std_dev = 1.0;
         std::string statuscontrol = StatusControl(std_dev, m.dBIn.first - Target, m.dBIn.second - Target);
