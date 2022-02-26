@@ -118,8 +118,6 @@ public:
             delay(1000);
             exit(EXIT_FAILURE);
         }
-        Serial.println(F("dBMeter"));
-        delay(100);
     }
     ~dBMeter()
     {
@@ -158,7 +156,6 @@ public:
     typedef void (dBMeter::* GetRawInputType)(Measurement&);
     double GetdB(Measurement& m)
     {
-        Serial.println("**");
         m.RV = 45;
         inputpregainRelay.Disable();
         GetRawInputType GetRawInput = System::GetCalibration() ? &GetRawInputInternal : &GetRawInputExternal;
@@ -175,16 +172,16 @@ public:
             Std.first = PolyVal(System::fit64RV45_l, m.Raw.first + m.Std.first, -System::_5dBInputAttenuator.first) - m.dBIn.first;
             Std.second = PolyVal(System::fit64RV45_r, m.Raw.second + m.Std.second, -System::_5dBInputAttenuator.second) - m.dBIn.second;
 
-            if (m.dBIn.first < DBIN_MIN || m.dBIn.second < DBIN_MIN) {
+            if (m.dBIn.first < DBIN_MIN_NOPREGAIN || m.dBIn.second < DBIN_MIN_NOPREGAIN) {
                 inputpregainRelay.Enable();
                 Measurement n(m);
                 (this->*GetRawInput)(n);
-                if (m.dBIn.first < DBIN_MIN) {
+                if (m.dBIn.first < DBIN_MIN_NOPREGAIN) {
                     m.Raw.first = n.Raw.first;
                     m.dBIn.first = PolyVal(System::fit64RV45_l, m.Raw.first, -System::_5dBInputAttenuator.first - 12.0);
                     Std.first = PolyVal(System::fit64RV45_l, m.Raw.first + m.Std.first, -System::_5dBInputAttenuator.first) - m.dBIn.first;
                 }
-                if (m.dBIn.second < DBIN_MIN) {
+                if (m.dBIn.second < DBIN_MIN_NOPREGAIN) {
                     m.Raw.second = n.Raw.second;
                     m.dBIn.second = PolyVal(System::fit64RV45_r, m.Raw.second, -System::_5dBInputAttenuator.second - 12.0);
                     Std.second = PolyVal(System::fit64RV45_r, m.Raw.second + m.Std.second, -System::_5dBInputAttenuator.second) - m.dBIn.second;
@@ -193,9 +190,12 @@ public:
             }
             m.Std.first = Std.first;
             m.Std.second = Std.second;
-            if (m.Std.first < .2 && m.Std.second < .2)
+            if (m.Std.first < .4 && m.Std.second < .4) {
                 buffer1.push(m);
-            Serial.println(m.String(2));
+                Serial.println(m.String(2));
+
+            }
+            //Serial.println(m.String(2));
             //    if ((m.Std.first > SkinnersKonstant || m.Std.second > SkinnersKonstant) && millis() - ms < 5000) {
             //        //delay(200); //settling time
             //        retry = true;
@@ -205,10 +205,9 @@ public:
             //} while (retry);
             ++counter;
         //    } while (buffer1.size() < 10);
-        } while ((counter < 10) && (m.Std.first >= .2 || m.Std.second >= .2));
+        } while ((counter < 10) && (m.Std.first >= .4 || m.Std.second >= .4));
         Calc(buffer2, m);
 
-        Serial.println("**");
         if (ChannelsVerified && SwapChannels) {
             std::swap<double>(m.dBIn.first, m.dBIn.second);
             std::swap<double>(m.Raw.first, m.Raw.second);
@@ -364,25 +363,18 @@ void System::SetupDevice() {
     dBMeter::Get().GetdB(m);
     System::_5dBInputAttenuator.first += m.dBIn.first - dB.first;
     System::_5dBInputAttenuator.second += m.dBIn.second - dB.second;
-    Serial.print(F("System::_5dBInputAttenuator: ")); Serial.println(m.String(2));
     Serial.println("System::Device2();");
 
-    constexpr double std_dev = 0.04;
-
-    if (fabs(m.dBIn.first - dB.first) > std_dev || fabs(m.dBIn.second - dB.second) > std_dev) {
+    if (fabs(m.dBIn.first - dB.first) > MAX_DEVICE_STD_DEV || fabs(m.dBIn.second - dB.second) > MAX_DEVICE_STD_DEV) {
         System::Device1();
         Serial.println("System::Device1();");
         SignalGenerator::Get().setFreq(1000, dB);
         dBMeter::Get().GetdB(m);
-        Serial.print(F("System::_5dBInputAttenuator: ")); Serial.println(m.String(2));
         System::_5dBInputAttenuator.first += m.dBIn.first - dB.first;
         System::_5dBInputAttenuator.second += m.dBIn.second - dB.second;
-
-        Serial.println(fabs(m.dBIn.first - dB.first));
-        Serial.println(fabs(m.dBIn.second - dB.second));
         delay(10);
 
-        if (fabs(m.dBIn.first - dB.first) > std_dev || fabs(m.dBIn.second - dB.second) > std_dev) {
+        if (fabs(m.dBIn.first - dB.first) > MAX_DEVICE_STD_DEV || fabs(m.dBIn.second - dB.second) > MAX_DEVICE_STD_DEV) {
             exit(EXIT_FAILURE);
         }
     }

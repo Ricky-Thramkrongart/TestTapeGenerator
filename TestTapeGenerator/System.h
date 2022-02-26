@@ -8,24 +8,31 @@
 #include <SafeString.h>
 #include "Relay.h"
 
-constexpr double SkinnersKonstant = 2.0;
+//constexpr double SkinnersKonstant = 2.0;
 
 constexpr int8_t DBIN_MAX = 5;
-constexpr int8_t DBIN_MIN = -23;
-constexpr int8_t DBIN_HEADROOM = 3;
+constexpr int8_t DBIN_MIN_NOPREGAIN = -32 + 5;
+constexpr int8_t DBIN_MIN = DBIN_MIN_NOPREGAIN - 12;
+constexpr int8_t DBIN_HEADROOM = 2;
 constexpr int8_t DBIN_MAX_SERVICE = DBIN_MAX - DBIN_HEADROOM;
 constexpr int8_t DBIN_MIN_SERVICE = DBIN_MIN + DBIN_HEADROOM;
 
 constexpr int8_t DBOUT_MAX = 0;
 constexpr int8_t DBOUT_MIN = -31;
-constexpr int8_t DBOUT_HEADROOM = 5;
+constexpr int8_t DBOUT_HEADROOM = 1;
 constexpr int8_t DBOUT_MAX_SERVICE = DBOUT_MAX - DBOUT_HEADROOM;
 constexpr int8_t DBOUT_MIN_SERVICE = DBOUT_MIN + DBOUT_HEADROOM;
+
+constexpr double MAX_DEVICE_STD_DEV = 0.1;
 
 bool Is_dBIn_OutOfRange(const double dB)
 {
     if (dB > DBIN_MAX || dB < DBIN_MIN) {
-        Serial.println(F("Is_dBIn_OutOfRange"));
+        Serial.print(F("DBIN_MIN: ")); Serial.println(DBIN_MIN);
+        Serial.print(F("DBIN_MAX: ")); Serial.println(DBIN_MAX);
+        Serial.print(F("DBIN_MIN_NOPREGAIN: ")); Serial.println(DBIN_MIN_NOPREGAIN);
+        Serial.print(F("Is_dBIn_OutOfRange: ")); Serial.println(dB);
+        delay(1000);
         return true;
     }
     return false;
@@ -34,7 +41,6 @@ bool Is_dBIn_OutOfRange(const double dB)
 bool Is_dBIn_OutOfRange(const std::pair<double, double>& dB)
 {
     if (Is_dBIn_OutOfRange(dB.first) || Is_dBIn_OutOfRange(dB.second)) {
-        Serial.println(F("Is_dBIn_OutOfRange"));
         return true;
     }
     return false;
@@ -43,7 +49,10 @@ bool Is_dBIn_OutOfRange(const std::pair<double, double>& dB)
 bool Is_dBOut_OutOfRange(const double dB)
 {
     if (dB > DBOUT_MAX || dB < DBOUT_MIN) {
-        Serial.println(F("Is_dBOut_OutOfRange"));
+        Serial.print(F("DBOUT_MIN: ")); Serial.println(DBOUT_MIN);
+        Serial.print(F("DBOUT_MAX: ")); Serial.println(DBOUT_MAX);
+        Serial.print(F("Is_dBOut_OutOfRange: ")); Serial.println(dB);
+        delay(1000);
         return true;
     }
     return false;
@@ -52,7 +61,6 @@ bool Is_dBOut_OutOfRange(const double dB)
 bool Is_dBOut_OutOfRange(const std::pair<double, double>& dB)
 {
     if (Is_dBOut_OutOfRange(dB.first) || Is_dBOut_OutOfRange(dB.second)) {
-        Serial.println(F("Is_dBOut_OutOfRange"));
         return true;
     }
     return false;

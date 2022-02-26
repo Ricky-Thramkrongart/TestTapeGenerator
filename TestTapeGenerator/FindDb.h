@@ -58,7 +58,7 @@ std::pair<double, double> FinddB(const uint32_t Targetfreq, std::pair<double, do
     {
         x0 = StartGuess;
         epsilon += 0.05;
-        double delta = 8 * epsilon;
+        double delta = 4*epsilon;
 
         cSF(sf_line, 41);
         sf_line.print("-> "); sf_line.print(Targetfreq,0,5); sf_line.print("Hz "); sf_line.print(TargetdB.first,1,5); sf_line.print("dBm "); sf_line.print(TargetdB.second, 1, 5); sf_line.print("dBm e: "); sf_line.print(epsilon,2);
@@ -68,6 +68,9 @@ std::pair<double, double> FinddB(const uint32_t Targetfreq, std::pair<double, do
 
         do
         {
+            Serial.print(F("x0:")); Serial.print(x0.first); Serial.print(F(" ")); Serial.println(x0.second);
+
+
             f0 = f(x0, Targetfreq, TargetdB);
             if (fabs(f0.first) <= epsilon && fabs(f0.second) <= epsilon) {
                 return x0;
@@ -76,12 +79,19 @@ std::pair<double, double> FinddB(const uint32_t Targetfreq, std::pair<double, do
             g0 = g(x0, Targetfreq, TargetdB, f0, delta);
             if (g0.first == 0.0 || g0.second == 0.0)
             {
+                Serial.println(F("G0 = 0"));
                 break;
             }
+            Serial.print(F("x0:")); Serial.print(x0.first); Serial.print(F(" ")); Serial.println(x0.second);
 
             x1.first = x0.first - f0.first / g0.first;
             x1.second = x0.second - f0.second / g0.second;
             x0 = x1;
+            x0.first = std::max(x0.first, (double)DBOUT_MIN);
+            x0.second = std::max(x0.second, (double)DBOUT_MIN);
+            x0.first = std::min(x0.first, (double)DBOUT_MAX);
+            x0.second = std::min(x0.second, (double)DBOUT_MAX);
+            Serial.print(F("x0:")); Serial.print(x0.first); Serial.print(F(" ")); Serial.println(x0.second);
         } while (!Is_dBOut_OutOfRange(x0));
     }
     FatalError("f is not convergent");

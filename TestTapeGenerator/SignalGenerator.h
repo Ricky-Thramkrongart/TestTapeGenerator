@@ -64,10 +64,6 @@ public:
         digitalWrite(_fsyncPin, HIGH);
 
         pinMode(_dataPin, OUTPUT);
-        
-        Serial.println(F("SignalGenerator"));
-        delay(100);
-
     }
     ~SignalGenerator()
     {
