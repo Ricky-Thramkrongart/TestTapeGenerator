@@ -124,7 +124,7 @@ public:
         std::pair<double, double> dbout_max{ DBOUT_MAX ,DBOUT_MAX };
         dBMeter::Measurement m_max(dbout_max);
         SignalGenerator::Get().setFreq((*ptr)->Frequency, dbout_max);
-        delay(1000); //Setteling time
+        delay(2000); //Setteling time
         dBMeter::Get().GetdB(m_max);
         if (m_max.dBIn.first < (*ptr)->Level || m_max.dBIn.second < (*ptr)->Level) {
             sf_line.clear();
@@ -139,7 +139,7 @@ public:
         std::pair<double, double> dbout_min{ DBOUT_MIN ,DBOUT_MIN };
         dBMeter::Measurement m_min(dbout_min);
         SignalGenerator::Get().setFreq((*ptr)->Frequency, dbout_min);
-        delay(1000); //Setteling time
+        delay(2000); //Setteling time
         dBMeter::Get().GetdB(m_min);
         if (m_min.dBIn.first > (*ptr)->Level || m_min.dBIn.second > (*ptr)->Level) {
             sf_line.clear();
