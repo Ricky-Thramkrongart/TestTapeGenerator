@@ -25,7 +25,7 @@ public:
 
 };
 
-class AmplificationAdjustment: public DialogOk
+class AmplificationAdjustment : public DialogOk
 {
 protected:
     int manual_calibration_ok_count;
@@ -52,7 +52,7 @@ public:
         Serial.println(m.String(2));
         //Serial.println(m.ToString().c_str());
 
-         constexpr double std_dev = 1.0;
+        constexpr double std_dev = 1.0;
         std::string statuscontrol = StatusControl(std_dev, m.dBIn.first - Target, m.dBIn.second - Target);
         if (fabs(m.dBIn.first - Target) < std_dev && fabs(m.dBIn.second - Target) < std_dev) {
             manual_calibration_ok_count++;
@@ -86,6 +86,81 @@ public:
         lcdhelper.Line(0, F("Amplification Adjustment"));
         lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
         lcdhelper.Line(2, sf_line);
+    }
+};
+
+class ValidateTapeRecorder : public DialogOk
+{
+public:
+    TapeInfo* tapeInfo;
+    std::vector<RecordStep*>::iterator ptr;
+    ValidateTapeRecorder(TapeInfo* tapeInfo_) : tapeInfo(tapeInfo_), ptr(tapeInfo->RecordSteps.begin())
+    {
+        System::OutPutOn();
+    }
+    ~ValidateTapeRecorder()
+    {
+        System::PopRelayStack();
+    }
+    void FullUpdate() {
+    }
+    void Update() {
+        lcdhelper.Line(0, F("Validate Tape Recorder"));
+        lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
+        lcdhelper.Line(3, "");
+
+        cSF(sf_line, 41);
+        sf_line.print((*ptr)->ToString().c_str());
+        sf_line.print(F(" ("));
+        sf_line.print((ptr - tapeInfo->RecordSteps.begin()) + 1);
+        sf_line.print(F("/"));
+        sf_line.print((int)tapeInfo->RecordSteps.size());
+        sf_line.print(F(")"));
+        lcdhelper.Line(2, sf_line);
+        Serial.println(sf_line);
+        System::PrintRelayState();
+        lcdhelper.Show();
+
+        std::pair<double, double> dbout_max{ DBOUT_MAX ,DBOUT_MAX };
+        dBMeter::Measurement m_max(dbout_max);
+        SignalGenerator::Get().setFreq((*ptr)->Frequency, dbout_max);
+        delay(1000); //Setteling time
+        dBMeter::Get().GetdB(m_max);
+        if (m_max.dBIn.first < (*ptr)->Level || m_max.dBIn.second < (*ptr)->Level) {
+            sf_line.clear();
+            sf_line.print(F("!! Device Max Level < Level: ")); sf_line.print((*ptr)->Level);
+            lcdhelper.Line(2, sf_line);
+            lcdhelper.Line(3, m_max.String());
+            lcdhelper.Show(Serial);
+            lcdhelper.Show(10000);
+            buttonPanel.returncode = ButtonPanel<DialogOk>::IDABORT;
+        }
+
+        std::pair<double, double> dbout_min{ DBOUT_MIN ,DBOUT_MIN };
+        dBMeter::Measurement m_min(dbout_min);
+        SignalGenerator::Get().setFreq((*ptr)->Frequency, dbout_min);
+        delay(1000); //Setteling time
+        dBMeter::Get().GetdB(m_min);
+        if (m_min.dBIn.first > (*ptr)->Level || m_min.dBIn.second > (*ptr)->Level) {
+            sf_line.clear();
+            sf_line.print(F("!! Device Min Level > Level: ")); sf_line.print((*ptr)->Level);
+            lcdhelper.Line(2, sf_line);
+            lcdhelper.Line(3, m_min.String());
+            lcdhelper.Show(Serial);
+            lcdhelper.Show(10000);
+            buttonPanel.returncode = ButtonPanel<DialogOk>::IDABORT;
+        }
+        
+        if (buttonPanel.returncode != ButtonPanel<DialogOk>::IDABORT) {
+            lcdhelper.Line(3, "Ok");
+            lcdhelper.Show(Serial);
+            lcdhelper.Show(1000);
+        }
+
+        ptr++;
+        if (ptr == tapeInfo->RecordSteps.end()) {
+            buttonPanel.returncode = ButtonPanel<DialogOk>::IDOK;
+        }
     }
 };
 
@@ -137,7 +212,7 @@ public:
     }
 };
 
-class RewindTape: public DialogOk
+class RewindTape : public DialogOk
 {
 public:
     TapeInfo* tapeInfo;
@@ -190,7 +265,7 @@ public:
         uint32_t f((*ptr)->Frequency);
         SignalGenerator::Get().setFreq(f, x0);
         dBMeter::Measurement m(x0);
-        delay(tapeInfo->Pause*1000); //Setteling time //Blank space
+        delay(tapeInfo->Pause * 1000); //Setteling time //Blank space
         System::OutPutOn();
         unsigned long ms = millis();
         std::pair<double, double> stdsum{ 0.0, 0.0 };
@@ -203,7 +278,7 @@ public:
 
         lcdhelper.Line(0, sf_line);
         do {
-            sf_line2 = sf_line; sf_line2.print(F(" ")); sf_line2.print((*ptr)->Time - (millis() - ms) / 1000.0,0,3); sf_line2.print(F("s ")); sf_line2.print((millis() - ms_progress) / (tapeInfo->Length * 10.0),0,3); sf_line2.print(F("%"));
+            sf_line2 = sf_line; sf_line2.print(F(" ")); sf_line2.print((*ptr)->Time - (millis() - ms) / 1000.0, 0, 3); sf_line2.print(F("s ")); sf_line2.print((millis() - ms_progress) / (tapeInfo->Length * 10.0), 0, 3); sf_line2.print(F("%"));
             lcdhelper.Line(0, sf_line2);
             lcdhelper.Show();
 
@@ -220,8 +295,8 @@ public:
             lcdhelper.Line(3, VUMeter[2].c_str());
             lcdhelper.Show();
             lcdhelper.Show(Serial);
-         } while (millis() < (*ptr)->Time*1000.0 + ms);
-            //} while (millis() - ms < 20000);
+        } while (millis() < (*ptr)->Time * 1000.0 + ms);
+        //} while (millis() - ms < 20000);
         System::PopRelayStack();
 
         Beep();
@@ -255,10 +330,13 @@ void NewTestTape()
         }
         tapeInfo = std::shared_ptr<TapeInfo>(TapeInfo::Get((TapeInfo::Tapes)selectTape.Current));
     }
-    if (StartRecording(tapeInfo.get()).Execute()!= ButtonPanel<DialogOk>::IDOK) {
+    if (StartRecording(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
         return;
     }
     if (AmplificationAdjustment(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
+        return;
+    }
+    if (ValidateTapeRecorder(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
         return;
     }
     if (RecordLevelAdjustment(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
@@ -270,7 +348,7 @@ void NewTestTape()
     if (RecordTestTape(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
         return;
     }
-//    if (!PrintProgress(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
-//           return;
-//    }
+    //    if (!PrintProgress(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
+    //           return;
+    //    }
 }
