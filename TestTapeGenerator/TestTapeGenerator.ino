@@ -91,16 +91,17 @@ void setup()
     System::OutPutOff();
     System::SetupDevice();
 
-    Serial.setTimeout(500);
-    Serial.println("Prompt>");
-    String str(Serial.readString());
-    str.trim();
-    if (str.length()) {
-        MatchState ms(const_cast<char*>(str.c_str()));
-        if (REGEXP_MATCHED == ms.Match("RVSweep")) {
-            //InputHardwareCalibration();
-        }
-    }
+    //Serial.setTimeout(500);
+    //Serial.println("Prompt>");
+    //String str(Serial.readString());
+    //str.trim();
+    //if (str.length()) {
+    //    MatchState ms(const_cast<char*>(str.c_str()));
+    //    if (REGEXP_MATCHED == ms.Match("RVSweep")) {
+    //        InputHardwareCalibration();
+    //    }
+    //}
+
     do {
         MainMenu mainMenu;
         if (mainMenu.Execute() == ButtonPanel<BasePanel>::IDOK) {

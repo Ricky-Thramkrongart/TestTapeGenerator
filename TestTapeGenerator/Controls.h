@@ -5,7 +5,7 @@
 #include "Timer.h"
 #include "Button.h"
 
-std::string StatusControl(double treshhold, double LeftLevelDiff, double RightLevelDiff)
+String StatusControl(double treshhold, double LeftLevelDiff, double RightLevelDiff)
 {
     char stringbuffer[] = "=:=";
     if (LeftLevelDiff < -treshhold)
@@ -49,15 +49,16 @@ void GetCaret(double min_val, double max_val, double value, char& caret, int& in
 
 }
 
-std::vector<std::string> GetVUMeterStrings(double left, double right)
+void GetVUMeterStrings(double left, double right, LCD_Helper & lcdhelper)
 {
-    std::vector<std::string> strs(3);
+    char strs[3][41] = {
+        {"   -2   .   1   .   0   .   1   .   2+  "},
+        {"L                                       "},
+        {"R                                       "} };
+    
     double min_val = -2.0;
     double max_val = 2.0;
     //         1234567890123456789012345678901234567890
-    strs[0] = "   -2   .   1   .   0   .   1   .   2+  ";
-    strs[1] = "L                                       ";
-    strs[2] = "R                                       ";
 
     char caret;
     int index;
@@ -65,7 +66,10 @@ std::vector<std::string> GetVUMeterStrings(double left, double right)
     strs[1][index] = caret;
     GetCaret(min_val, max_val, right, caret, index);
     strs[2][index] = caret;
-    return strs;
+
+    lcdhelper.Line(1, strs[0]);
+    lcdhelper.Line(2, strs[1]);
+    lcdhelper.Line(3, strs[2]);
 }
 
 class BasePanel

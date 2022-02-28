@@ -398,6 +398,6 @@ std::pair<double, double>System::_5dBInputAttenuator({ 0.0, 0.0 });
 Relay System::muteRelay(Relay(28, true));
 Relay System::calibrationRelay(Relay(26));
 
-std::vector<float64_t> System::fit64;
+std::vector<float64_t> System::fit64(0);
 std::vector<float64_t> System::fit64RV45_l(0);
 std::vector<float64_t> System::fit64RV45_r(0);

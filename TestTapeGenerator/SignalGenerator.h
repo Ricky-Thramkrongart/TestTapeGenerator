@@ -42,7 +42,7 @@ public:
         //rv = fp64_round(rv);
         rv = fp64_fmin(rv, fp64_sd(255));
         rv = fp64_fmax(rv, fp64_sd(0));
-        return atoi(fp64_to_string(rv, 15, 2));
+        return fp64_to_uint16(rv);
     }
 
     SignalGenerator() : potentio(AD5254_ASUKIAAA_ADDR_A0_GND_A1_GND)

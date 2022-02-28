@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ArduinoSTL.h>
+//#include <ArduinoSTL.h>
 #include <SafeString.h>
 
 const char* TAPELIST_VERSION = "TapeList: " __DATE__ " " __TIME__;
@@ -18,7 +18,7 @@ public:
     {
     }
 
-    std::string ToString()
+    String ToString()
     {
         cSF(sf_line, 100);
         sf_line.print(Frequency);
@@ -30,7 +30,7 @@ public:
         return sf_line.c_str();
     }
 
-    std::string ToStringExt()
+    String ToStringExt()
     {
         cSF(sf_line, 100);
         sf_line = ToString().c_str();
@@ -85,22 +85,23 @@ public:
         }
     }
 
-    std::vector<std::string> ToString()
+    String ToString0()
+    {
+        return Description;
+    }
+    String ToString1()
     {
         cSF(sf_line, 41);
-        std::vector<std::string> Result(2);
         char format = 'R';
         if (Format == TapeFormat::Cassette) {
             format = 'C';
         }
         sf_line.print(F("Track:")); sf_line.print(Tracks);
         sf_line.print(F(" Tracks:"));  sf_line.print(RecordSteps.size()); sf_line.print(F(" "));
-        sf_line.print((Length % 60) ? Length / 60 + 1 : Length / 60); sf_line.print(F("[Min] ")); 
-        sf_line.print(Flux); sf_line.print(F("[nW/m] ")); 
+        sf_line.print((Length % 60) ? Length / 60 + 1 : Length / 60); sf_line.print(F("[Min] "));
+        sf_line.print(Flux); sf_line.print(F("[nW/m] "));
         sf_line.print(format);
-        Result[0] = String(Description).c_str();
-        Result[1] = sf_line.c_str();
-        return Result;
+        return sf_line.c_str();
     }
 
 

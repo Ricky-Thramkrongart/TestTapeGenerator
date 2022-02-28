@@ -17,7 +17,7 @@ public:
     }
     void FullUpdate() {
         lcdhelper.Line(0, F("Amplification Adjustment"));
-        lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
+        lcdhelper.Line(1, tapeInfo->ToString0());
         lcdhelper.Line(2, F("Start recording"));
     }
     void Update() {
@@ -53,7 +53,7 @@ public:
         //Serial.println(m.ToString().c_str());
 
         constexpr double std_dev = 1.0;
-        std::string statuscontrol = StatusControl(std_dev, m.dBIn.first - Target, m.dBIn.second - Target);
+        String statuscontrol = StatusControl(std_dev, m.dBIn.first - Target, m.dBIn.second - Target);
         if (fabs(m.dBIn.first - Target) < std_dev && fabs(m.dBIn.second - Target) < std_dev) {
             manual_calibration_ok_count++;
             Beep();
@@ -84,7 +84,7 @@ public:
         sf_line.print(Target, 1, 4);
         sf_line.print(F(" dBm  Actuel (L:R):        "));
         lcdhelper.Line(0, F("Amplification Adjustment"));
-        lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
+        lcdhelper.Line(1, tapeInfo->ToString0());
         lcdhelper.Line(2, sf_line);
     }
 };
@@ -106,7 +106,7 @@ public:
     }
     void Update() {
         lcdhelper.Line(0, F("Validate Tape Recorder"));
-        lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
+        lcdhelper.Line(1, tapeInfo->ToString0());
         lcdhelper.Line(3, "");
 
         cSF(sf_line, 41);
@@ -150,7 +150,7 @@ public:
             lcdhelper.Show(10000);
             buttonPanel.returncode = ButtonPanel<DialogOk>::IDABORT;
         }
-        
+
         if (buttonPanel.returncode != ButtonPanel<DialogOk>::IDABORT) {
             lcdhelper.Line(3, "Ok");
             lcdhelper.Show(Serial);
@@ -179,7 +179,7 @@ public:
     }
     void FullUpdate() {
         lcdhelper.Line(0, F("Adjusting Record Level"));
-        lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
+        lcdhelper.Line(1, tapeInfo->ToString0());
         lcdhelper.Line(3, "");
         lcdhelper.Show();
 
@@ -221,7 +221,7 @@ public:
     }
     void FullUpdate() {
         lcdhelper.Line(0, F("Record Test Tape"));
-        lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
+        lcdhelper.Line(1, tapeInfo->ToString0());
         lcdhelper.Line(2, F("Rewind Tape and Start Recording"));
     }
     void Update() {
@@ -246,7 +246,7 @@ public:
     }
     void FullUpdate() {
         lcdhelper.Line(0, F("Recording Test Tape"));
-        lcdhelper.Line(1, tapeInfo->ToString()[0].c_str());
+        lcdhelper.Line(1, tapeInfo->ToString0());
 
         cSF(sf_line, 41);
         cSF(sf_line2, 41);
@@ -289,10 +289,7 @@ public:
             stdsum.second += square(m.dBIn.second - (*ptr)->Level);
             std.first = sqrt(stdsum.first / count);
             std.second = sqrt(stdsum.second / count);
-            std::vector<std::string> VUMeter(GetVUMeterStrings(std.first, std.second));
-            lcdhelper.Line(1, VUMeter[0].c_str());
-            lcdhelper.Line(2, VUMeter[1].c_str());
-            lcdhelper.Line(3, VUMeter[2].c_str());
+            GetVUMeterStrings(std.first, std.second, lcdhelper);
             lcdhelper.Show();
             lcdhelper.Show(Serial);
         } while (millis() < (*ptr)->Time * 1000.0 + ms);
@@ -313,9 +310,8 @@ public:
     SelectTape() : Menu(TapeInfo::Tapes::LAST_TAPE) {}
     void FullUpdate() {
         std::shared_ptr<TapeInfo> tapeInfo(TapeInfo::Get(Current));
-        std::vector<std::string> strs = tapeInfo->ToString();
-        lcdhelper.Line(0, strs[0].c_str());
-        lcdhelper.Line(1, strs[1].c_str());
+        lcdhelper.Line(0, tapeInfo->ToString0());
+        lcdhelper.Line(1, tapeInfo->ToString1());
     }
 };
 
@@ -348,7 +344,7 @@ void NewTestTape()
     if (RecordTestTape(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
         return;
     }
-    //    if (!PrintProgress(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
-    //           return;
-    //    }
+    if (!PrintProgress(tapeInfo.get()).Execute()) {
+        return;
+    }
 }

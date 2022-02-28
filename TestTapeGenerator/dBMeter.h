@@ -34,7 +34,7 @@ public:
         Measurement(const std::pair<double, double>& dB_, const uint8_t RV_ = 45) : dBOut(dB_), RV(RV_) {
         }
 
-        std::string ToString(void) {
+        String ToString(void) {
             int bitsLeft = ceil(log(Raw.first) / log(2));
             int bitsRight = ceil(log(Raw.second) / log(2));
             cSF(sf_line, 41);
@@ -46,7 +46,7 @@ public:
             return sf_line.c_str();
         }
 
-        std::string ToStringData(const uint8_t decs = 1) {
+        String ToStringData(const uint8_t decs = 1) {
             cSF(sf_line, 41);
             sf_line.print(RV);
             sf_line.print(F(","));
@@ -137,12 +137,12 @@ public:
         }
         float64_t dBLeftMean64 = fp64_div(dBLeftSum64, fp64_sd(buffer.size()));
         float64_t dBRightMean64 = fp64_div(dBRightSum64, fp64_sd(buffer.size()));
-        m.Raw.first = atoi(fp64_to_string(dBLeftMean64, 15, 2));
-        m.Raw.second = atoi(fp64_to_string(dBRightMean64, 15, 2));
+        m.Raw.first = fp64_ds(dBLeftMean64);
+        m.Raw.second = fp64_ds(dBRightMean64);
 
         //Standard Deviation
-        double dBLeftMean = atof(fp64_to_string(dBLeftMean64, 15, 2));
-        double dBRightMean = atof(fp64_to_string(dBRightMean64, 15, 2));
+        double dBLeftMean = fp64_ds(dBLeftMean64);
+        double dBRightMean = fp64_ds(dBRightMean64);
         double dBLeftSum = 0.0;
         double dBRightSum = 0.0;
         for (index_t i = 0; i < buffer.size(); i++) {
@@ -164,11 +164,11 @@ public:
         buffer1.clear();
         int counter = 0;
         do {
-            (this->*GetRawInput)(m); 
+            (this->*GetRawInput)(m);
             m.dBIn.first = PolyVal(System::fit64RV45_l, m.Raw.first, -System::_5dBInputAttenuator.first);
             m.dBIn.second = PolyVal(System::fit64RV45_r, m.Raw.second, -System::_5dBInputAttenuator.second);
 
-            std::pair<double, double> Std;    
+            std::pair<double, double> Std;
             Std.first = PolyVal(System::fit64RV45_l, m.Raw.first + m.Std.first, -System::_5dBInputAttenuator.first) - m.dBIn.first;
             Std.second = PolyVal(System::fit64RV45_r, m.Raw.second + m.Std.second, -System::_5dBInputAttenuator.second) - m.dBIn.second;
 
@@ -342,12 +342,17 @@ public:
 Relay dBMeter::inputpregainRelay(Relay(30));
 
 void System::SetupDevice() {
+    
+    System::fit64.reserve(10);
+    System::fit64RV45_l.reserve(20);
+    System::fit64RV45_r.reserve(20);
+    
     System::Device2();
     Serial.print("System::Device2(): ");
 
     LCD_Helper lcdhelper;
     lcdhelper.Line(0, F("Setting System Paramaters"));
-    lcdhelper.Show();
+    lcdhelper.Show(100);
 
     System::InternalMeasurementOn();
     std::pair<double, double> dB({ -2, -2 });

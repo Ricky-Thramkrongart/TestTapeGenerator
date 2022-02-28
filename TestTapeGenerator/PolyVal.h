@@ -1,7 +1,6 @@
 #pragma once
 
 #include <fp64lib.h>
-#include <ArduinoSTL.h>
 
 double PolyVal(const std::vector <float64_t>& fit64, uint16_t v, double offset)
 {
@@ -15,5 +14,5 @@ double PolyVal(const std::vector <float64_t>& fit64, uint16_t v, double offset)
     y = fp64_fmax(y, fp64_sd(-29.2));
     y = fp64_fmin(y, fp64_sd(0));
 
-    return atof(fp64_to_string(y, 15, 2)) + offset;
+    return fp64_ds(y) + offset;
 }

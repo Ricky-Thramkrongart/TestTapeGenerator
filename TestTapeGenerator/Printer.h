@@ -20,7 +20,7 @@ class PrintProgress : public Dialog
 public:
     SoftwareSerial mySerial;
     Adafruit_Thermal printer;
-    std::shared_ptr<TapeInfo> tapeInfo;
+    TapeInfo* tapeInfo;
     void Print(void) {
         RTC_Helper rtchelper;
         printer.justify('C');
@@ -31,8 +31,8 @@ public:
         printer.setSize('S');
         ///////tapeInfo.printlnExt(printer);
 
-        //printer.println(tapeInfo->ToString()[0].c_str());
-        //printer.println(tapeInfo->ToString()[1].c_str());
+        printer.println(tapeInfo->ToString0());
+        printer.println(tapeInfo->ToString1());
         for (std::vector<RecordStep*>::iterator ptr = tapeInfo->RecordSteps.begin(); ptr != tapeInfo->RecordSteps.end(); ptr++)
         {
             if ((*ptr)->Comment) {
@@ -51,22 +51,20 @@ public:
         printer.printBitmap(adaqrcode_width, adaqrcode_height, adaqrcode_data);
         printer.feed(2);
     }
-    PrintProgress(TapeInfo::Tapes Tape) : Dialog(1000), tapeInfo(TapeInfo::Get(Tape)), mySerial(RX_PIN, TX_PIN), printer(&mySerial)
+    PrintProgress(TapeInfo* tapeInfo_) : Dialog(1000), tapeInfo(tapeInfo_), mySerial(RX_PIN, TX_PIN), printer(&mySerial)
     {
         mySerial.begin(9600);  // Initialize SoftwareSerial til 9600 ( printer)
         printer.begin();        // Init printer (same regardless of serial type)
     }
     void FullUpdate() {
-/*
-        lcdhelper.line[0] = "Printing";
-        lcdhelper.line[1] = tapeInfo->ToString()[0];
-        lcdhelper.line[2] = tapeInfo->ToString()[1];
+        lcdhelper.Line(0, F("Printing"));
+        lcdhelper.Line(1, tapeInfo->ToString0());
+        lcdhelper.Line(2, tapeInfo->ToString1());
         lcdhelper.Show();
         if (!finished) {
             Print();
-            lcdhelper.line[0] = "Finished Printing";
+            lcdhelper.Line(0, F("Finished Printing"));
             finished = true;
         }
-*/
     }
 };
