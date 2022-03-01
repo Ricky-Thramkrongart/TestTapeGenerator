@@ -108,7 +108,7 @@ void setup()
             switch (mainMenu.Current)
             {
             case 0:
-                //NewTestTape();
+                //NewTestTape(); 
                 break;
             case 1:
                 Tests();
@@ -120,16 +120,16 @@ void setup()
                 dBMeterOkDialog().Execute();
                 break;
             case 4:
-                //OutputHardwareCalibration();
+                OutputHardwareCalibration();
                 break;
             case 5:
-                //InputHardwareCalibration();
+                InputHardwareCalibration();
                 break;
             case 6:
-                //dBMeterScan();
+                dBMeterScan();
                 break;
             case 7:
-                //SetDateTime();
+                SetDateTime();
                 break;
 
             };

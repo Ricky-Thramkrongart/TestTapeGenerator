@@ -77,6 +77,11 @@ void FrequencyResponseTest_3()
     FrequencyResponseTest(F("Frequency Response Test #3"), std::vector<uint32_t>{ 20, 315, 500, 1000, 5000, 10000, 15000, 18000, 20000, 22000 }, std::vector<std::pair<double, double>> { { -12.0, -12.0} }, 20000);
 }
 
+void AttenuatorTest_1()
+{
+    FrequencyResponseTest(F("Attenuator Test #1"), std::vector<uint32_t>{ 1000 }, std::vector<std::pair<double, double>> { { 0.0, 0.0}, { -9.0, -9.0 }, { -11.0, -11.0 }, { -21.0, -21.0 }, { -31.0, -31.0 }, { -35.0, -35.0 }, { -23.0, -32.0 } }, 2000);
+}
+
 void FinddBTest()
 {
     LCD_Helper lcdHelper;
@@ -111,7 +116,7 @@ void FinddBTest()
 class TestMenu : public Menu
 {
 public:
-    TestMenu() : Menu(5) {}
+    TestMenu() : Menu(6) {}
     void FullUpdate() {
         const __FlashStringHelper* str = 0;
         switch (Current) {
@@ -128,6 +133,9 @@ public:
             str = F("Frequency Response Test #3");
             break;
         case 4:
+            str = F("Attenuator Test #1");
+            break;
+        case 5:
             str = F("FinddB Test");
             break;
         }
@@ -156,6 +164,9 @@ void Tests()
             FrequencyResponseTest_3();
             break;
         case 4:
+            AttenuatorTest_1();
+            break;
+        case 5:
             FinddBTest();
             break;
         };

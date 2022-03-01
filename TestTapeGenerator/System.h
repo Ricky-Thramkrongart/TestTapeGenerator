@@ -11,7 +11,7 @@
 //constexpr double SkinnersKonstant = 2.0;
 
 constexpr int8_t DBIN_MAX = 5;
-constexpr int8_t DBIN_MIN_NOPREGAIN = -32 + 5;
+constexpr int8_t DBIN_MIN_NOPREGAIN = -28 + 5;
 constexpr int8_t DBIN_MIN = DBIN_MIN_NOPREGAIN - 12;
 constexpr int8_t DBIN_HEADROOM = 2;
 constexpr int8_t DBIN_MAX_SERVICE = DBIN_MAX - DBIN_HEADROOM;
