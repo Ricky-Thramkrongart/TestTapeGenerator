@@ -339,7 +339,7 @@ public:
         }
     }
 };
-Relay dBMeter::inputpregainRelay(Relay(30));
+Relay dBMeter::inputpregainRelay(Relay(30, false, 2000));
 
 void System::SetupDevice() {
     
