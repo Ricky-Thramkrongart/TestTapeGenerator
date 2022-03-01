@@ -179,17 +179,18 @@ public:
                 if (m.dBIn.first < DBIN_MIN_NOPREGAIN) {
                     m.Raw.first = n.Raw.first;
                     m.dBIn.first = PolyVal(System::fit64RV45_l, m.Raw.first, -System::_5dBInputAttenuator.first - 12.0);
-                    Std.first = PolyVal(System::fit64RV45_l, m.Raw.first + m.Std.first, -System::_5dBInputAttenuator.first) - m.dBIn.first;
+                    Std.first = PolyVal(System::fit64RV45_l, m.Raw.first + m.Std.first, -System::_5dBInputAttenuator.first - 12.0) - m.dBIn.first;
                 }
                 if (m.dBIn.second < DBIN_MIN_NOPREGAIN) {
                     m.Raw.second = n.Raw.second;
                     m.dBIn.second = PolyVal(System::fit64RV45_r, m.Raw.second, -System::_5dBInputAttenuator.second - 12.0);
-                    Std.second = PolyVal(System::fit64RV45_r, m.Raw.second + m.Std.second, -System::_5dBInputAttenuator.second) - m.dBIn.second;
+                    Std.second = PolyVal(System::fit64RV45_r, m.Raw.second + m.Std.second, -System::_5dBInputAttenuator.second - 12.0) - m.dBIn.second;
                 }
                 inputpregainRelay.Disable();
             }
             m.Std.first = Std.first;
             m.Std.second = Std.second;
+            Serial.println(m.String(3));
             if (m.Std.first < .4 && m.Std.second < .4) {
                 buffer1.push(m);
                 Serial.println(m.String(2));

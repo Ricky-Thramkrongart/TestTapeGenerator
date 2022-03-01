@@ -103,37 +103,37 @@ void setup()
     //}
 
     do {
-        MainMenu mainMenu;
-        if (mainMenu.Execute() == ButtonPanel<BasePanel>::IDOK) {
-            switch (mainMenu.Current)
-            {
-            case 0:
-                //NewTestTape(); 
-                break;
-            case 1:
-                Tests();
-                break;
-            case 2:
-                SignalGeneratorOkDialog().Execute();
-                break;
-            case 3:
-                dBMeterOkDialog().Execute();
-                break;
-            case 4:
-                OutputHardwareCalibration();
-                break;
-            case 5:
-                InputHardwareCalibration();
-                break;
-            case 6:
-                dBMeterScan();
-                break;
-            case 7:
-                SetDateTime();
-                break;
+        //MainMenu mainMenu;
+        //if (mainMenu.Execute() == ButtonPanel<BasePanel>::IDOK) {
+        //    switch (mainMenu.Current)
+        //    {
+        //    case 0:
+                NewTestTape(); 
+        //        break;
+        //    case 1:
+        //        Tests();
+        //        break;
+        //    case 2:
+        //        SignalGeneratorOkDialog().Execute();
+        //        break;
+        //    case 3:
+        //        dBMeterOkDialog().Execute();
+        //        break;
+        //    case 4:
+        //        OutputHardwareCalibration();
+        //        break;
+        //    case 5:
+        //        InputHardwareCalibration();
+        //        break;
+        //    case 6:
+        //        dBMeterScan();
+        //        break;
+        //    case 7:
+        //        SetDateTime();
+        //        break;
 
-            };
-        }
+        //    };
+        //}
     } while (1);
 }
 
