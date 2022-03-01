@@ -108,16 +108,16 @@ void setup()
             switch (mainMenu.Current)
             {
             case 0:
-                NewTestTape();
+                //NewTestTape();
                 break;
             case 1:
-                //Tests();
+                Tests();
                 break;
             case 2:
-                //SignalGeneratorOkDialog().Execute();
+                SignalGeneratorOkDialog().Execute();
                 break;
             case 3:
-                //dBMeterOkDialog().Execute();
+                dBMeterOkDialog().Execute();
                 break;
             case 4:
                 //OutputHardwareCalibration();

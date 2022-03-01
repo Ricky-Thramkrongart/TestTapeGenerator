@@ -91,25 +91,25 @@ public:
 
         double dBdiff;
         const double dBMax(std::max(dB.first, dB.second));
-        if (dBMax > -5) {
-            digitalWrite(7, LOW);  // -5 db att OFF
+        if (dBMax > -10) {
             digitalWrite(10, LOW);  // -10 db att OFF
+            digitalWrite(7, LOW);  // -20 db att OFF
             dBdiff = 0;
         }
-        else if (dBMax <= -5 && dBMax > -10) {
-            digitalWrite(7, HIGH);  // -5 db att ON
-            digitalWrite(10, LOW);  // -10 db att OFF
-            dBdiff = 5;  // beregn rest att fra digi-pot
+        else if (dBMax <= -10 && dBMax > -20) {
+            digitalWrite(10, HIGH);  // -10 db att ON
+            digitalWrite(7, LOW);  // -20 db att ON
+            dBdiff = 10;  // beregn rest att fra digi-pot
         }
-        else if (dBMax <= -10 && dBMax > -15) {
-            digitalWrite(7, LOW);   // -5 db att OFF
-            digitalWrite(10, HIGH); // -10 db att ON
-            dBdiff = 10; // beregn rest att fra digi-pot
+        else if (dBMax <= -20 && dBMax > -30) {
+            digitalWrite(10, LOW); // -10 db att OFF
+            digitalWrite(7, HIGH);   // -20 db att ON
+            dBdiff = 20; // beregn rest att fra digi-pot
         }
-        else if (dBMax <= -15) {
-            digitalWrite(7, HIGH);  // -5 db att ON
+        else if (dBMax <= -30) {
             digitalWrite(10, HIGH); // -10 db att ON
-            dBdiff = 15; // beregn rest att fra digi-pot
+            digitalWrite(7, HIGH);  // -20 db att ON
+            dBdiff = 30; // beregn rest att fra digi-pot
         }
 
         std::pair<uint8_t, uint8_t>output{ OutPutFit64(dB.first + dBdiff) ,OutPutFit64(dB.second + dBdiff) };
