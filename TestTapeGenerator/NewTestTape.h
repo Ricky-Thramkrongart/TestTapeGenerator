@@ -233,10 +233,12 @@ class RecordTestTape : public Dialog
 {
 protected:
     unsigned long ms_progress;
+    double std_max;
+    std::vector<RecordStep*>::iterator ptr_std_max;
 public:
     TapeInfo* tapeInfo;
     std::vector<RecordStep*>::iterator ptr;
-    RecordTestTape(TapeInfo* tapeInfo_) : Dialog(1000), tapeInfo(tapeInfo_), ptr(tapeInfo->RecordSteps.begin()), ms_progress(millis())
+    RecordTestTape(TapeInfo* tapeInfo_) : Dialog(1000), tapeInfo(tapeInfo_), ptr(tapeInfo->RecordSteps.begin()), ms_progress(millis()), std_max(0.0), ptr_std_max(tapeInfo->RecordSteps.begin())
     {
         System::OutPutOff();
     }
@@ -270,6 +272,7 @@ public:
         unsigned long ms = millis();
         std::pair<double, double> stdsum{ 0.0, 0.0 };
         std::pair<double, double> std;
+
         uint16_t count = 0;
 
         lcdhelper.Line(1, F(""));
@@ -284,7 +287,11 @@ public:
 
             dBMeter::Get().GetdB(m);
             count++;
-
+            double std_max_ = std::max(fabs(m.dBIn.first - (*ptr)->Level), fabs(m.dBIn.second - (*ptr)->Level));
+            if (std_max_> std_max) {
+                std_max = std_max_;
+                ptr_std_max = ptr;
+            }
             stdsum.first += square(m.dBIn.first - (*ptr)->Level);
             stdsum.second += square(m.dBIn.second - (*ptr)->Level);
             std.first = sqrt(stdsum.first / count);
@@ -299,6 +306,13 @@ public:
         Beep();
         ptr++;
         if (ptr == tapeInfo->RecordSteps.end()) {
+            sf_line.clear();
+            sf_line.print(F("Std Max: ")); sf_line.print(std_max);
+            lcdhelper.Line(1, (*ptr)->ToString().c_str());
+            lcdhelper.Line(2, sf_line);
+            lcdhelper.Line(3, F(""));
+            lcdhelper.Show(Serial);
+            lcdhelper.Show(10000);
             finished = true;
         }
     }
@@ -332,9 +346,9 @@ void NewTestTape()
     if (AmplificationAdjustment(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
         return;
     }
-    if (ValidateTapeRecorder(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
-        return;
-    }
+    //if (ValidateTapeRecorder(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
+    //    return;
+    //}
     if (RecordLevelAdjustment(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
         return;
     }

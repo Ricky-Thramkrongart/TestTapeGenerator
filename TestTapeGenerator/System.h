@@ -18,8 +18,8 @@ constexpr int8_t DBIN_MAX_SERVICE = DBIN_MAX - DBIN_HEADROOM;
 constexpr int8_t DBIN_MIN_SERVICE = DBIN_MIN + DBIN_HEADROOM;
 
 constexpr int8_t DBOUT_MAX = 0;
-constexpr int8_t DBOUT_MIN = -31;
-constexpr int8_t DBOUT_HEADROOM = 1;
+constexpr int8_t DBOUT_MIN = -16 -10 -20;
+constexpr int8_t DBOUT_HEADROOM = 5;
 constexpr int8_t DBOUT_MAX_SERVICE = DBOUT_MAX - DBOUT_HEADROOM;
 constexpr int8_t DBOUT_MIN_SERVICE = DBOUT_MIN + DBOUT_HEADROOM;
 

@@ -91,23 +91,23 @@ void setup()
     System::OutPutOff();
     System::SetupDevice();
 
-    //Serial.setTimeout(500);
-    //Serial.println("Prompt>");
-    //String str(Serial.readString());
-    //str.trim();
-    //if (str.length()) {
-    //    MatchState ms(const_cast<char*>(str.c_str()));
-    //    if (REGEXP_MATCHED == ms.Match("RVSweep")) {
-    //        InputHardwareCalibration();
-    //    }
-    //}
+//    serial.settimeout(500);
+//    serial.println("prompt>");
+//    string str(serial.readstring());
+//    str.trim();
+//    if (str.length()) {
+//        matchstate ms(const_cast<char*>(str.c_str()));
+//        if (regexp_matched == ms.match("rvsweep")) {
+//            inputhardwarecalibration();
+//        }
+//    }
 
     do {
-        //MainMenu mainMenu;
-        //if (mainMenu.Execute() == ButtonPanel<BasePanel>::IDOK) {
-        //    switch (mainMenu.Current)
-        //    {
-        //    case 0:
+    //    MainMenu mainMenu;
+    //    if (mainMenu.Execute() == ButtonPanel<BasePanel>::IDOK) {
+    //        switch (mainMenu.Current)
+    //        {
+    //        case 0:
                 NewTestTape(); 
         //        break;
         //    case 1:

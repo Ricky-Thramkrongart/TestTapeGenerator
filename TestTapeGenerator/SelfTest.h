@@ -3,6 +3,7 @@
 #include <Wire.h>
 #include "dBMeter.h"
 #include "findDb.h"
+#include "NewTestTape.h"
 
 
 void SelfTest()
@@ -116,26 +117,29 @@ void FinddBTest()
 class TestMenu : public Menu
 {
 public:
-    TestMenu() : Menu(6) {}
+    TestMenu() : Menu(7) {}
     void FullUpdate() {
         const __FlashStringHelper* str = 0;
         switch (Current) {
         case 0:
-            str = F("SelfTest");
+            str = F("Validate Tape Recorder");
             break;
         case 1:
-            str = F("Frequency Response Test #1");
+            str = F("SelfTest");
             break;
         case 2:
-            str = F("Frequency Response Test #2");
+            str = F("Frequency Response Test #1");
             break;
         case 3:
-            str = F("Frequency Response Test #3");
+            str = F("Frequency Response Test #2");
             break;
         case 4:
-            str = F("Attenuator Test #1");
+            str = F("Frequency Response Test #3");
             break;
         case 5:
+            str = F("Attenuator Test #1");
+            break;
+        case 6:
             str = F("FinddB Test");
             break;
         }
@@ -152,21 +156,38 @@ void Tests()
         switch (testMenu.Current)
         {
         case 0:
-            SelfTest();
+            std::shared_ptr<TapeInfo> tapeInfo;
+            {
+                SelectTape selectTape;
+                if (selectTape.Execute() != ButtonPanel<BasePanel>::IDOK) {
+                    return;
+                }
+                tapeInfo = std::shared_ptr<TapeInfo>(TapeInfo::Get((TapeInfo::Tapes)selectTape.Current));
+            }
+            if (StartRecording(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
+                return;
+            }
+            if (AmplificationAdjustment(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
+                return;
+            }
+            ValidateTapeRecorder(tapeInfo.get()).Execute();
             break;
         case 1:
-            FrequencyResponseTest_1();
+            SelfTest();
             break;
         case 2:
-            FrequencyResponseTest_2();
+            FrequencyResponseTest_1();
             break;
         case 3:
-            FrequencyResponseTest_3();
+            FrequencyResponseTest_2();
             break;
         case 4:
-            AttenuatorTest_1();
+            FrequencyResponseTest_3();
             break;
         case 5:
+            AttenuatorTest_1();
+            break;
+        case 6:
             FinddBTest();
             break;
         };
