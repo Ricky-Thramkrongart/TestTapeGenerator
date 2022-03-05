@@ -1,5 +1,6 @@
 #pragma once
 
+#include <MemoryFree.h>
 #include <Wire.h>
 #include "dBMeter.h"
 #include "findDb.h"
@@ -26,7 +27,7 @@ void SelfTest()
     }
     LCD_Helper().Test();
 
-    lcdHelper.Line(0, String(F("Free Memory: ")) + String(freeMemory()));
+//    lcdHelper.Line(0, String(F("Free Memory: ")) + String(freeMemory()));
     lcdHelper.Line(1, F("DISP:OK EEPROM:OK RTC:OK DATT:OK"));
     lcdHelper.Show();
     lcdHelper.Show(Serial);
@@ -91,7 +92,7 @@ void FinddBTest()
 
     System::InternalMeasurementOn();
 
-    std::vector<std::pair<double, double>> dbFinddBTest{ { DBOUT_MAX_SERVICE, DBOUT_MAX_SERVICE }, {-15,-15}, { DBOUT_MIN_SERVICE, DBOUT_MIN_SERVICE } };
+    std::vector<std::pair<double, double>> dbFinddBTest{ { DBIN_MIN_SERVICE, DBIN_MIN_SERVICE }, {-15,-15}, { DBOUT_MAX_SERVICE, DBOUT_MAX_SERVICE } };
     std::vector<uint32_t> freqTest = { 1000 };
     for (std::vector<uint32_t>::iterator f = freqTest.begin(); f != freqTest.end(); f++) {
         for (std::vector<std::pair<double, double>>::iterator d = dbFinddBTest.begin(); d != dbFinddBTest.end(); d++) {
@@ -155,7 +156,7 @@ void Tests()
     while (testMenu.Execute() == ButtonPanel<BasePanel>::IDOK) {
         switch (testMenu.Current)
         {
-        case 0:
+        case 0: {
             std::shared_ptr<TapeInfo> tapeInfo;
             {
                 SelectTape selectTape;
@@ -172,7 +173,9 @@ void Tests()
             }
             ValidateTapeRecorder(tapeInfo.get()).Execute();
             break;
+        }
         case 1:
+            Serial.println("SelfTest()");
             SelfTest();
             break;
         case 2:

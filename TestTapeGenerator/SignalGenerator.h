@@ -33,10 +33,13 @@ public:
     uint16_t OutPutFit64(const double dB)
     {
         float64_t dB64 = fp64_sd(dB);
-        float64_t rv = fp64_add(System::fit64[0], fp64_mul(System::fit64[1], dB64));
-        for (int i = System::fit64.size() - 1; i != 1; i--)
+        float64_t dB64_pow = fp64_sd(1.0);
+
+        float64_t rv = System::fit64[0];
+        for (int i = 1; i != System::fit64.size(); ++i)
         {
-            rv = fp64_add(rv, fp64_mul(System::fit64[i], fp64_pow(dB64, fp64_sd(i))));
+            dB64_pow = fp64_mul(dB64, dB64_pow);
+            rv = fp64_add(rv, fp64_mul(System::fit64[i], dB64_pow));
         }
 
         //rv = fp64_round(rv);
