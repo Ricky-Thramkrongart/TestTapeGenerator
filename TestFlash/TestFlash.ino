@@ -1,0 +1,108 @@
+#include <ArduinoSTL.h>
+#include <fp64lib.h>
+
+const std::vector <float64_t> fit64{
+(float64_t)4643170361447727206LL, //254.83884893125213
+(float64_t)4625311246433173744LL, //16.406533912931025
+(float64_t)13826466162739603870LL, //-0.54610830741448857
+(float64_t)13804946084766212980LL, //-0.020528115676117634
+(float64_t)13794443971273051489LL, //-3.8708237535246969E-3
+(float64_t)13787028885511535108LL, //-1.3040839584018702E-3
+(float64_t)13771625268806377890LL, //-1.1688793870179859E-4
+(float64_t)13750155056991901613LL, //-4.3783084399724716E-6
+(float64_t)13722620578406386687LL //-6.1623148223802267E-8
+};
+
+const std::vector <float64_t> fit64RV45_l{
+(float64_t)13852328171936497664LL, //-29.355779672332574
+(float64_t)4598729032677225461LL, //0.28074280452147998
+(float64_t)13794669453749475540LL, //-,.0309723796864878E-3
+(float64_t)4542466373570639892LL, //,.9748269797742075E-5
+(float64_t)13735106658844864340LL, //-,.3066302928320864E-7
+(float64_t)4478279631990624686LL, //,.5664114005358071E-9
+(float64_t)13666029766803593906L, //-,.0682418823283996E-11
+(float64_t)4405021524398216095LL, //,.1584024533829449E-14
+(float64_t)13588296773283881548LL, //-,.7056839408840926E-17
+(float64_t)4322959140154988601LL, //,.0244379036302585E-19
+(float64_t)13502034192772973347LL, //-,.115804991376365E-22
+(float64_t)4231737999454206243LL, //,.4506437891524204E-26
+(float64_t)13405751706773511980LL, //-,.227894224574707E-29
+(float64_t)4129886612513857885LL, //,.2560653304131632E-32
+(float64_t)13295144786331457814L //-,.6779235851105009E-36
+};
+
+const std::vector <float64_t> fit64RV45_r{
+(float64_t)13852251674767900672LL, //-29.084007135068532
+(float64_t)4598738819454652931LL, //0.28128607980332293
+(float64_t)13794839316444044651LL, //-,.1783047816673453E-3
+(float64_t)4542962144645554073LL, //,.3107745275726005E-5
+(float64_t)13735858084951937328LL, //-,.7044319616557479E-7
+(float64_t)4478984521471939029LL, //,.8579468570036992E-9
+(float64_t)13666909680314710262LL, //-,.2103995770781873E-11
+(float64_t)4405780903599719474LL, //,.6376381048261166E-14
+(float64_t)13589221222723261109LL,//-,.8451558496028697E-17
+(float64_t)4324006261809167393LL, //,.2167590034249164E-19
+(float64_t)13503007680088403932LL, //-,.3446707593535264E-22
+(float64_t)4233372120118173711LL, //,.0326522313620901E-25
+(float64_t)13407382428027780173LL, //-,.2351804072132252E-29
+(float64_t)4131051555248098586LL, //,.5748997961393054E-32
+(float64_t)13296494190582714881LL //-,.1287535929115348E-36
+};
+
+const std::pair<double, double> _5dBInputAttenuator = { -5.21, -5.20 };
+
+#include "SignalGenerator.h"
+#include "dBMeter.h"
+
+const char Flash0[] = "123456789ABCDEF0";
+const uint64_t Flash32K_1[INT16_MAX / 8] PROGMEM = { 0LL };
+const uint64_t Flash32K_2[INT16_MAX / 8] PROGMEM = { 0LL };
+const uint64_t Flash32K_3[INT16_MAX / 8] PROGMEM = { 0LL };
+const uint64_t Flash32K_4[INT16_MAX / 8] PROGMEM = { 0LL };
+const uint64_t Flash32K_5[INT16_MAX / 8] PROGMEM = { 0LL };
+const uint64_t Flash32K_6[INT16_MAX / 8] PROGMEM = { 0LL };
+const uint64_t Flash32K_7[INT16_MAX / 8] PROGMEM = { 0LL };
+const uint64_t Flash32K_8[800] PROGMEM = { 0LL };
+const char Flash9[] = "123456789ABCDEF0";
+
+uint64_t f(const uint64_t* a, size_t s)
+{
+    uint64_t r = 0;
+    for (int i = 0; i != s; ++i)
+    {
+        r += a[i];
+    }
+    return r;
+}
+
+template <class T, size_t N>
+size_t array_size(T(&array)[N]) {
+    return N;
+}
+
+void setup() {
+    signalGenerator.begin();
+    dbMeter.begin();
+
+
+    Serial.begin(115200);
+    Serial.println("Hello World");
+    delay(1000);
+    Serial.println(Flash9);
+    delay(1000);
+    int i =
+        f(Flash32K_1, array_size(Flash32K_1)) +
+        f(Flash32K_2, array_size(Flash32K_2)) +
+        f(Flash32K_3, array_size(Flash32K_3));
+
+    //    f(Flash32K_8, array_size(Flash32K_8));
+    SetupDevice();
+    Serial.println(i);
+    Serial.println(Flash0);
+    Serial.println(Flash9);
+    //splashscreen();
+}
+
+// the loop function runs over and over again until power down or reset
+void loop() {
+}
