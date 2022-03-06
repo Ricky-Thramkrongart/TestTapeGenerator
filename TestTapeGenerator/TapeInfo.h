@@ -1,6 +1,7 @@
 #pragma once
 
-//#include <ArduinoSTL.h>
+#include <ArduinoSTL.h>
+#include <limits>
 #include <SafeString.h>
 
 const char* TAPELIST_VERSION = "TapeList: " __DATE__ " " __TIME__;
@@ -13,8 +14,9 @@ public:
     int8_t Level;
     std::pair<double, double> RecordLevel;
     double e;
+    bool validated;
     const __FlashStringHelper* Comment;
-    RecordStep(uint32_t Frequency_, uint8_t Time_, int8_t Level_, const __FlashStringHelper* Comment_ = 0) : Frequency(Frequency_), Time(Time_), Level(Level_), Comment(Comment_), e(0.0)
+    RecordStep(uint32_t Frequency_, uint8_t Time_, int8_t Level_, const __FlashStringHelper* Comment_ = 0) : Frequency(Frequency_), Time(Time_), Level(Level_), Comment(Comment_), e(0.0), RecordLevel{ std::numeric_limits<double>::min() ,std::numeric_limits<double>::min() }, validated(false)
     {
     }
 
@@ -80,7 +82,9 @@ public:
     }
     ~TapeInfo() {
         std::vector<RecordStep*>::iterator ptr;
-        for (std::vector<RecordStep*>::iterator ptr = RecordSteps.begin(); ptr < RecordSteps.end(); ptr++) {
+        std::sort(RecordSteps.begin(), RecordSteps.end());
+        auto last = std::unique(RecordSteps.begin(), RecordSteps.end());
+        for (std::vector<RecordStep*>::iterator ptr = RecordSteps.begin(); ptr != last; ptr++) {
             delete* ptr;
         }
     }
@@ -166,56 +170,58 @@ public:
                 new RecordStep(12500, 20, -20)
                 });
         case PLAYBACK_EQ_TEST_TAPE:
+            RecordStep* RS10000;
+            RecordStep* RS1000;
             return new TapeInfo(F("Playback EQ Test Tape"), 2, 200, TapeInfo::Cassette, {
                 //new RecordStep(1000, 120, 0, "1 kHz Reference Level"),
                 //new RecordStep(10000, 5, -20, "Alternating 10kHz"),
                 //new RecordStep(1000, 5, -20, "Alternating 1kHz"),
-                new RecordStep(10000, 5, -20),
-                new RecordStep(1000, 5, -20),
-                new RecordStep(10000, 5, -20),
-                new RecordStep(1000, 5, -20),
-                new RecordStep(10000, 5, -20),
-                new RecordStep(1000, 5, -20),
-                new RecordStep(10000, 5, -20),
-                new RecordStep(1000, 5, -20),
-                new RecordStep(10000, 5, -20),
-                new RecordStep(1000, 5, -20),
-                new RecordStep(10000, 5, -20),
-                new RecordStep(1000, 5, -20),
-                new RecordStep(10000, 5, -20),
-                new RecordStep(1000, 5, -20),
-                new RecordStep(10000, 5, -20),
-                new RecordStep(1000, 5, -20),
-                new RecordStep(10000, 5, -20),
-                new RecordStep(1000, 5, -20),
-                new RecordStep(10000, 5, -20),
-                new RecordStep(1000, 5, -20),
-                new RecordStep(10000, 5, -20),
-                new RecordStep(1000, 5, -20),
-                new RecordStep(10000, 5, -20),
-                new RecordStep(1000, 5, -20),
-                new RecordStep(10000, 5, -20),
-                new RecordStep(1000, 5, -20),
-                new RecordStep(10000, 5, -20),
-                new RecordStep(1000, 5, -20),
-                new RecordStep(10000, 5, -20),
-                new RecordStep(1000, 5, -20),
-                new RecordStep(10000, 5, -20),
-                new RecordStep(1000, 5, -20),
-                new RecordStep(10000, 5, -20),
-                new RecordStep(1000, 5, -20),
-                new RecordStep(10000, 5, -20),
-                new RecordStep(1000, 5, -20),
-                new RecordStep(10000, 5, -20),
-                new RecordStep(1000, 5, -20),
-                new RecordStep(10000, 5, -20),
-                new RecordStep(1000, 5, -20),
-                new RecordStep(10000, 5, -20),
-                new RecordStep(1000, 5, -20),
-                new RecordStep(10000, 5, -20),
-                new RecordStep(1000, 5, -20),
-                new RecordStep(10000, 5, -20),
-                new RecordStep(1000, 5, -20),
+                RS10000 = new RecordStep(10000, 5, -20),
+                RS1000 = new RecordStep(10000, 5, -20),
+                RS10000,
+                RS1000,
+                RS10000,
+                RS1000,
+                RS10000,
+                RS1000,
+                RS10000,
+                RS1000,
+                RS10000,
+                RS1000,
+                RS10000,
+                RS1000,
+                RS10000,
+                RS1000,
+                RS10000,
+                RS1000,
+                RS10000,
+                RS1000,
+                RS10000,
+                RS1000,
+                RS10000,
+                RS1000,
+                RS10000,
+                RS1000,
+                RS10000,
+                RS1000,
+                RS10000,
+                RS1000,
+                RS10000,
+                RS1000,
+                RS10000,
+                RS1000,
+                RS10000,
+                RS1000,
+                RS10000,
+                RS1000,
+                RS10000,
+                RS1000,
+                RS10000,
+                RS1000,
+                RS10000,
+                RS1000,
+                RS10000,
+                RS1000,
                 new RecordStep(10000, 120, -20, F("Azimuth"))
                 });
         case REVOX_B215_TEST_TAPE:

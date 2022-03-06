@@ -118,7 +118,7 @@ void FinddBTest()
 class TestMenu : public Menu
 {
 public:
-    TestMenu() : Menu(7) {}
+    TestMenu() : Menu(8) {}
     void FullUpdate() {
         const __FlashStringHelper* str = 0;
         switch (Current) {
@@ -142,6 +142,9 @@ public:
             break;
         case 6:
             str = F("FinddB Test");
+            break;
+        case 7:
+            str = F("Test All Tapes");
             break;
         }
         lcdhelper.Line(0, F("== Test Menu ====================="));
@@ -192,6 +195,9 @@ void Tests()
             break;
         case 6:
             FinddBTest();
+            break;
+        case 7:
+            TestAllTestTape();
             break;
         };
     }

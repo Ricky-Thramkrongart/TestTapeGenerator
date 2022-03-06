@@ -30,6 +30,13 @@ public:
                 return true;
             return false;
         }
+
+        std::pair<double, double> dBOut;
+        std::pair<double, double> dBIn;
+        std::pair<double, double> Raw;
+        std::pair<double, double> Std;
+        uint8_t RV;
+
         Measurement() {}
         Measurement(const std::pair<double, double>& dB_, const uint8_t RV_ = 45) : dBOut(dB_), RV(RV_) {
         }
@@ -88,11 +95,6 @@ public:
             }
             return sf_line.c_str();
         }
-        std::pair<double, double> dBOut;
-        std::pair<double, double> dBIn;
-        std::pair<double, double> Raw;
-        std::pair<double, double> Std;
-        uint8_t RV;
     };
 
     // for chip info see https://www.analog.com/en/products/ad9833.html
@@ -190,7 +192,7 @@ public:
             }
             m.Std.first = Std.first;
             m.Std.second = Std.second;
-            Serial.println(m.String(3));
+            //Serial.println(m.String(3));
             if (m.Std.first < .4 && m.Std.second < .4) {
                 buffer1.push(m);
                 Serial.println(m.String(2));

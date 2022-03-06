@@ -125,7 +125,6 @@ public:
         const uint8_t rightChannelOut(0);
         potentio.writeRDAC(leftChannelOut, output.first);
         potentio.writeRDAC(rightChannelOut, output.second);
-        delay(200);
     }
 
     void ManualOutPut(const uint8_t output)
@@ -158,6 +157,8 @@ public:
         spiSend(b28);
         spiSend(f_low | freq);
         spiSend(f_high | freq);
+
+        delay(1000); //Settling Time
     }
 
     static String String(const uint32_t f, const std::pair<double, double>& dB, const uint8_t decs = 1)
