@@ -177,7 +177,7 @@ public:
                 //new RecordStep(10000, 5, -20, "Alternating 10kHz"),
                 //new RecordStep(1000, 5, -20, "Alternating 1kHz"),
                 RS10000 = new RecordStep(10000, 5, -20),
-                RS1000 = new RecordStep(10000, 5, -20),
+                RS1000 = new RecordStep(1000, 5, -20),
                 RS10000,
                 RS1000,
                 RS10000,
