@@ -9,18 +9,17 @@ const char* TAPELIST_VERSION = "TapeList: " __DATE__ " " __TIME__;
 class RecordStep
 {
 public:
-    uint32_t Frequency;
-    uint8_t Time;
-    int8_t Level;
+    const uint32_t Frequency;
+    const uint8_t Time;
+    const int8_t Level;
     std::pair<double, double> RecordLevel;
-    double e;
     bool validated;
     const __FlashStringHelper* Comment;
-    RecordStep(uint32_t Frequency_, uint8_t Time_, int8_t Level_, const __FlashStringHelper* Comment_ = 0) : Frequency(Frequency_), Time(Time_), Level(Level_), Comment(Comment_), e(0.0), RecordLevel{ std::numeric_limits<double>::min() ,std::numeric_limits<double>::min() }, validated(false)
+    RecordStep(uint32_t Frequency_, uint8_t Time_, int8_t Level_, const __FlashStringHelper* Comment_ = 0) : Frequency(Frequency_), Time(Time_), Level(Level_), Comment(Comment_), RecordLevel{ std::numeric_limits<double>::min() ,std::numeric_limits<double>::min() }, validated(false)
     {
     }
 
-    String ToString()
+    String ToString() const
     {
         cSF(sf_line, 100);
         sf_line.print(Frequency);
@@ -32,7 +31,7 @@ public:
         return sf_line.c_str();
     }
 
-    String ToStringExt()
+    String ToStringExt() const
     {
         cSF(sf_line, 100);
         sf_line = ToString().c_str();
@@ -41,7 +40,7 @@ public:
         return sf_line.c_str();
     }
 
-    void println(Stream& out)
+    void println(Stream& out) const
     {
         out.println(ToString().c_str());
     }
@@ -53,7 +52,7 @@ protected:
     int8_t MaxLevel;
 public:
     int8_t GetAmplificationAdjustment() {
-        return std::max(DBOUT_MAX_SERVICE, MaxLevel)-DBOUT_MAX_SERVICE;
+        return std::max(DBOUT_MAX_SERVICE, MaxLevel) - DBOUT_MAX_SERVICE;
     }
     enum TapeFormat { Cassette, Reel };
     const __FlashStringHelper* Description;
@@ -62,7 +61,7 @@ public:
     int8_t Pause;
     uint16_t Flux;
     TapeFormat Format;
-    std::pair<double,double> ReferenceLevel;
+    std::pair<double, double> ReferenceLevel;
 
     std::vector<RecordStep*> RecordSteps;
 
@@ -89,11 +88,11 @@ public:
         }
     }
 
-    String ToString0()
+    String ToString0()const
     {
         return Description;
     }
-    String ToString1()
+    String ToString1()const
     {
         cSF(sf_line, 41);
         char format = 'R';
@@ -256,7 +255,7 @@ public:
                 new RecordStep(1000, 4800, +2, F("Flux: 250nW/m"))
                 });
         case TEAC_MTT_MULTI_TEST_TAPE:
-            return new TapeInfo(F("Tandberg #24 Test Tape"), 2, 250, TapeInfo::Cassette, {
+            return new TapeInfo(F("TEAC MTT Multi Test Tape"), 2, 250, TapeInfo::Cassette, {
                 new RecordStep(315, 120, 0, F("MTT-212N")),
                 new RecordStep(315, 120, -4, F("MTT-212CN")),
                 new RecordStep(1000, 120, -4, F("MTT-212EN")),

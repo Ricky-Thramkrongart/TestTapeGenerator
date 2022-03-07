@@ -209,7 +209,7 @@ public:
             System::PrintRelayState();
             std::pair<double, double> x0({ (*ptr)->Level, (*ptr)->Level });
             std::pair<double, double> start_guess{ x0.first - tapeInfo->GetAmplificationAdjustment(),  x0.second - tapeInfo->GetAmplificationAdjustment() };
-            (*ptr)->RecordLevel = FinddB((*ptr)->Frequency, x0, start_guess, (*ptr)->e, lcdhelper);
+            (*ptr)->RecordLevel = FinddB((*ptr)->Frequency, x0, start_guess, lcdhelper);
             SignalGenerator::Get().setFreq((*ptr)->Frequency, (*ptr)->RecordLevel);
             delay(1000); //Setteling time
             dBMeter::Measurement m((*ptr)->RecordLevel);

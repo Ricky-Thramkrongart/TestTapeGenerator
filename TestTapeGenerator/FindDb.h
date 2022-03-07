@@ -75,15 +75,13 @@ std::pair<double, double> g(const std::pair<double, double> x0, const uint32_t T
     return g0;
 }
 
-std::pair<double, double> FinddB(const uint32_t Targetfreq, std::pair<double, double> TargetdB, std::pair<double, double> StartGuess, double& epsilon, LCD_Helper& lcdHelper)
+std::pair<double, double> FinddB(const uint32_t Targetfreq, std::pair<double, double> TargetdB, std::pair<double, double> StartGuess, LCD_Helper& lcdHelper)
 {
     dBMeter::Get().Cabling();
 
     std::pair<double, double> x0, x1, f0, f1, g0;
     
-    if (epsilon == 0.0) {
-        epsilon = 0.05 + fabs(0.01 * (TargetdB.second + TargetdB.first) / DBOUT_MAX_SERVICE) + fabs(0.1 * Targetfreq / 25000.0);
-    }
+    double epsilon = 0.05 + fabs(0.01 * (TargetdB.second + TargetdB.first) / DBOUT_MAX_SERVICE) + fabs(0.1 * Targetfreq / 25000.0);
 
     clearBestGuess = true;
 

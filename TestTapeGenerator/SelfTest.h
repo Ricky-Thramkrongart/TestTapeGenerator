@@ -100,8 +100,7 @@ void FinddBTest()
             lcdHelper.Line(2, SignalGenerator::String(*f, *d));
             lcdHelper.Line(3, F(""));
             lcdHelper.Show();
-            double e = 0.0;
-            std::pair<double, double> dbIn = FinddB(*f, *d, *d, e, lcdHelper);
+            std::pair<double, double> dbIn = FinddB(*f, *d, *d, lcdHelper);
             SignalGenerator::Get().setFreq(*f, dbIn);
             dBMeter::Measurement m(dbIn);
             dBMeter::Get().GetdB(m);
