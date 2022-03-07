@@ -250,10 +250,11 @@ protected:
     unsigned long ms_progress;
     double std_max;
     std::vector<RecordStep*>::iterator ptr_std_max;
+    bool show_status;
 public:
     TapeInfo* tapeInfo;
     std::vector<RecordStep*>::iterator ptr;
-    RecordTestTape(TapeInfo* tapeInfo_) : Dialog(1000), tapeInfo(tapeInfo_), ptr(tapeInfo->RecordSteps.begin()), ms_progress(millis()), std_max(0.0), ptr_std_max(tapeInfo->RecordSteps.begin())
+    RecordTestTape(TapeInfo* tapeInfo_) : Dialog(1000), tapeInfo(tapeInfo_), ptr(tapeInfo->RecordSteps.begin()), ms_progress(millis()), std_max(0.0), ptr_std_max(tapeInfo->RecordSteps.begin()), show_status(true)
     {
         System::OutPutOff();
     }
@@ -262,73 +263,77 @@ public:
         System::PopRelayStack();
     }
     void FullUpdate() {
-        lcdhelper.Line(0, F("Recording Test Tape"));
-        lcdhelper.Line(1, tapeInfo->ToString0());
-
-        cSF(sf_line, 41);
-        cSF(sf_line2, 41);
-        sf_line.print((*ptr)->ToString().c_str());
-        sf_line.print(F(" ("));
-        sf_line.print((ptr - tapeInfo->RecordSteps.begin()) + 1);
-        sf_line.print(F("/"));
-        sf_line.print((int)tapeInfo->RecordSteps.size());
-        sf_line.print(F(")"));
-        lcdhelper.Line(2, sf_line);
-        sf_line2.print(F("Blank Space: "));  sf_line2.print(tapeInfo->Pause); sf_line2.print(F("s"));
-        lcdhelper.Line(3, sf_line2);
-        lcdhelper.Show();
-        lcdhelper.Show(Serial);
-        std::pair<double, double> x0((*ptr)->RecordLevel);
-        uint32_t f((*ptr)->Frequency);
-        SignalGenerator::Get().setFreq(f, x0);
-        dBMeter::Measurement m(x0);
-        delay(tapeInfo->Pause * 1000); //Setteling time //Blank space
-        System::OutPutOn();
-        unsigned long ms = millis();
-        std::pair<double, double> stdsum{ 0.0, 0.0 };
-        std::pair<double, double> std;
-
-        uint16_t count = 0;
-
-        lcdhelper.Line(1, F(""));
-        lcdhelper.Line(2, F(""));
-        lcdhelper.Line(3, F(""));
-
-        lcdhelper.Line(0, sf_line);
-        do {
-            sf_line2 = sf_line; sf_line2.print(F(" ")); sf_line2.print((*ptr)->Time - (millis() - ms) / 1000.0, 0, 3); sf_line2.print(F("s ")); sf_line2.print((millis() - ms_progress) / (tapeInfo->Length * 10.0), 0, 3); sf_line2.print(F("%"));
-            lcdhelper.Line(0, sf_line2);
-            lcdhelper.Show();
-
-            dBMeter::Get().GetdB(m);
-            count++;
-            double std_max_ = std::max(fabs(m.dBIn.first - (*ptr)->Level), fabs(m.dBIn.second - (*ptr)->Level));
-            if (std_max_ > std_max) {
-                std_max = std_max_;
-                ptr_std_max = ptr;
-            }
-            stdsum.first += square(m.dBIn.first - (*ptr)->Level);
-            stdsum.second += square(m.dBIn.second - (*ptr)->Level);
-            std.first = sqrt(stdsum.first / count);
-            std.second = sqrt(stdsum.second / count);
-            GetVUMeterStrings(std.first, std.second, lcdhelper);
-            lcdhelper.Show();
-            lcdhelper.Show(Serial);
-        } while (millis() < (*ptr)->Time * 1000.0 + ms);
-        //} while (millis() - ms < 20000);
-        System::PopRelayStack();
-
-        Beep();
-        ptr++;
         if (ptr == tapeInfo->RecordSteps.end()) {
-            sf_line.clear();
-            sf_line.print(F("Std Max: ")); sf_line.print(std_max);
-            lcdhelper.Line(1, (*ptr)->ToString().c_str());
+            if (show_status) {
+                cSF(sf_line, 41);
+                sf_line.print(F("Std Max: ")); sf_line.print(std_max);
+                lcdhelper.Line(1, (*ptr_std_max)->ToString().c_str());
+                lcdhelper.Line(2, sf_line);
+                lcdhelper.Line(3, F(""));
+                lcdhelper.Show(Serial);
+                lcdhelper.Show();
+                show_status = false;
+            }
+            //finished = true;
+        } else {
+            lcdhelper.Line(0, F("Recording Test Tape"));
+            lcdhelper.Line(1, tapeInfo->ToString0());
+
+            cSF(sf_line, 41);
+            cSF(sf_line2, 41);
+            sf_line.print((*ptr)->ToString().c_str());
+            sf_line.print(F(" ("));
+            sf_line.print((ptr - tapeInfo->RecordSteps.begin()) + 1);
+            sf_line.print(F("/"));
+            sf_line.print((int)tapeInfo->RecordSteps.size());
+            sf_line.print(F(")"));
             lcdhelper.Line(2, sf_line);
-            lcdhelper.Line(3, F(""));
+            sf_line2.print(F("Blank Space: "));  sf_line2.print(tapeInfo->Pause); sf_line2.print(F("s"));
+            lcdhelper.Line(3, sf_line2);
+            lcdhelper.Show();
             lcdhelper.Show(Serial);
-            lcdhelper.Show(10000);
-            finished = true;
+            std::pair<double, double> x0((*ptr)->RecordLevel);
+            uint32_t f((*ptr)->Frequency);
+            SignalGenerator::Get().setFreq(f, x0);
+            dBMeter::Measurement m(x0);
+            delay(tapeInfo->Pause * 1000); //Setteling time //Blank space
+            System::OutPutOn();
+            unsigned long ms = millis();
+            std::pair<double, double> stdsum{ 0.0, 0.0 };
+            std::pair<double, double> std;
+
+            uint16_t count = 0;
+
+            lcdhelper.Line(1, F(""));
+            lcdhelper.Line(2, F(""));
+            lcdhelper.Line(3, F(""));
+
+            lcdhelper.Line(0, sf_line);
+            do {
+                sf_line2 = sf_line; sf_line2.print(F(" ")); sf_line2.print((*ptr)->Time - (millis() - ms) / 1000.0, 0, 3); sf_line2.print(F("s ")); sf_line2.print(std::min((millis() - ms_progress) / (tapeInfo->Length * 10.0), 100.0), 0, 3); sf_line2.print(F("%"));
+                lcdhelper.Line(0, sf_line2);
+                lcdhelper.Show();
+
+                dBMeter::Get().GetdB(m);
+                count++;
+                double std_max_ = std::max(fabs(m.dBIn.first - (*ptr)->Level), fabs(m.dBIn.second - (*ptr)->Level));
+                if (std_max_ > std_max) {
+                    std_max = std_max_;
+                    ptr_std_max = ptr;
+                }
+                stdsum.first += square(m.dBIn.first - (*ptr)->Level);
+                stdsum.second += square(m.dBIn.second - (*ptr)->Level);
+                std.first = sqrt(stdsum.first / count);
+                std.second = sqrt(stdsum.second / count);
+                GetVUMeterStrings(std.first, std.second, lcdhelper);
+                lcdhelper.Show();
+                lcdhelper.Show(Serial);
+            } while (millis() < (*ptr)->Time * 1000.0 + ms);
+            //} while (millis() - ms < 20000);
+            System::PopRelayStack();
+
+            Beep();
+            ptr++;
         }
     }
 };

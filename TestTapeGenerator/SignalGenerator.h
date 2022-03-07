@@ -158,7 +158,7 @@ public:
         spiSend(f_low | freq);
         spiSend(f_high | freq);
 
-        delay(1000); //Settling Time
+        delay(1500); //Settling Time
     }
 
     static String String(const uint32_t f, const std::pair<double, double>& dB, const uint8_t decs = 1)

@@ -78,7 +78,7 @@ public:
             Length += (*ptr)->Time;
             MaxLevel = std::max(MaxLevel, (*ptr)->Level);
         }
-        Length += (RecordSteps.size()-1) * Pause;
+        Length += RecordSteps.size() * Pause;
     }
     ~TapeInfo() {
         std::vector<RecordStep*>::iterator ptr;
