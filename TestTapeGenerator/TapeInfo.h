@@ -12,10 +12,8 @@ public:
     const uint32_t Frequency;
     const uint8_t Time;
     const int8_t Level;
-    std::pair<double, double> RecordLevel;
-    bool validated;
     const __FlashStringHelper* Comment;
-    RecordStep(uint32_t Frequency_, uint8_t Time_, int8_t Level_, const __FlashStringHelper* Comment_ = 0) : Frequency(Frequency_), Time(Time_), Level(Level_), Comment(Comment_), RecordLevel{ std::numeric_limits<double>::min() ,std::numeric_limits<double>::min() }, validated(false)
+    RecordStep(uint32_t Frequency_, uint8_t Time_, int8_t Level_, const __FlashStringHelper* Comment_ = 0) : Frequency(Frequency_), Time(Time_), Level(Level_), Comment(Comment_)
     {
     }
 
@@ -64,6 +62,7 @@ public:
     std::pair<double, double> ReferenceLevel;
 
     std::vector<RecordStep*> RecordSteps;
+    std::vector<std::pair<double, double>> RecordLevels;
 
     TapeInfo(
         const __FlashStringHelper* Description_,
@@ -72,8 +71,11 @@ public:
         TapeFormat Format_,
         std::vector<RecordStep*> RecordSteps_) : Description(Description_), Tracks(Tracks_), Flux(Flux_), Format(Format_), RecordSteps(RecordSteps_), ReferenceLevel{ 0.0, 0.0 }, Pause(5), MaxLevel(DBIN_MIN_SERVICE)
     {
+        RecordLevels.reserve(RecordSteps.size());
+
         Length = 0;
         for (std::vector<RecordStep*>::iterator ptr = RecordSteps.begin(); ptr < RecordSteps.end(); ptr++) {
+            RecordLevels.push_back({ std::numeric_limits<double>::min() ,std::numeric_limits<double>::min() });
             Length += (*ptr)->Time;
             MaxLevel = std::max(MaxLevel, (*ptr)->Level);
         }
@@ -177,50 +179,50 @@ public:
                 //new RecordStep(1000, 5, -20, "Alternating 1kHz"),
                 RS10000 = new RecordStep(10000, 5, -20),
                 RS1000 = new RecordStep(1000, 5, -20),
-                RS10000,
-                RS1000,
-                RS10000,
-                RS1000,
-                RS10000,
-                RS1000,
-                RS10000,
-                RS1000,
-                RS10000,
-                RS1000,
-                RS10000,
-                RS1000,
-                RS10000,
-                RS1000,
-                RS10000,
-                RS1000,
-                RS10000,
-                RS1000,
-                RS10000,
-                RS1000,
-                RS10000,
-                RS1000,
-                RS10000,
-                RS1000,
-                RS10000,
-                RS1000,
-                RS10000,
-                RS1000,
-                RS10000,
-                RS1000,
-                RS10000,
-                RS1000,
-                RS10000,
-                RS1000,
-                RS10000,
-                RS1000,
-                RS10000,
-                RS1000,
-                RS10000,
-                RS1000,
-                RS10000,
-                RS1000,
-                RS10000,
-                RS1000,
+                //RS10000,
+                //RS1000,
+                //RS10000,
+                //RS1000,
+                //RS10000,
+                //RS1000,
+                //RS10000,
+                //RS1000,
+                //RS10000,
+                //RS1000,
+                //RS10000,
+                //RS1000,
+                //RS10000,
+                //RS1000,
+                //RS10000,
+                //RS1000,
+                //RS10000,
+                //RS1000,
+                //RS10000,
+                //RS1000,
+                //RS10000,
+                //RS1000,
+                //RS10000,
+                //RS1000,
+                //RS10000,
+                //RS1000,
+                //RS10000,
+                //RS1000,
+                //RS10000,
+                //RS1000,
+                //RS10000,
+                //RS1000,
+                //RS10000,
+                //RS1000,
+                //RS10000,
+                //RS1000,
+                //RS10000,
+                //RS1000,
+                //RS10000,
+                //RS1000,
+                //RS10000,
+                //RS1000,
+                //RS10000,
+                //RS1000,
                 new RecordStep(10000, 120, -20, F("Azimuth"))
                 });
         case REVOX_B215_TEST_TAPE:

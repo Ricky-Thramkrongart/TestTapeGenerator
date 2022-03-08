@@ -384,7 +384,8 @@ public:
         _5dBInputAttenuator = { -5.11,-5.03 };
     }
 
-    static void SetupDevice();
+    static void SetupDevice1();
+    static void SetupDevice2();
 
     static std::vector<float64_t> fit64RV45_l;
     static std::vector<float64_t> fit64RV45_r;

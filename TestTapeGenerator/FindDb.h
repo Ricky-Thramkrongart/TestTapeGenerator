@@ -92,7 +92,7 @@ std::pair<double, double> FinddB(const uint32_t Targetfreq, std::pair<double, do
         double delta = 4*epsilon;
 
         cSF(sf_line, 41);
-        sf_line.print("-> "); sf_line.print(Targetfreq,0,5); sf_line.print("Hz "); sf_line.print(TargetdB.first,1,5); sf_line.print("dBm "); sf_line.print(TargetdB.second, 1, 5); sf_line.print("dBm e: "); sf_line.print(epsilon,2);
+        sf_line.print(F("-> ")); sf_line.print(Targetfreq,0,5); sf_line.print(F("Hz ")); sf_line.print(TargetdB.first,1,5); sf_line.print(F("dBm ")); sf_line.print(TargetdB.second, 1, 5); sf_line.print(F("dBm e: ")); sf_line.print(epsilon,2);
         lcdHelper.Line(1, sf_line);
         lcdHelper.Show(Serial);
         lcdHelper.Show();

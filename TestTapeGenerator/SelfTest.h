@@ -27,7 +27,7 @@ void SelfTest()
     }
     LCD_Helper().Test();
 
-//    lcdHelper.Line(0, String(F("Free Memory: ")) + String(freeMemory()));
+    lcdHelper.Line(0, String(F("Free Memory: ")) + String(freeMemory()));
     lcdHelper.Line(1, F("DISP:OK EEPROM:OK RTC:OK DATT:OK"));
     lcdHelper.Show();
     lcdHelper.Show(Serial);

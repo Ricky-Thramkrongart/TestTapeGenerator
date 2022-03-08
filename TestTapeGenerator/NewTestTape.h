@@ -1,12 +1,9 @@
 #pragma once
 
+#include <ArduinoSTL.h>
+#include <map>
 #include "FindDb.h"
 #include "Beep.h"
-
-//double randomDouble(double minf, double maxf)
-//{
-//    return minf + random(1UL << 31) * (maxf - minf) / (1UL << 31);  // use 1ULL<<63 for max double values)
-//}
 
 class StartRecording : public DialogOk
 {
@@ -93,9 +90,25 @@ class ValidateTapeRecorder : public DialogOk
 {
 public:
     TapeInfo* tapeInfo;
-    std::vector<RecordStep*>::iterator ptr;
-    ValidateTapeRecorder(TapeInfo* tapeInfo_) : tapeInfo(tapeInfo_), ptr(tapeInfo->RecordSteps.begin())
+    typedef std::map<uint32_t, std::pair<int8_t, int8_t> > ValidationMap;
+    ValidationMap   Validation;
+    ValidationMap::iterator ptr;
+    uint16_t v;
+
+    ValidateTapeRecorder(TapeInfo* tapeInfo_) : tapeInfo(tapeInfo_), v(0)
     {
+        for (std::vector<RecordStep*>::iterator i = tapeInfo->RecordSteps.begin(); tapeInfo->RecordSteps.end() != i; ++i) {
+            ValidationMap::iterator j = Validation.find((*i)->Frequency);
+            if (Validation.end() == j) {
+                Validation[(*i)->Frequency] = { (*i)->Level, (*i)->Level };
+            }
+            else {
+                j->second.first = std::min(j->second.first, (*i)->Level);
+                j->second.second = std::max(j->second.second, (*i)->Level);
+            }
+        }
+        ptr = Validation.begin();
+
         System::OutPutOn();
     }
     ~ValidateTapeRecorder()
@@ -105,71 +118,83 @@ public:
     void FullUpdate() {
     }
     void Update() {
-        lcdhelper.Line(0, F("Validate Tape Recorder"));
+        cSF(sf_line, 41);
+        sf_line.print(F("Validate Tape Recorder "));
+        sf_line.print(freeMemory());
+        sf_line.print(F("B"));
+        lcdhelper.Line(0, sf_line);
         lcdhelper.Line(1, tapeInfo->ToString0());
         lcdhelper.Line(3, "");
 
-        cSF(sf_line, 41);
-        sf_line.print((*ptr)->ToString().c_str());
-        sf_line.print(F(" ("));
-        sf_line.print((ptr - tapeInfo->RecordSteps.begin()) + 1);
+        uint32_t frequency(ptr->first);
+        int8_t required_min_level(ptr->second.first);
+        int8_t required_max_level(ptr->second.second);
+
+        sf_line.clear();
+        sf_line.print(frequency);
+        sf_line.print(F("Hz ["));
+        sf_line.print(required_min_level);
+        sf_line.print(F(":"));
+        sf_line.print(required_max_level);
+        sf_line.print(F("]dBm  ("));
+        sf_line.print(++v);
         sf_line.print(F("/"));
-        sf_line.print((int)tapeInfo->RecordSteps.size());
+        sf_line.print((int)Validation.size());
         sf_line.print(F(")"));
         lcdhelper.Line(2, sf_line);
         Serial.println(sf_line);
         System::PrintRelayState();
         lcdhelper.Show();
 
-        if (!(*ptr)->validated) {
+        std::pair<double, double> dbout_max{ DBOUT_MAX ,DBOUT_MAX };
+        dBMeter::Measurement m_max(dbout_max);
 
-            std::pair<double, double> dbout_max{ DBOUT_MAX ,DBOUT_MAX };
-            dBMeter::Measurement m_max(dbout_max);
-            SignalGenerator::Get().setFreq((*ptr)->Frequency, dbout_max);
-            delay(2000); //Setteling time
-            dBMeter::Get().GetdB(m_max);
-            if (m_max.dBIn.first < (*ptr)->Level || m_max.dBIn.second < (*ptr)->Level) {
-                sf_line.clear();
-                sf_line.print(F("!! Device Max Level < Level: ")); sf_line.print((*ptr)->Level);
-                lcdhelper.Line(2, sf_line);
-                lcdhelper.Line(3, m_max.String());
-                lcdhelper.Show(Serial);
-                lcdhelper.Show(10000);
-                buttonPanel.returncode = ButtonPanel<DialogOk>::IDABORT;
-            }
-
-            std::pair<double, double> dbout_min{ DBOUT_MIN ,DBOUT_MIN };
-            dBMeter::Measurement m_min(dbout_min);
-            SignalGenerator::Get().setFreq((*ptr)->Frequency, dbout_min);
-            delay(2000); //Setteling time
-            dBMeter::Get().GetdB(m_min);
-            if (m_min.dBIn.first > (*ptr)->Level || m_min.dBIn.second > (*ptr)->Level) {
-                sf_line.clear();
-                sf_line.print(F("!! Device Min Level > Level: ")); sf_line.print((*ptr)->Level);
-                lcdhelper.Line(2, sf_line);
-                lcdhelper.Line(3, m_min.String());
-                lcdhelper.Show(Serial);
-                lcdhelper.Show(10000);
-                buttonPanel.returncode = ButtonPanel<DialogOk>::IDABORT;
-            }
-            (*ptr)->validated = true;
-            if (buttonPanel.returncode != ButtonPanel<DialogOk>::IDABORT) {
-                lcdhelper.Line(3, "Ok");
-                lcdhelper.Show(Serial);
-                lcdhelper.Show(1000);
-            }
-        }
-        else {
-            if (buttonPanel.returncode != ButtonPanel<DialogOk>::IDABORT) {
-                lcdhelper.Line(3, "Ok");
-                lcdhelper.Show(Serial);
-                lcdhelper.Show(100);
-            }
+        SignalGenerator::Get().setFreq(frequency, dbout_max);
+        delay(2000); //Setteling time
+        dBMeter::Get().GetdB(m_max);
+        if (m_max.dBIn.first < required_max_level || m_max.dBIn.second < required_max_level) {
+            sf_line.clear();
+            sf_line.print(F("!! Device Max Level < Level: ")); sf_line.print(required_max_level);
+            lcdhelper.Line(2, sf_line);
+            lcdhelper.Line(3, m_max.String());
+            lcdhelper.Show(Serial);
+            lcdhelper.Show(10000);
+            buttonPanel.returncode = ButtonPanel<DialogOk>::IDABORT;
         }
 
+        std::pair<double, double> dbout_min{ DBOUT_MIN ,DBOUT_MIN };
+        dBMeter::Measurement m_min(dbout_min);
+        SignalGenerator::Get().setFreq(frequency, dbout_min);
+        delay(2000); //Setteling time
+        dBMeter::Get().GetdB(m_min);
 
+        if (m_min.dBIn.first > required_min_level || m_min.dBIn.second > required_min_level) {
+            sf_line.clear();
+            sf_line.print(F("!! Device Min Level > Level: ")); sf_line.print(required_min_level);
+            lcdhelper.Line(2, sf_line);
+            lcdhelper.Line(3, m_min.String());
+            lcdhelper.Show(Serial);
+            lcdhelper.Show(10000);
+            buttonPanel.returncode = ButtonPanel<DialogOk>::IDABORT;
+        }
+
+        if (buttonPanel.returncode != ButtonPanel<DialogOk>::IDABORT) {
+            sf_line.clear();
+            sf_line.print(F("Ok: [("));
+            sf_line.print(m_min.dBIn.first, 1, 5, true);
+            sf_line.print(F(","));
+            sf_line.print(m_min.dBIn.second, 1, 5, true);
+            sf_line.print(F("):("));
+            sf_line.print(m_max.dBIn.first, 1, 5, true);
+            sf_line.print(F(","));
+            sf_line.print(m_max.dBIn.second, 1, 5, true);
+            sf_line.print(F(")]dBm"));
+            lcdhelper.Line(3, sf_line);
+            lcdhelper.Show(Serial);
+            lcdhelper.Show(2000);
+        }
         ptr++;
-        if (ptr == tapeInfo->RecordSteps.end()) {
+        if (Validation.end() == ptr) {
             buttonPanel.returncode = ButtonPanel<DialogOk>::IDOK;
         }
     }
@@ -180,8 +205,22 @@ class RecordLevelAdjustment : public Dialog
 public:
     TapeInfo* tapeInfo;
     std::vector<RecordStep*>::iterator ptr;
-    RecordLevelAdjustment(TapeInfo* tapeInfo_) : Dialog(1000), tapeInfo(tapeInfo_), ptr(tapeInfo->RecordSteps.begin())
+    std::vector<RecordStep*> RecordSteps;
+    std::vector<std::pair<double, double>>& RecordLevels;
+
+    RecordLevelAdjustment(TapeInfo* tapeInfo_) : Dialog(1000), tapeInfo(tapeInfo_), RecordLevels(tapeInfo->RecordLevels)
     {
+        RecordSteps = tapeInfo->RecordSteps;
+        std::sort(RecordSteps.begin(), RecordSteps.end());
+        auto last = std::unique(RecordSteps.begin(), RecordSteps.end());
+        if (last == RecordSteps.end()) {
+            RecordSteps = tapeInfo->RecordSteps;
+        }
+        else {
+            RecordSteps.erase(last, RecordSteps.end());
+        }
+        ptr = RecordSteps.begin();
+
         System::OutPutOn();
     }
     ~RecordLevelAdjustment()
@@ -189,39 +228,51 @@ public:
         System::PopRelayStack();
     }
     void FullUpdate() {
-        lcdhelper.Line(0, F("Adjusting Record Level"));
+        cSF(sf_line, 41);
+        sf_line.print(F("Adjusting Record Level "));
+        sf_line.print(freeMemory());
+        sf_line.print(F("B"));
+        lcdhelper.Line(0, sf_line);
         lcdhelper.Line(1, tapeInfo->ToString0());
         lcdhelper.Line(3, "");
 
-        cSF(sf_line, 41);
+        sf_line.clear();
         sf_line.print((*ptr)->ToString().c_str());
         sf_line.print(F(" ("));
-        sf_line.print((ptr - tapeInfo->RecordSteps.begin()) + 1);
+        sf_line.print((ptr - RecordSteps.begin()) + 1);
         sf_line.print(F("/"));
-        sf_line.print((int)tapeInfo->RecordSteps.size());
+        sf_line.print((int)RecordSteps.size());
         sf_line.print(F(")"));
         lcdhelper.Line(2, sf_line);
         Serial.println(sf_line);
         lcdhelper.Show();
-
-        if ((*ptr)->RecordLevel == std::pair<double, double>{std::numeric_limits<double>::min(), std::numeric_limits<double>::min()}) {
-
+        std::pair<double, double>& RecordLevel = RecordLevels[ptr - RecordSteps.begin()];
+        if (RecordLevel.second == std::numeric_limits<double>::min()) {
             System::PrintRelayState();
             std::pair<double, double> x0({ (*ptr)->Level, (*ptr)->Level });
             std::pair<double, double> start_guess{ x0.first - tapeInfo->GetAmplificationAdjustment(),  x0.second - tapeInfo->GetAmplificationAdjustment() };
-            (*ptr)->RecordLevel = FinddB((*ptr)->Frequency, x0, start_guess, lcdhelper);
-            SignalGenerator::Get().setFreq((*ptr)->Frequency, (*ptr)->RecordLevel);
+            RecordLevel = FinddB((*ptr)->Frequency, x0, start_guess, lcdhelper);
+            SignalGenerator::Get().setFreq((*ptr)->Frequency, RecordLevel);
             delay(1000); //Setteling time
-            dBMeter::Measurement m((*ptr)->RecordLevel);
+            dBMeter::Measurement m(RecordLevel);
             dBMeter::Get().GetdB(m);
-            lcdhelper.Line(2, SignalGenerator::String((*ptr)->Frequency, (*ptr)->RecordLevel));
+            lcdhelper.Line(2, SignalGenerator::String((*ptr)->Frequency, RecordLevel));
             lcdhelper.Line(3, m.String());
             Serial.println(m.String());
             lcdhelper.Show(2000);
         }
 
         ptr++;
-        if (ptr == tapeInfo->RecordSteps.end()) {
+        if (ptr == RecordSteps.end()) {
+            //for (std::vector<RecordStep*>::iterator i = RecordSteps.begin(); RecordSteps.end() != i; ++i) {
+            //    for (std::vector<RecordStep*>::iterator j = tapeInfo->RecordSteps.begin(); tapeInfo->RecordSteps.end() != j; ++j) {
+            //        if (*i == *j) {
+            //            Serial.println(F("RecordLevels"));
+            //            delay(100);
+            //            tapeInfo->RecordLevels[j - tapeInfo->RecordSteps.begin()] = RecordLevels[i - RecordSteps.begin()];
+            //        }
+            //    }
+            //}
             finished = true;
         }
     }
@@ -275,11 +326,16 @@ public:
                 show_status = false;
             }
             //finished = true;
-        } else {
-            lcdhelper.Line(0, F("Recording Test Tape"));
+        }
+        else {
+            cSF(sf_line, 41);
+            sf_line.print(F("Recording Test Tape "));
+            sf_line.print(freeMemory());
+            sf_line.print(F("B"));
+            lcdhelper.Line(0, sf_line);
             lcdhelper.Line(1, tapeInfo->ToString0());
 
-            cSF(sf_line, 41);
+            sf_line.clear();
             cSF(sf_line2, 41);
             sf_line.print((*ptr)->ToString().c_str());
             sf_line.print(F(" ("));
@@ -292,7 +348,8 @@ public:
             lcdhelper.Line(3, sf_line2);
             lcdhelper.Show();
             lcdhelper.Show(Serial);
-            std::pair<double, double> x0((*ptr)->RecordLevel);
+            std::pair<double, double>& RecordLevel = tapeInfo->RecordLevels[ptr - tapeInfo->RecordSteps.begin()];
+            std::pair<double, double> x0(RecordLevel);
             uint32_t f((*ptr)->Frequency);
             SignalGenerator::Get().setFreq(f, x0);
             dBMeter::Measurement m(x0);
