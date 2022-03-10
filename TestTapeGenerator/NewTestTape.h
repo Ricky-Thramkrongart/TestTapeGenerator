@@ -120,8 +120,10 @@ public:
     void Update() {
         cSF(sf_line, 41);
         sf_line.print(F("Validate Tape Recorder "));
+#ifndef DEBUG
         sf_line.print(freeMemory());
         sf_line.print(F("B"));
+#endif // !DEBUG
         lcdhelper.Line(0, sf_line);
         lcdhelper.Line(1, tapeInfo->ToString0());
         lcdhelper.Line(3, "");
@@ -230,8 +232,10 @@ public:
     void FullUpdate() {
         cSF(sf_line, 41);
         sf_line.print(F("Adjusting Record Level "));
+#ifndef DEBUG
         sf_line.print(freeMemory());
         sf_line.print(F("B"));
+#endif // !DEBUG
         lcdhelper.Line(0, sf_line);
         lcdhelper.Line(1, tapeInfo->ToString0());
         lcdhelper.Line(3, "");
@@ -330,8 +334,10 @@ public:
         else {
             cSF(sf_line, 41);
             sf_line.print(F("Recording Test Tape "));
+#ifndef DEBUG
             sf_line.print(freeMemory());
             sf_line.print(F("B"));
+#endif // !DEBUG
             lcdhelper.Line(0, sf_line);
             lcdhelper.Line(1, tapeInfo->ToString0());
 
@@ -422,9 +428,9 @@ void NewTestTape()
     if (AmplificationAdjustment(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
         return;
     }
-    if (ValidateTapeRecorder(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
-        return;
-    }
+    //if (ValidateTapeRecorder(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
+    //    return;
+    //}
     if (RecordLevelAdjustment(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
         return;
     }
