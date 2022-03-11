@@ -35,9 +35,7 @@ public:
         printer.println(tapeInfo->ToString1());
         for (std::vector<RecordStep*>::iterator ptr = tapeInfo->RecordSteps.begin(); ptr != tapeInfo->RecordSteps.end(); ptr++)
         {
-            //if ((*ptr)->Comment) {
-                printer.println((*ptr)->ToStringExt().c_str());
-            //}
+            printer.println((*ptr)->ToStringExt().c_str());
         }
 
         printer.feed(4);

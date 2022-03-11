@@ -97,7 +97,7 @@ void setup()
     Serial.begin(115200);
     splashscreen();
     System::OutPutOff();
-    System::SetupDevice1();
+    System::SetupDevice();
 
     Serial.setTimeout(500);
     Serial.println("Prompt>");

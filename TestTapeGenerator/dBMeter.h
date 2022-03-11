@@ -344,35 +344,10 @@ public:
 };
 Relay dBMeter::inputpregainRelay(Relay(30, false, 2000));
 
-void System::SetupDevice1() {
+dBMeter::CirBufType dBMeter::buffer1;
+dBMeter::CirBufType dBMeter::buffer2;
 
-    System::fit64.reserve(10);
-    System::fit64RV45_l.reserve(20);
-    System::fit64RV45_r.reserve(20);
-
-    System::Device1();
-    Serial.print("System::Device1(): ");
-
-    LCD_Helper lcdhelper;
-    lcdhelper.Line(0, F("Setting System Paramaters"));
-    lcdhelper.Show(100);
-
-    System::InternalMeasurementOn();
-    std::pair<double, double> dB({ -2, -2 });
-    SignalGenerator::Get().setFreq(1000, dB);
-    dBMeter::Measurement m;
-    dBMeter::Get().GetdB(m);
-    System::_5dBInputAttenuator.first += m.dBIn.first - dB.first;
-    System::_5dBInputAttenuator.second += m.dBIn.second - dB.second;
-    System::PopRelayStack();
-}
-
-void System::SetupDevice2() {
-
-    System::fit64.reserve(10);
-    System::fit64RV45_l.reserve(20);
-    System::fit64RV45_r.reserve(20);
-
+void System::SetupDevice() {
     System::Device2();
     Serial.print("System::Device2(): ");
 
@@ -388,24 +363,19 @@ void System::SetupDevice2() {
     System::_5dBInputAttenuator.first += m.dBIn.first - dB.first;
     System::_5dBInputAttenuator.second += m.dBIn.second - dB.second;
 
-    //if (fabs(m.dBIn.first - dB.first) > MAX_DEVICE_STD_DEV || fabs(m.dBIn.second - dB.second) > MAX_DEVICE_STD_DEV) {
-    //    System::Device1();
-    //    Serial.print("System::Device1(): ");
-    //    SignalGenerator::Get().setFreq(1000, dB);
-    //    dBMeter::Get().GetdB(m);
-    //    System::_5dBInputAttenuator.first += m.dBIn.first - dB.first;
-    //    System::_5dBInputAttenuator.second += m.dBIn.second - dB.second;
-    //    delay(10);
+    if (fabs(m.dBIn.first - dB.first) > MAX_DEVICE_STD_DEV || fabs(m.dBIn.second - dB.second) > MAX_DEVICE_STD_DEV) {
+        System::Device1();
+        Serial.print("System::Device1(): ");
+        SignalGenerator::Get().setFreq(1000, dB);
+        dBMeter::Get().GetdB(m);
+        System::_5dBInputAttenuator.first += m.dBIn.first - dB.first;
+        System::_5dBInputAttenuator.second += m.dBIn.second - dB.second;
+        delay(10);
 
-    //    if (fabs(m.dBIn.first - dB.first) > MAX_DEVICE_STD_DEV || fabs(m.dBIn.second - dB.second) > MAX_DEVICE_STD_DEV) {
-    //        exit(EXIT_FAILURE);
-    //    }
-    //}
+        if (fabs(m.dBIn.first - dB.first) > MAX_DEVICE_STD_DEV || fabs(m.dBIn.second - dB.second) > MAX_DEVICE_STD_DEV) {
+            exit(EXIT_FAILURE);
+        }
+    }
 
     System::PopRelayStack();
 }
-
-
-
-dBMeter::CirBufType dBMeter::buffer1;
-dBMeter::CirBufType dBMeter::buffer2;

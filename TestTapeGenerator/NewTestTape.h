@@ -264,15 +264,6 @@ public:
 
         ptr++;
         if (ptr == RecordSteps.end()) {
-            //for (std::vector<RecordStep*>::iterator i = RecordSteps.begin(); RecordSteps.end() != i; ++i) {
-            //    for (std::vector<RecordStep*>::iterator j = tapeInfo->RecordSteps.begin(); tapeInfo->RecordSteps.end() != j; ++j) {
-            //        if (*i == *j) {
-            //            Serial.println(F("RecordLevels"));
-            //            delay(100);
-            //            tapeInfo->RecordLevels[j - tapeInfo->RecordSteps.begin()] = RecordLevels[i - RecordSteps.begin()];
-            //        }
-            //    }
-            //}
             finished = true;
         }
     }
