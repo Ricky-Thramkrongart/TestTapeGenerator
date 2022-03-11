@@ -23,14 +23,39 @@ protected:
     AD5254_asukiaaa potentio;
 
 public:
-    static SignalGenerator& Get()
+    static SignalGenerator& Get() 
     {
         static SignalGenerator* signalGenerator = new SignalGenerator();
         return *signalGenerator;
     }
 
+
+    uint16_t OutPutFit64(const double dB)
+    {
+        float64_t dB64 = fp64_sd(dB);
+        float64_t dB64_pow = fp64_sd(1.0);
+
+        float64_t rv = System::fit64[0];
+        for (int i = 1; i != System::fit64.size(); ++i)
+        {
+            dB64_pow = fp64_mul(dB64, dB64_pow);
+            rv = fp64_add(rv, fp64_mul(System::fit64[i], dB64_pow));
+        }
+
+        //rv = fp64_round(rv);
+        rv = fp64_fmin(rv, fp64_sd(255));
+        rv = fp64_fmax(rv, fp64_sd(0));
+        return fp64_to_uint16(rv);
+    }
+
     SignalGenerator() : potentio(AD5254_ASUKIAAA_ADDR_A0_GND_A1_GND)
     {
+        if (System::fit64.empty()) {
+            Serial.print("System::fit64.empty()");
+            delay(1000);
+            exit(EXIT_FAILURE);
+        }
+
         //ReadFit64FromEEPROM();
 
         potentio.begin();        // start Didital potmeter
@@ -90,7 +115,7 @@ public:
             dBdiff = 30; // beregn rest att fra digi-pot
         }
 
-        std::pair<uint8_t, uint8_t>output{ System::OutPutFit64(dB.first + dBdiff) ,System::OutPutFit64(dB.second + dBdiff) };
+        std::pair<uint8_t, uint8_t>output{ OutPutFit64(dB.first + dBdiff) ,OutPutFit64(dB.second + dBdiff) };
 
         //cSF(sf_line, 128);
         //sf_line.print(F("dBLeft: ")); sf_line.print(dB.first, 1, 5); sf_line.print(F("dBRight: ")); sf_line.print(dB.second, 1, 5); sf_line.print(F(" dBDiff: ")); sf_line.print(dBdiff, 1, 5); sf_line.print(F(" outputLeft: ")); sf_line.print(output.first); sf_line.print(F(" outputRight: ")); sf_line.print(output.second);

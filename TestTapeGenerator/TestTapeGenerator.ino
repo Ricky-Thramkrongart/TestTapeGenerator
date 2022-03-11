@@ -1,6 +1,3 @@
-#include <fp64lib.h>
-#define PROGMEM_FAR  __attribute__((section(".fini7")))
-
 #include "System.h"
 #include "Menu.h"
 #include "Printer.h"
@@ -15,12 +12,12 @@
 #include <Regexp.h>         // https://github.com/nickgammon/Regexp/
 #include <MemoryFree.h>
 #include "Splash.h"
-#include "SignalGenerator.h"
 #include "SelfTest.h"
 #include "NewTestTape.h"
 #include "Tools.h"
 
 using namespace std;
+
 
 class PotentioMeterOutputSelection : public Menu
 {
@@ -87,56 +84,60 @@ void InputHardwareCalibration(void)
     dBMeter::Get().RVSweep();
 }
 
+template <class T, size_t N>
+size_t array_size(T(&array)[N]) {
+    return N;
+}
+
 void setup()
 {
     Serial.begin(115200);
     splashscreen();
     System::OutPutOff();
-    //System::SetupDevice();
-    System::Device1();
+    System::SetupDevice1();
 
-    //Serial.setTimeout(500);
-    //Serial.println("Prompt>");
-    //String str(Serial.readString());
-    //str.trim();
-    //if (str.length()) {
-    //    MatchState ms(const_cast<char*>(str.c_str()));
-    //    if (REGEXP_MATCHED == ms.Match("RVSweep"))
-    //        InputHardwareCalibration();
-    //}
+    Serial.setTimeout(500);
+    Serial.println("Prompt>");
+    String str(Serial.readString());
+    str.trim();
+    if (str.length()) {
+        MatchState ms(const_cast<char*>(str.c_str()));
+        if (REGEXP_MATCHED == ms.Match("RVSweep"))
+            InputHardwareCalibration();
+    }
 
     do {
-        //MainMenu mainMenu;
-        //if (mainMenu.Execute() == ButtonPanel<BasePanel>::IDOK) {
-        //    switch (mainMenu.Current)
-        //    {
-        //    case 0:
+        MainMenu mainMenu;
+        if (mainMenu.Execute() == ButtonPanel<BasePanel>::IDOK) {
+            switch (mainMenu.Current)
+            {
+            case 0:
                 NewTestTape(); 
-        //        break;
-        //    case 1:
-        //        Tests();
-        //        break;
-        //    case 2:
-        //        SignalGeneratorOkDialog().Execute();
-        //        break;
-        //    case 3:
-        //        dBMeterOkDialog().Execute();
-        //        break;
-        //    case 4:
-        //        OutputHardwareCalibration();
-        //        break;
-        //    case 5:
-        //        InputHardwareCalibration();
-        //        break;
-        //    case 6:
-        //        dBMeterScan();
-        //        break;
-        //    case 7:
-        //        SetDateTime();
-        //        break;
+                break;
+            case 1:
+                Tests();
+                break;
+            case 2:
+                SignalGeneratorOkDialog().Execute();
+                break;
+            case 3:
+                dBMeterOkDialog().Execute();
+                break;
+            case 4:
+                OutputHardwareCalibration();
+                break;
+            case 5:
+                InputHardwareCalibration();
+                break;
+            case 6:
+                dBMeterScan();
+                break;
+            case 7:
+                SetDateTime();
+                break;
 
-        //    };
-        //}
+            };
+        }
     } while (1);
 }
 

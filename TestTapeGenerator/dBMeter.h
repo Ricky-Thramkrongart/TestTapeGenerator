@@ -114,6 +114,12 @@ public:
     {
         potentio.begin();
         inputpregainRelay.Disable();
+
+        if (System::fit64RV45_l.empty() || System::fit64RV45_r.empty()) {
+            Serial.print("System::fit64RV45_l.empty() || System::fit64RV45_r.empty()");
+            delay(1000);
+            exit(EXIT_FAILURE);
+        }
     }
     ~dBMeter()
     {
@@ -161,12 +167,12 @@ public:
         int counter = 0;
         do {
             (this->*GetRawInput)(m);
-            m.dBIn.first = System::PolyVal(System::fit64RV45_l, System::fit64RV45_l_size, m.Raw.first, -System::_5dBInputAttenuator.first);
-            m.dBIn.second = System::PolyVal(System::fit64RV45_r, System::fit64RV45_r_size, m.Raw.second, -System::_5dBInputAttenuator.second);
+            m.dBIn.first = PolyVal(System::fit64RV45_l, m.Raw.first, -System::_5dBInputAttenuator.first);
+            m.dBIn.second = PolyVal(System::fit64RV45_r, m.Raw.second, -System::_5dBInputAttenuator.second);
 
             std::pair<double, double> Std;
-            Std.first = System::PolyVal(System::fit64RV45_l, System::fit64RV45_l_size, m.Raw.first + m.Std.first, -System::_5dBInputAttenuator.first) - m.dBIn.first;
-            Std.second = System::PolyVal(System::fit64RV45_r, System::fit64RV45_r_size, m.Raw.second + m.Std.second, -System::_5dBInputAttenuator.second) - m.dBIn.second;
+            Std.first = PolyVal(System::fit64RV45_l, m.Raw.first + m.Std.first, -System::_5dBInputAttenuator.first) - m.dBIn.first;
+            Std.second = PolyVal(System::fit64RV45_r, m.Raw.second + m.Std.second, -System::_5dBInputAttenuator.second) - m.dBIn.second;
 
             if (m.dBIn.first < DBIN_MIN_NOPREGAIN || m.dBIn.second < DBIN_MIN_NOPREGAIN) {
                 inputpregainRelay.Enable();
@@ -174,13 +180,13 @@ public:
                 (this->*GetRawInput)(n);
                 if (m.dBIn.first < DBIN_MIN_NOPREGAIN) {
                     m.Raw.first = n.Raw.first;
-                    m.dBIn.first = System::PolyVal(System::fit64RV45_l, System::fit64RV45_l_size, m.Raw.first, -System::_5dBInputAttenuator.first - 12.0);
-                    Std.first = System::PolyVal(System::fit64RV45_l, System::fit64RV45_l_size, m.Raw.first + m.Std.first, -System::_5dBInputAttenuator.first - 12.0) - m.dBIn.first;
+                    m.dBIn.first = PolyVal(System::fit64RV45_l, m.Raw.first, -System::_5dBInputAttenuator.first - 12.0);
+                    Std.first = PolyVal(System::fit64RV45_l, m.Raw.first + m.Std.first, -System::_5dBInputAttenuator.first - 12.0) - m.dBIn.first;
                 }
                 if (m.dBIn.second < DBIN_MIN_NOPREGAIN) {
                     m.Raw.second = n.Raw.second;
-                    m.dBIn.second = System::PolyVal(System::fit64RV45_r, System::fit64RV45_r_size, m.Raw.second, -System::_5dBInputAttenuator.second - 12.0);
-                    Std.second = System::PolyVal(System::fit64RV45_r, System::fit64RV45_r_size, m.Raw.second + m.Std.second, -System::_5dBInputAttenuator.second - 12.0) - m.dBIn.second;
+                    m.dBIn.second = PolyVal(System::fit64RV45_r, m.Raw.second, -System::_5dBInputAttenuator.second - 12.0);
+                    Std.second = PolyVal(System::fit64RV45_r, m.Raw.second + m.Std.second, -System::_5dBInputAttenuator.second - 12.0) - m.dBIn.second;
                 }
                 inputpregainRelay.Disable();
             }
@@ -338,7 +344,34 @@ public:
 };
 Relay dBMeter::inputpregainRelay(Relay(30, false, 2000));
 
-void System::SetupDevice() {
+void System::SetupDevice1() {
+
+    System::fit64.reserve(10);
+    System::fit64RV45_l.reserve(20);
+    System::fit64RV45_r.reserve(20);
+
+    System::Device1();
+    Serial.print("System::Device1(): ");
+
+    LCD_Helper lcdhelper;
+    lcdhelper.Line(0, F("Setting System Paramaters"));
+    lcdhelper.Show(100);
+
+    System::InternalMeasurementOn();
+    std::pair<double, double> dB({ -2, -2 });
+    SignalGenerator::Get().setFreq(1000, dB);
+    dBMeter::Measurement m;
+    dBMeter::Get().GetdB(m);
+    System::_5dBInputAttenuator.first += m.dBIn.first - dB.first;
+    System::_5dBInputAttenuator.second += m.dBIn.second - dB.second;
+    System::PopRelayStack();
+}
+
+void System::SetupDevice2() {
+
+    System::fit64.reserve(10);
+    System::fit64RV45_l.reserve(20);
+    System::fit64RV45_r.reserve(20);
 
     System::Device2();
     Serial.print("System::Device2(): ");
@@ -355,19 +388,19 @@ void System::SetupDevice() {
     System::_5dBInputAttenuator.first += m.dBIn.first - dB.first;
     System::_5dBInputAttenuator.second += m.dBIn.second - dB.second;
 
-    if (fabs(m.dBIn.first - dB.first) > MAX_DEVICE_STD_DEV || fabs(m.dBIn.second - dB.second) > MAX_DEVICE_STD_DEV) {
-        System::Device1();
-        Serial.print("System::Device1(): ");
-        SignalGenerator::Get().setFreq(1000, dB);
-        dBMeter::Get().GetdB(m);
-        System::_5dBInputAttenuator.first += m.dBIn.first - dB.first;
-        System::_5dBInputAttenuator.second += m.dBIn.second - dB.second;
-        delay(10);
+    //if (fabs(m.dBIn.first - dB.first) > MAX_DEVICE_STD_DEV || fabs(m.dBIn.second - dB.second) > MAX_DEVICE_STD_DEV) {
+    //    System::Device1();
+    //    Serial.print("System::Device1(): ");
+    //    SignalGenerator::Get().setFreq(1000, dB);
+    //    dBMeter::Get().GetdB(m);
+    //    System::_5dBInputAttenuator.first += m.dBIn.first - dB.first;
+    //    System::_5dBInputAttenuator.second += m.dBIn.second - dB.second;
+    //    delay(10);
 
-        if (fabs(m.dBIn.first - dB.first) > MAX_DEVICE_STD_DEV || fabs(m.dBIn.second - dB.second) > MAX_DEVICE_STD_DEV) {
-            exit(EXIT_FAILURE);
-        }
-    }
+    //    if (fabs(m.dBIn.first - dB.first) > MAX_DEVICE_STD_DEV || fabs(m.dBIn.second - dB.second) > MAX_DEVICE_STD_DEV) {
+    //        exit(EXIT_FAILURE);
+    //    }
+    //}
 
     System::PopRelayStack();
 }
