@@ -460,3 +460,18 @@ void TestAllTestTape()
         }
     }
 }
+
+void PrintLabel()
+{
+    std::shared_ptr<TapeInfo> tapeInfo;
+    {
+        SelectTape selectTape;
+        if (selectTape.Execute() != ButtonPanel<BasePanel>::IDOK) {
+            return;
+        }
+        tapeInfo = std::shared_ptr<TapeInfo>(TapeInfo::Get((TapeInfo::Tapes)selectTape.Current));
+    }
+    if (!PrintProgress(tapeInfo.get()).Execute()) {
+        return;
+    }
+}
