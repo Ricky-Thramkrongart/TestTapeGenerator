@@ -35,7 +35,7 @@ public:
 class MainMenu : public Menu
 {
 public:
-    MainMenu() : Menu(8) {}
+    MainMenu() : Menu(9) {}
     void FullUpdate() {
         const __FlashStringHelper* str = 0;
         switch (Current) {
@@ -43,24 +43,27 @@ public:
             str = F("Create Test Tape");
             break;
         case 1:
-            str = F("Tests...");
+            str = F("Print Label");
             break;
         case 2:
-            str = F("Start Signal Generator");
+            str = F("Tests...");
             break;
         case 3:
-            str = F("Start dBMeter");
+            str = F("Start Signal Generator");
             break;
         case 4:
-            str = F("Output Hardware Calibration");
+            str = F("Start dBMeter");
             break;
         case 5:
-            str = F("Input Hardware Calibration");
+            str = F("Output Hardware Calibration");
             break;
         case 6:
-            str = F("dBMeter RV Scan");
+            str = F("Input Hardware Calibration");
             break;
         case 7:
+            str = F("dBMeter RV Scan");
+            break;
+        case 8:
             str = F("Set Time");
             break;
         }
@@ -115,24 +118,27 @@ void setup()
                 NewTestTape(); 
                 break;
             case 1:
-                Tests();
+                PrintLabel();
                 break;
             case 2:
-                SignalGeneratorOkDialog().Execute();
+                Tests();
                 break;
             case 3:
-                dBMeterOkDialog().Execute();
+                SignalGeneratorOkDialog().Execute();
                 break;
             case 4:
-                OutputHardwareCalibration();
+                dBMeterOkDialog().Execute();
                 break;
             case 5:
-                InputHardwareCalibration();
+                OutputHardwareCalibration();
                 break;
             case 6:
-                dBMeterScan();
+                InputHardwareCalibration();
                 break;
             case 7:
+                dBMeterScan();
+                break;
+            case 8:
                 SetDateTime();
                 break;
 
