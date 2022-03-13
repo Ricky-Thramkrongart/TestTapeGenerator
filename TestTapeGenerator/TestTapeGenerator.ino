@@ -35,7 +35,7 @@ public:
 class MainMenu : public Menu
 {
 public:
-    MainMenu() : Menu(9) {}
+    MainMenu() : Menu(10) {}
     void FullUpdate() {
         const __FlashStringHelper* str = 0;
         switch (Current) {
@@ -43,27 +43,30 @@ public:
             str = F("Create Test Tape");
             break;
         case 1:
-            str = F("Print Label");
+            str = F("Create Sweep Tape");
             break;
         case 2:
-            str = F("Tests...");
+            str = F("Print Label");
             break;
         case 3:
-            str = F("Start Signal Generator");
+            str = F("Tests...");
             break;
         case 4:
-            str = F("Start dBMeter");
+            str = F("Start Signal Generator");
             break;
         case 5:
-            str = F("Output Hardware Calibration");
+            str = F("Start dBMeter");
             break;
         case 6:
-            str = F("Input Hardware Calibration");
+            str = F("Output Hardware Calibration");
             break;
         case 7:
-            str = F("dBMeter RV Scan");
+            str = F("Input Hardware Calibration");
             break;
         case 8:
+            str = F("dBMeter RV Scan");
+            break;
+        case 9:
             str = F("Set Time");
             break;
         }
@@ -118,27 +121,30 @@ void setup()
                 NewTestTape(); 
                 break;
             case 1:
-                PrintLabel();
+                TestTapeSweep();
                 break;
             case 2:
-                Tests();
+                PrintLabel();
                 break;
             case 3:
-                SignalGeneratorOkDialog().Execute();
+                Tests();
                 break;
             case 4:
-                dBMeterOkDialog().Execute();
+                SignalGeneratorOkDialog().Execute();
                 break;
             case 5:
-                OutputHardwareCalibration();
+                dBMeterOkDialog().Execute();
                 break;
             case 6:
-                InputHardwareCalibration();
+                OutputHardwareCalibration();
                 break;
             case 7:
-                dBMeterScan();
+                InputHardwareCalibration();
                 break;
             case 8:
+                dBMeterScan();
+                break;
+            case 9:
                 SetDateTime();
                 break;
 

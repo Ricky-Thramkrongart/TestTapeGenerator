@@ -127,6 +127,7 @@ public:
         WOW_AND_FLUTTER_TEST_TAPE_2,
         WOW_AND_FLUTTER_TEST_TAPE_3,
         WOW_AND_FLUTTER_TEST_TAPE_4,
+        SWEEP_TEST_TAPE,
         LAST_TAPE
     };
     static Tapes Begin()
@@ -361,6 +362,25 @@ public:
             return new TapeInfo(F("Wow & Flutter Test Tape #4"), 4, 257, TapeInfo::Reel, {
                 new RecordStep(3000, 120, 0, F("DIN Standard")),
                 new RecordStep(3150, 120, 0, F("JIS Standard"))
+                });
+        case SWEEP_TEST_TAPE:
+            return new TapeInfo(F("Sweep"), 2, 200, TapeInfo::Cassette, {
+            new RecordStep(20, 60, -20),
+                new RecordStep(31.5, 60, -20),
+                new RecordStep(63, 60, -20),
+                new RecordStep(125, 60, -20),
+                new RecordStep(250, 60, -20),
+                new RecordStep(500, 60, -20),
+                new RecordStep(1000, 60, -20),
+                new RecordStep(2000, 60, -20),
+                new RecordStep(4000, 60, -20),
+                new RecordStep(6300, 60, -20),
+                new RecordStep(8000, 60, -20),
+                new RecordStep(10000, 60, -20),
+                new RecordStep(12500, 60, -20),
+                new RecordStep(15000, 60, -20),
+                new RecordStep(18000, 60, -20),
+                new RecordStep(20000, 60, -20) 
                 });
         default:
             break;

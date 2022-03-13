@@ -430,6 +430,26 @@ void NewTestTape()
     }
 }
 
+void TestTapeSweep()
+{
+    std::shared_ptr<TapeInfo> tapeInfo(TapeInfo::Get(TapeInfo::SWEEP_TEST_TAPE));
+    if (StartRecording(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
+        return;
+    }
+    if (AmplificationAdjustment(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
+        return;
+    }
+    if (ValidateTapeRecorder(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
+        return;
+    }
+    if (RecordLevelAdjustment(tapeInfo.get()).Execute() != ButtonPanel<DialogOk>::IDOK) {
+        return;
+    }
+    if (!PrintProgress(tapeInfo.get(), true).Execute()) {
+        return;
+    }
+}
+
 void TestAllTestTape()
 {
     for (TapeInfo::Tapes t = TapeInfo::Tapes::FIRST_TAPE; t != TapeInfo::Tapes::LAST_TAPE; t++) {
