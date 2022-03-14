@@ -46,10 +46,11 @@ class PrintProgress : public Dialog
             {
                 printer.println((*ptr)->ToStringExt().c_str());
                 if (Sweep) {
+
                     printer.print("Record Level: ("); 
-                    printer.print(tapeInfo->RecordLevels[ptr - tapeInfo->RecordSteps.begin()].first);
+                    printer.print(tapeInfo->RecordLevels[ptr - tapeInfo->RecordSteps.begin()].first - (*ptr)->Level - tapeInfo->GetAmplificationAdjustment());
                     printer.print(",");
-                    printer.print(tapeInfo->RecordLevels[ptr - tapeInfo->RecordSteps.begin()].second);
+                    printer.print(tapeInfo->RecordLevels[ptr - tapeInfo->RecordSteps.begin()].second - (*ptr)->Level - tapeInfo->GetAmplificationAdjustment());
                     printer.println(")dBm");
                 }
             }
