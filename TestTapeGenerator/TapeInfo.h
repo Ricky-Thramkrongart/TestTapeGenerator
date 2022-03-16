@@ -164,12 +164,12 @@ public:
                 });
         case NAKAMICHI_TEST_TAPE:
             return new TapeInfo(F("Nakamichi Test Tape"), 2, 200, TapeInfo::Cassette, {
-                new RecordStep(20000, 180, -20, F("DA09001A 20 kHz Frequency Response")),
-                new RecordStep(15000, 180, -20, F("DA09002A 15 kHz Frequency Response")),
-                new RecordStep(10000, 180, -20, F("DA09003A 10 kHz Frequency Response")),
-                new RecordStep(400, 180, -10, F("DA09005A 400 Hz Playback Level")),
-                new RecordStep(3000, 180, 0, F("DA09006A 3 kHz Speed and Wow & Flutter")),
-                new RecordStep(1000, 180, 0, F("1 kHz Level"))
+                new RecordStep(20000, 180, -20, F("DA09001A 20 kHz\nFrequency Response")),
+                new RecordStep(15000, 180, -20, F("DA09002A 15 kHz\nFrequency Response")),
+                new RecordStep(10000, 180, -20, F("DA09003A 10 kHz\nFrequency Response")),
+                new RecordStep(400, 180, -10,   F("DA09005A 400 Hz\nPlayback Level")),
+                new RecordStep(3000, 180, 0,    F("DA09006A 3 kHz\nSpeed and Wow & Flutter")),
+                new RecordStep(1000, 180, 0,    F("1 kHz Level"))
                 });
         case PANASONIC_QZZCFM_TEST_TAPE:
             return new TapeInfo(F("Panasonic QZZCFM Test Tape"), 2, 200, TapeInfo::Cassette, {
