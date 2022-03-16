@@ -94,18 +94,32 @@ public:
     {
         return Description;
     }
-    String ToString1()const
+    String ToString1(bool print = false)const
     {
         cSF(sf_line, 41);
-        char format = 'R';
-        if (Format == TapeFormat::Cassette) {
-            format = 'C';
+        if (print) {
+            if (Format == TapeFormat::Cassette) {
+                sf_line.println(F("Cassette"));
+            }
+            else {
+                sf_line.println(F("Reel"));
+            }
         }
-        sf_line.print(F("Track:")); sf_line.print(Tracks);
-        sf_line.print(F(" Tracks:"));  sf_line.print(RecordSteps.size()); sf_line.print(F(" "));
+
+        if (Format == TapeFormat::Reel) {
+            sf_line.print(F("Track:")); sf_line.print(Tracks); sf_line.print(F(" "));
+        }
+        sf_line.print(F("Tracks:"));  sf_line.print(RecordSteps.size()); sf_line.print(F(" "));
         sf_line.print((Length % 60) ? Length / 60 + 1 : Length / 60); sf_line.print(F("[Min] "));
         sf_line.print(Flux); sf_line.print(F("[nW/m] "));
-        sf_line.print(format);
+        if (!print) {
+            if (Format == TapeFormat::Cassette) {
+                sf_line.print(F("Cass."));
+            }
+            else {
+                sf_line.print(F("Reel"));
+            }
+        }
         return sf_line.c_str();
     }
 

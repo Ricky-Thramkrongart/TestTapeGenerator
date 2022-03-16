@@ -22,8 +22,16 @@ class PrintProgress : public Dialog
         Adafruit_Thermal printer;
         TapeInfo* tapeInfo;
         bool Sweep;
+        static void pad(SafeString& s, const int n)
+        {
+            if (n < 10) {
+                s.print(F("0"));
+            }
+            s.print(n);
+        }
+
         void Print(void) {
-            RTC_Helper rtchelper;
+            printer.setDefault();
             printer.println("*******************************");
             printer.boldOn();
             printer.println("Calibration/Test-Tape    type:");
@@ -31,7 +39,6 @@ class PrintProgress : public Dialog
             printer.println("................................");
 
             printer.justify('L');
-            rtchelper.printlnExt(printer);
             printer.setSize('S');
             ///////tapeInfo.printlnExt(printer);
             printer.boldOn();
@@ -40,19 +47,23 @@ class PrintProgress : public Dialog
             printer.boldOff();
             printer.justify('L');
             printer.println("-------------------------------");
-            printer.println(tapeInfo->ToString1());
+            printer.println(tapeInfo->ToString1(true));
             printer.println("-------------------------------");
             for (std::vector<RecordStep*>::iterator ptr = tapeInfo->RecordSteps.begin(); ptr != tapeInfo->RecordSteps.end(); ptr++)
             {
-                printer.println((*ptr)->ToStringExt().c_str());
+                printer.print(F("Track#: ")); printer.println(ptr - tapeInfo->RecordSteps.begin() + 1);
+                if ((*ptr)->Comment) {
+                    printer.println((*ptr)->Comment);
+                }
+                printer.println((*ptr)->ToString().c_str());
                 if (Sweep) {
-
                     printer.print("Record Level: ("); 
                     printer.print(tapeInfo->RecordLevels[ptr - tapeInfo->RecordSteps.begin()].first - (*ptr)->Level - tapeInfo->GetAmplificationAdjustment());
                     printer.print(",");
                     printer.print(tapeInfo->RecordLevels[ptr - tapeInfo->RecordSteps.begin()].second - (*ptr)->Level - tapeInfo->GetAmplificationAdjustment());
                     printer.println(")dBm");
                 }
+                printer.println();
             }
             printer.feed(2);
             printer.justify('L');
@@ -67,6 +78,20 @@ class PrintProgress : public Dialog
             printer.doubleHeightOn();
             printer.setSize('L');
             printer.println("QC PASSED");
+            
+            // YYYY/MM/DD-HH:MM:SS
+            cSF(sf_line, 100);
+            pad(sf_line, year());
+            sf_line.print(F("/"));
+            pad(sf_line, month());
+            sf_line.print(F("/"));
+            pad(sf_line, day());
+            sf_line.print(F("-"));
+            pad(sf_line, hour());
+            sf_line.print(F(":"));
+            pad(sf_line, minute());
+            printer.println(sf_line);
+
             printer.doubleHeightOff();
             printer.setSize('S');
             printer.justify('L');

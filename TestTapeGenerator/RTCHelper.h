@@ -11,28 +11,27 @@ public:
         setSyncProvider(RTC.get);   // the function to get the time from the RTC
     }
     
-    void pad(SafeString& s, const int n)
+    static void pad(SafeString& s, const int n)
     {
         if (n < 10) {
             s.print(F("0"));
         }
         s.print(n);
     }
-/*
-    SafeString& ToString()
-    {
-        cSFA(sf_line, buffer);
-        sf_line.clear();
-        pad(sf_line, hour());
-        sf_line.print(F(":"));
-        pad(sf_line, minute());
-        sf_line.print(F(":"));
-        pad(sf_line, second());
-        return sf_line;
-    }
-*/ 
 
-    String ToString()
+    //String ToStringExt()
+    //{
+    //    cSF(sf_line, 41);
+    //    sf_line.clear();
+    //    pad(sf_line, hour());
+    //    sf_line.print(F(":"));
+    //    pad(sf_line, minute());
+    //    sf_line.print(F(":"));
+    //    pad(sf_line, second());
+    //    return sf_line.c_str();
+    //}
+
+    static String ToString() 
     {
         cSF(sf, 41);
         pad(sf, hour());
@@ -45,7 +44,7 @@ public:
 
     String ToStringExt()
     {
-        cSFA(sf, 41);
+        cSF(sf, 41);
         sf = ToString().c_str();
         sf.print(RTC.temperature());
         sf.print(F(" C\xDF"));
